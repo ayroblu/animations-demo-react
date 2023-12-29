@@ -1,6 +1,16 @@
 .halfSheet {
   view-transition-name: half-sheet;
 }
+@keyframes slide-up-centered {
+  from {
+    transform: translateY(calc(50vh + 50%));
+  }
+}
+@keyframes slide-down-centered {
+  to {
+    transform: translateY(calc(50vh + 50%));
+  }
+}
 @keyframes slide-up {
   from {
     transform: translateY(100%);
@@ -11,9 +21,19 @@
     transform: translateY(100%);
   }
 }
-::view-transition-old(half-sheet) {
-  animation: 0.2s ease-in both slide-down;
+@media only screen and (max-width: 600px) and (prefers-reduced-motion: no-preference) and (update: fast) {
+  ::view-transition-old(half-sheet) {
+    animation: 0.2s ease-in both slide-down;
+  }
+  ::view-transition-new(half-sheet) {
+    animation: 0.2s ease-in both slide-up;
+  }
 }
-::view-transition-new(half-sheet) {
-  animation: 0.2s ease-in both slide-up;
+@media only screen and (min-width: 601px) and (prefers-reduced-motion: no-preference) and (update: fast) {
+  ::view-transition-old(half-sheet) {
+    animation: 0.2s ease-in both slide-down-centered;
+  }
+  ::view-transition-new(half-sheet) {
+    animation: 0.2s ease-in both slide-up-centered;
+  }
 }
