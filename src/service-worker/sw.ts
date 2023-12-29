@@ -1,12 +1,10 @@
-declare const self: ServiceWorkerGlobalScope;
-
+/// <reference lib="webworker" />
 import "./types";
-import {
-  cleanupStaleAssets,
-  handleNavigationPreload,
-  handlePrecache,
-  proxyFetch,
-} from "./main";
+import { proxyFetch } from "./fetch";
+import { handlePrecache } from "./install";
+import { cleanupStaleAssets, handleNavigationPreload } from "./activate";
+
+declare const self: ServiceWorkerGlobalScope;
 
 self.addEventListener("fetch", proxyFetch);
 
