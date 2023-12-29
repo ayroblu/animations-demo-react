@@ -28,7 +28,7 @@ export function handleNavigationPreload(event: ExtendableEvent) {
 }
 async function setNavigationPreload() {
   if (self.registration.navigationPreload) {
-    if (process.env.NODE_ENV === "production2") {
+    if (process.env.NODE_ENV === "production") {
       await self.registration.navigationPreload.enable();
     } else {
       // In devel, we have no manifest, so can't identify precache
