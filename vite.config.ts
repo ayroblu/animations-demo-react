@@ -10,7 +10,7 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src/service-worker",
       filename: "sw.ts",
-      // scope: "./",
+      scope: "./",
       // injectRegister: "inline",
       devOptions: {
         enabled: true,
@@ -18,6 +18,5 @@ export default defineConfig({
       },
     }),
   ],
-  // base: process.env.BASE_PATH ?? "/",
-  base: "",
+  base: process.env.BASE_PATH ?? "/",
 });
