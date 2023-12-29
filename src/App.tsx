@@ -14,6 +14,8 @@ function App() {
           <Link to={routes.halfSheet}>half-sheet</Link>
         </li>
       </ul>
+
+      <button onClick={() => window.location.reload()}>Reload</button>
     </>
   );
 }
