@@ -1,0 +1,49 @@
+.halfSheet {
+  position: fixed;
+  width: 600px;
+  max-width: 100%;
+  view-transition-name: halfSheet;
+}
+@media (max-width: 600px) {
+  .halfSheet {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #555;
+    border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+@media (min-width: 601px) {
+  .halfSheet {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #555;
+    border-radius: 16px;
+  }
+}
+.halfSheetHeader {
+  display: flex;
+}
+.halfSheetHeader > * {
+  flex: 1 1 1px;
+}
+.halfSheetHeader > *:nth-child(2) {
+  text-align: center;
+}
+.halfSheetHeader > *:nth-child(3) {
+  text-align: right;
+}
+.halfSheet h3 {
+  margin: 0;
+  padding: 4px 0;
+}
+.cover {
+  position: fixed;
+  inset: 0 0 0 0;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.content {
+  padding: 0 16px;
+}

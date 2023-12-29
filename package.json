@@ -15,6 +15,7 @@
     "react-router-dom": "^6.21.1"
   },
   "devDependencies": {
+    "@types/dom-view-transitions": "^1.0.4",
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
@@ -24,6 +25,7 @@
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "prettier": "^3.1.1",
     "typescript": "^5.0.2",
     "vite": "^4.4.5"
   }

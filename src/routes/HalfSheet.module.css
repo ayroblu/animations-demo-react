@@ -1,0 +1,19 @@
+.halfSheet {
+  view-transition-name: half-sheet;
+}
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes slide-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+::view-transition-old(half-sheet) {
+  animation: 0.2s ease-in both slide-down;
+}
+::view-transition-new(half-sheet) {
+  animation: 0.2s ease-in both slide-up;
+}
