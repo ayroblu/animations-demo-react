@@ -21,6 +21,8 @@ export function proxyFetch(event: FetchEvent) {
     event.respondWith(handleNavigation(event));
   } else if (precacheRoutes.has(route)) {
     event.respondWith(handlePrefetch(event));
+  } else if (route.includes("favicon")) {
+    event.respondWith(networkFirst(event));
   }
 }
 
@@ -79,4 +81,30 @@ async function handlePrefetch(
     await cache.put(url, res.clone());
   }
   return res;
+}
+
+async function networkFirst(event: FetchEvent) {
+  let isDone = false;
+  const network = fetch(event.request).then(async (res) => {
+    if (res.ok) {
+      const cache = await caches.open(cacheName);
+      await cache.put(event.request.url, res.clone());
+    }
+    isDone = true;
+    return res;
+  });
+  const cacheResult = raceSafeAny([wait(1000), network]).then(async () => {
+    if (isDone) return new Promise<Response>(() => {});
+    const cache = await caches.open(cacheName);
+    const match = await cache.match(navigationCacheUrl, { ignoreSearch: true });
+    if (match) {
+      isDone = true;
+      return match;
+    }
+    // if the cache is not found, hang the response forever
+    return new Promise<Response>(() => {});
+  });
+  network.catch((err) => log("network err", err));
+  cacheResult.catch((err) => log("network cache err", err));
+  return raceSafe([network, cacheResult]);
 }
