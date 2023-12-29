@@ -1,10 +1,8 @@
-const base = import.meta.env.BASE_URL;
-
 declare const self: ServiceWorkerGlobalScope;
 
 function getCacheablePaths() {
   const manifest = self.__WB_MANIFEST ?? [];
-  return manifest.map(({ url }) => `${base}${url}`);
+  return manifest;
 }
 
 // if you ever change this, you need to delete existing cache storage

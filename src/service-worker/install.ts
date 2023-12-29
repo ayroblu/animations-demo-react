@@ -8,7 +8,7 @@ export function handlePrecache(event: ExtendableEvent) {
   event.waitUntil(handlePrecacheManifest());
 }
 async function handlePrecacheManifest() {
-  saveRoutes(cacheablePaths);
+  saveRoutes(cacheablePaths.map(({ url }) => url));
   const cache = await caches.open(cacheName);
   const cachedRequests = await cache.keys();
   const cachedUrls = new Set(
@@ -16,11 +16,13 @@ async function handlePrecacheManifest() {
       .map(({ url }) => url)
       .map((url) => url.replace(self.location.origin, "")),
   );
-  const newPaths = cacheablePaths.filter((url) => !cachedUrls.has(url));
+  const newPaths = cacheablePaths.filter(
+    ({ url, revision }) => revision || !cachedUrls.has(url),
+  );
   log("sw: new precache:", newPaths.length, "/", cacheablePaths.length);
 
-  for (const path of newPaths) {
-    const reqUrl = new URL(path, self.location.origin);
+  for (const { url } of newPaths) {
+    const reqUrl = new URL(url, self.location.origin);
     // TODO: update tests to support URL param to fetch
     await cache.add(reqUrl);
   }
