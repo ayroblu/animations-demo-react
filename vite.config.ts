@@ -23,7 +23,7 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src/service-worker",
       filename: "sw.ts",
-      // injectRegister: "inline",
+      injectRegister: "inline",
       devOptions: {
         enabled: true,
         type: "module",
