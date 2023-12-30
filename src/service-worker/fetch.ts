@@ -23,6 +23,8 @@ export function proxyFetch(event: FetchEvent) {
     event.respondWith(handlePrefetch(event));
   } else if (route.includes("favicon")) {
     event.respondWith(networkFirst(event));
+  } else {
+    log("missing", event.request.url);
   }
 }
 
