@@ -1,4 +1,4 @@
-import { cacheName, cacheablePaths, precacheRoutes } from "./helper";
+import { cacheName, cacheablePaths } from "./helper";
 import { log } from "./utils";
 
 declare const self: ServiceWorkerGlobalScope;
@@ -8,7 +8,6 @@ export function handlePrecache(event: ExtendableEvent) {
   event.waitUntil(handlePrecacheManifest());
 }
 async function handlePrecacheManifest() {
-  saveRoutes(cacheablePaths.map(({ url }) => url));
   const cache = await caches.open(cacheName);
   const cachedRequests = await cache.keys();
   const cachedUrls = new Set(
@@ -25,12 +24,5 @@ async function handlePrecacheManifest() {
     const reqUrl = new URL(url, self.location.origin);
     // TODO: update tests to support URL param to fetch
     await cache.add(reqUrl);
-  }
-}
-function saveRoutes(routes: string[]) {
-  for (const route of routes) {
-    const url = new URL(route, self.location.origin);
-    const simplifiedRoute = `${url.origin}${url.pathname}`;
-    precacheRoutes.add(simplifiedRoute);
   }
 }
