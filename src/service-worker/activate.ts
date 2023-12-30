@@ -8,7 +8,7 @@ export function cleanupStaleAssets(event: ExtendableEvent) {
   event.waitUntil(handleRemoveStaleAssets());
 }
 async function handleRemoveStaleAssets() {
-  const cacheablePathsSet = new Set(cacheablePaths);
+  const cacheablePathsSet = new Set(cacheablePaths.map(({ url }) => url));
   const cache = await caches.open(cacheName);
   const cachedRequests = await cache.keys();
   const staleRequests = cachedRequests.filter(
