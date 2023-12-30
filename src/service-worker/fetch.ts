@@ -1,4 +1,4 @@
-import { cacheablePaths } from "./helper";
+import { precacheRoutes } from "./helper";
 import { raceSafe, raceSafeAny, log, wait } from "./utils";
 
 declare const self: ServiceWorkerGlobalScope;
@@ -19,7 +19,7 @@ export function proxyFetch(event: FetchEvent) {
     (!url.pathname.includes(".") || url.pathname.endsWith(".html"))
   ) {
     event.respondWith(handleNavigation(event));
-  } else if (cacheablePaths.some((path) => path.url === url.pathname)) {
+  } else if (precacheRoutes.has(route)) {
     event.respondWith(handlePrefetch(event));
   } else if (route.includes("favicon")) {
     event.respondWith(networkFirst(event));
