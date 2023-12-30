@@ -19,7 +19,7 @@ export function proxyFetch(event: FetchEvent) {
     (!url.pathname.includes(".") || url.pathname.endsWith(".html"))
   ) {
     event.respondWith(handleNavigation(event));
-  } else if (cacheablePaths.some(({ url }) => url === route)) {
+  } else if (cacheablePaths.some((path) => path.url === url.pathname)) {
     event.respondWith(handlePrefetch(event));
   } else if (route.includes("favicon")) {
     event.respondWith(networkFirst(event));
