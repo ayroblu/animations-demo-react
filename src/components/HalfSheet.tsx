@@ -243,7 +243,7 @@ function useMatchingSpace<T extends HTMLElement>() {
   };
 }
 
-const trackTime = 500;
+const trackTime = 200;
 function createAxisPointsTracker() {
   let points: [number, number][] = [];
   function addPoint(point: number) {
