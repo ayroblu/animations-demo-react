@@ -16,7 +16,7 @@ function deferred() {
 
 export function useViewTransitions() {
   const deferredItemsRef: { current: Deferred[] } = React.useRef([]);
-  function wrapInViewTransition(func: () => void) {
+  const wrapInViewTransition = React.useCallback((func: () => void) => {
     const deferredItems = deferredItemsRef.current;
     if (!document.startViewTransition) {
       func();
@@ -28,7 +28,7 @@ export function useViewTransitions() {
         await def.promise;
       });
     }
-  }
+  }, []);
   React.useLayoutEffect(() => {
     const deferredItems = deferredItemsRef.current;
     if (deferredItems.length) {

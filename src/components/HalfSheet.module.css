@@ -3,13 +3,17 @@
   width: 600px;
   max-width: 100%;
   view-transition-name: halfSheet;
+  background-color: #000;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
 }
 @media (max-width: 600px) {
   .halfSheet {
     bottom: 0;
     left: 0;
     right: 0;
-    border-top: 1px solid #555;
+    border-top: 1px solid #333;
     border-radius: 16px 16px 0 0;
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -19,12 +23,19 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 1px solid #555;
+    border: 1px solid #333;
     border-radius: 16px;
   }
 }
 .halfSheetHeader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
+  border-bottom: 1px solid #333;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
 }
 .halfSheetHeader > * {
   flex: 1 1 1px;
@@ -43,7 +54,10 @@
   position: fixed;
   inset: 0 0 0 0;
   background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(2px);
 }
 .content {
   padding: 0 16px;
+  overflow: auto;
+  flex-shrink: 1;
 }

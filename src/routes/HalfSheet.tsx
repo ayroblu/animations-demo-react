@@ -6,11 +6,11 @@ import style from "./HalfSheet.module.css";
 export function HalfSheetRoute() {
   const [visible, setVisible] = React.useState(false);
   const { wrapInViewTransition } = useViewTransitions();
-  function toggleVisible() {
+  const toggleVisible = React.useCallback(() => {
     wrapInViewTransition(() => {
       setVisible((visible) => !visible);
     });
-  }
+  }, [wrapInViewTransition]);
 
   return (
     <>
