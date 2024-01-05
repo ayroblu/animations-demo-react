@@ -117,8 +117,10 @@ function useTouch<T extends HTMLElement>(handleDismiss: () => void) {
     if (!el) return;
     const element = el;
     const elementHeight = element.getBoundingClientRect().height;
+    const transition = createTransition();
     let startTouchY: null | number = null;
     function startTracking(e: TouchEvent) {
+      transition.cancel();
       const { touches } = e;
       if (touches.length !== 1) {
         return;
@@ -133,6 +135,7 @@ function useTouch<T extends HTMLElement>(handleDismiss: () => void) {
       const [touch] = touches;
       startTouchY = touch.pageY;
     }
+    const pointTracker = createAxisPointsTracker();
     function callback(e: TouchEvent) {
       const { touches } = e;
       if (touches.length !== 1) {
@@ -155,15 +158,27 @@ function useTouch<T extends HTMLElement>(handleDismiss: () => void) {
       if (diff > 0) {
         e.preventDefault();
         setOffset(diff);
+        pointTracker.addPoint(diff);
       }
     }
-    function stopTracking() {
+    function stopTracking(e: TouchEvent) {
+      const { touches } = e;
+      if (touches.length === 1 && startTouchY !== null) {
+        const [touch] = touches;
+        const diff = touch.pageY - startTouchY;
+        pointTracker.addPoint(diff);
+      }
+      const velocity = pointTracker.getVelocity();
+
       startTouchY = null;
-      const offset = offsetRef.current;
+      const offset = offsetRef.current + velocity * 0.2;
       if (offset > elementHeight / 2) {
         handleDismiss();
       } else {
         setOffset(0);
+        if (offset !== 0) {
+          transition.transition(element);
+        }
       }
     }
     element.addEventListener("touchstart", startTracking);
@@ -173,6 +188,7 @@ function useTouch<T extends HTMLElement>(handleDismiss: () => void) {
       element.removeEventListener("touchstart", startTracking);
       element.removeEventListener("touchmove", callback);
       element.removeEventListener("touchend", stopTracking);
+      transition.getCallback()?.();
     };
   }, [handleDismiss]);
   const offsetStyle = React.useMemo(() => {
@@ -225,4 +241,55 @@ function useMatchingSpace<T extends HTMLElement>() {
     space,
     spaceStyle,
   };
+}
+
+const trackTime = 500;
+function createAxisPointsTracker() {
+  let points: [number, number][] = [];
+  function addPoint(point: number) {
+    const now = Date.now();
+    points.push([point, now]);
+    points = points.filter(([, time]) => time > now - trackTime);
+  }
+  function getVelocity(): number {
+    const now = Date.now();
+    points = points.filter(([, time]) => time > now - trackTime);
+    let avg = null;
+    for (let i = 1; i < points.length; ++i) {
+      const [point, time] = points[i - 1];
+      const [point2, time2] = points[i];
+      const velocity = ((point2 - point) / (time2 - time)) * 1000;
+      if (avg === null) {
+        avg = velocity;
+      } else {
+        avg += (velocity - avg) / i;
+      }
+    }
+    return avg ?? 0;
+  }
+  return {
+    addPoint,
+    getVelocity,
+  };
+}
+
+function createTransition() {
+  let callback: (() => void) | null = null;
+  function transition(element: HTMLElement) {
+    element.style.transition = "0.2s transform";
+    function transitionEndCallback() {
+      element.style.transition = "";
+      element.removeEventListener("transitionend", transitionEndCallback);
+      callback = null;
+    }
+    callback = transitionEndCallback;
+    element.addEventListener("transitionend", transitionEndCallback);
+  }
+  function cancel() {
+    callback?.();
+  }
+  function getCallback() {
+    return callback;
+  }
+  return { transition, cancel, getCallback };
 }
