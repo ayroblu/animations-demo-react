@@ -153,6 +153,7 @@ function useTouch<T extends HTMLElement>(handleDismiss: () => void) {
       }
       const diff = touch.pageY - startTouchY;
       if (diff > 0) {
+        e.preventDefault();
         setOffset(diff);
       }
     }
