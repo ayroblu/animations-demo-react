@@ -2,9 +2,15 @@
   font-family: system-ui, sans-serif;
   color-scheme: light dark;
 }
+body {
+  margin: 0;
+}
 * {
   box-sizing: border-box;
 }
 button {
-  font-size: 1rem;
+  /* https://gist.github.com/MoOx/9137295?permalink_comment_id=4525068#gistcomment-4525068 */
+  all: unset;
+  outline: revert;
+  cursor: pointer;
 }

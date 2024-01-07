@@ -2,7 +2,6 @@
   position: fixed;
   width: 600px;
   max-width: 100%;
-  view-transition-name: halfSheet;
   background-color: #000;
   max-height: 95vh;
   display: flex;

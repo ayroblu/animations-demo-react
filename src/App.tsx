@@ -11,7 +11,10 @@ function App() {
 
       <ul>
         <li>
-          <Link to={routes.halfSheet}>half-sheet</Link>
+          <Link to={routes.halfSheet}>Half Sheet</Link>
+        </li>
+        <li>
+          <Link to={routes.segmentedControl}>Segmented Control</Link>
         </li>
       </ul>
 
