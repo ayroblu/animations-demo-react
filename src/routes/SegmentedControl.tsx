@@ -1,11 +1,29 @@
+import React from "react";
 import { SegmentedControl } from "../components/SegmentedControl";
+import { useNestedViewTransitions } from "../lib/view-transitions";
+import styles from "./SegmentedControl.module.css";
 
 export function SegmentedControlRoute() {
+  const { wrapInViewTransition } = useNestedViewTransitions();
+  const [value, setValue] = React.useState<string>();
+  const handleChange = React.useCallback(
+    (value: string) => {
+      wrapInViewTransition(() => {
+        setValue(value);
+      });
+    },
+    [wrapInViewTransition],
+  );
   return (
     <>
       <h1>Segmented Control demo</h1>
 
-      <SegmentedControl items={items} />
+      <SegmentedControl
+        selectedClassName={styles.selectedSegmentedControl}
+        items={items}
+        onChange={handleChange}
+        value={value}
+      />
     </>
   );
 }

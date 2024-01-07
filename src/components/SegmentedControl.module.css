@@ -18,6 +18,14 @@
   flex-basis: 1px;
   position: relative;
 }
+.segmentedControlItem > .background {
+  border-radius: 8px;
+}
+.segmentedControlItem.selected > .background {
+  position: absolute;
+  inset: 0 0 0 0;
+  background-color: #666;
+}
 .segmentedControlItem:not(:last-child)::after {
   content: "";
   border-right: 1px solid #666;
@@ -31,7 +39,6 @@
 .segmentedControlItem.isAdjacentSelected:not(:last-child)::after {
   opacity: 0;
 }
-.selected {
-  background-color: #666;
-  border-radius: 8px;
+.text {
+  position: relative;
 }

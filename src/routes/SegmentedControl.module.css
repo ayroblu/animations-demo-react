@@ -1,0 +1,3 @@
+.selectedSegmentedControl::before {
+  view-transition-name: segmented-control;
+}

@@ -16,6 +16,9 @@ function App() {
         <li>
           <Link to={routes.segmentedControl}>Segmented Control</Link>
         </li>
+        <li>
+          <Link to={routes.segmentedControlOld}>Segmented Control Old</Link>
+        </li>
       </ul>
 
       <button onClick={() => window.location.reload()}>Reload</button>

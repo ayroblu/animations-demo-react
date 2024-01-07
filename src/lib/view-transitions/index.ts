@@ -43,3 +43,33 @@ export function useViewTransitions() {
     wrapInViewTransition,
   };
 }
+
+export function useNestedViewTransitions() {
+  const deferredItemsRef: { current: Deferred[] } = React.useRef([]);
+  const wrapInViewTransition = React.useCallback((func: () => void) => {
+    const deferredItems = deferredItemsRef.current;
+    if (!document.startViewTransition) {
+      func();
+    } else {
+      document.startViewTransition(async () => {
+        const def = deferred();
+        deferredItems.push(def);
+        func();
+        await def.promise;
+      });
+    }
+  }, []);
+  React.useEffect(() => {
+    const deferredItems = deferredItemsRef.current;
+    if (deferredItems.length) {
+      deferredItems.forEach((p) => {
+        p.resolve();
+      });
+      deferredItemsRef.current = [];
+    }
+  });
+
+  return {
+    wrapInViewTransition,
+  };
+}
