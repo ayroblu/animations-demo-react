@@ -4,34 +4,30 @@ import style from "./HalfSheet.module.css";
 import { globalResizeObserver } from "../lib/global-resize-observer";
 
 type Props = {
-  onDismiss: () => void;
+  dismiss: () => void;
   dialogClassName?: string;
 };
 export function HalfSheet(props: Props) {
-  const { dialogClassName, onDismiss } = props;
+  const { dialogClassName, dismiss } = props;
   const { onTopRef, spaceStyle } = useMatchingSpace<HTMLDivElement>();
-  const { touchRef, offsetStyle } = useTouch<HTMLDivElement>(onDismiss);
+  const { touchRef } = useTouch<HTMLDivElement>(dismiss);
   return (
     <div
       className={style.cover}
       onClick={(e) => {
         if (e.target == e.currentTarget) {
-          onDismiss();
+          dismiss();
         }
       }}
     >
-      <div
-        className={cn(style.halfSheet, dialogClassName)}
-        style={offsetStyle}
-        ref={touchRef}
-      >
+      <div className={cn(style.halfSheet, dialogClassName)} ref={touchRef}>
         <div className={style.halfSheetHeader} ref={onTopRef}>
           <div></div>
           <div>
             <h3>Title</h3>
           </div>
           <div>
-            <button onClick={onDismiss}>Close</button>
+            <button onClick={dismiss}>Close</button>
           </div>
         </div>
         <div className={style.content}>
@@ -107,7 +103,7 @@ export function HalfSheet(props: Props) {
 }
 
 // "ontouchstart" in document.documentElement
-function useTouch<T extends HTMLElement>(handleDismiss: () => void) {
+function useTouch<T extends HTMLElement>(dismiss: () => void) {
   const touchRef = React.useRef<T | null>(null);
   const [offset, setOffset] = React.useState<number>(0);
   const offsetRef = React.useRef(offset);
@@ -173,7 +169,7 @@ function useTouch<T extends HTMLElement>(handleDismiss: () => void) {
       startTouchY = null;
       const offset = offsetRef.current + velocity * 0.2;
       if (offset > elementHeight / 2) {
-        handleDismiss();
+        dismiss();
       } else {
         setOffset(0);
         if (offset !== 0) {
@@ -190,11 +186,23 @@ function useTouch<T extends HTMLElement>(handleDismiss: () => void) {
       element.removeEventListener("touchend", stopTracking);
       transition.getCallback()?.();
     };
-  }, [handleDismiss]);
-  const offsetStyle = React.useMemo(() => {
-    return { transform: `translateY(${offset}px)` };
+  }, [dismiss]);
+
+  const originalTransformRef = React.useRef<string>();
+  React.useLayoutEffect(() => {
+    const el = touchRef.current;
+    if (!el) return;
+    const element = el;
+    const originalTransform = originalTransformRef.current;
+    if (!originalTransform || offset === 0) {
+      originalTransformRef.current = getComputedStyle(element).transform;
+    } else {
+      element.style.transform = originalTransform;
+      element.style.transform += `translateY(${offset}px)`;
+    }
   }, [offset]);
-  return { touchRef, offsetStyle };
+
+  return { touchRef };
 }
 
 function getIsScrolledElements(

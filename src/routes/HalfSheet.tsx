@@ -21,10 +21,7 @@ export function HalfSheetRoute() {
       </button>
 
       {visible && (
-        <HalfSheet
-          dialogClassName={style.halfSheet}
-          onDismiss={toggleVisible}
-        />
+        <HalfSheet dialogClassName={style.halfSheet} dismiss={toggleVisible} />
       )}
     </>
   );
