@@ -1,5 +1,6 @@
 import React from "react";
 import { SegmentedControl } from "../components/SegmentedControl";
+import { Link } from "react-router-dom";
 
 export function SegmentedControlOldRoute() {
   const [, setValue] = React.useState<string>();
@@ -9,6 +10,7 @@ export function SegmentedControlOldRoute() {
   const { selectedRef } = useSelectedElement();
   return (
     <>
+      <Link to="/">&lt; Home</Link>
       <h1>Segmented Control Old demo</h1>
 
       <p>

@@ -2,6 +2,7 @@ import React from "react";
 import { HalfSheet } from "../components/HalfSheet";
 import { useViewTransitions } from "../lib/view-transitions";
 import style from "./HalfSheet.module.css";
+import { Link } from "react-router-dom";
 
 export function HalfSheetRoute() {
   const [visible, setVisible] = React.useState(false);
@@ -14,6 +15,7 @@ export function HalfSheetRoute() {
 
   return (
     <>
+      <Link to="/">&lt; Home</Link>
       <h1>Half Sheet demo</h1>
 
       <button onClick={toggleVisible}>
