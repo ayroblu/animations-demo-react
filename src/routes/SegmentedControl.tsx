@@ -21,7 +21,7 @@ export function SegmentedControlRoute() {
       <h1>Segmented Control demo</h1>
 
       <SegmentedControl
-        selectedClassName={styles.selectedSegmentedControl}
+        selectedBackgroundClassName={styles.selectedSegmentedControl}
         items={items}
         onChange={handleChange}
         value={value}

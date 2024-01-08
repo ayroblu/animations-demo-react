@@ -7,7 +7,7 @@ type Props = {
   initialValue?: string;
   value?: string;
   onChange?: (value: string) => void;
-  selectedClassName?: string;
+  selectedBackgroundClassName?: string;
   selectedRef?: (element: HTMLElement | null) => void;
 };
 export function SegmentedControl({
@@ -15,7 +15,7 @@ export function SegmentedControl({
   value,
   initialValue,
   onChange,
-  selectedClassName,
+  selectedBackgroundClassName,
   selectedRef,
 }: Props) {
   const [internalValue, setInternalValue] = React.useState(() => initialValue);
@@ -42,7 +42,7 @@ export function SegmentedControl({
               (selectedIndex === i || selectedIndex === i + 1)
             }
             isSelected={selectedIndex === i}
-            selectedClassName={selectedClassName}
+            selectedBackgroundClassName={selectedBackgroundClassName}
             selectedRef={selectedRef}
           />
         ))}
@@ -56,7 +56,7 @@ type SegmentedControlItemProps = {
   item: { label: string; value: string };
   onChange: (value: string) => void;
   isAdjacentSelected: boolean;
-  selectedClassName?: string;
+  selectedBackgroundClassName?: string;
   selectedRef?: (element: HTMLElement | null) => void;
 };
 function SegmentedControlItem({
@@ -64,7 +64,7 @@ function SegmentedControlItem({
   item,
   onChange,
   isAdjacentSelected,
-  selectedClassName,
+  selectedBackgroundClassName,
   selectedRef,
 }: SegmentedControlItemProps) {
   const ref = React.useRef<HTMLDivElement | null>(null);
@@ -78,11 +78,16 @@ function SegmentedControlItem({
       className={cn(
         styles.segmentedControlItem,
         isSelected && styles.selected,
-        isSelected && selectedClassName,
         isAdjacentSelected && styles.isAdjacentSelected,
       )}
     >
-      <div ref={ref} className={styles.background} />
+      <div
+        ref={ref}
+        className={cn(
+          styles.background,
+          isSelected && selectedBackgroundClassName,
+        )}
+      />
       <span className={styles.text}>{item.label}</span>
     </button>
   );
