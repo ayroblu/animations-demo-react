@@ -72,6 +72,10 @@ function SegmentedControlItem({
     onChange(item.value);
     selectedRef?.(ref.current);
   }, [item.value, onChange, selectedRef]);
+  const style = React.useMemo(
+    () => ({ viewTransitionName: "segmented-control-" + item.value }),
+    [item.value],
+  );
   return (
     <button
       onClick={handleClick}
@@ -88,7 +92,9 @@ function SegmentedControlItem({
           isSelected && selectedBackgroundClassName,
         )}
       />
-      <span className={styles.text}>{item.label}</span>
+      <span className={styles.text} style={style}>
+        {item.label}
+      </span>
     </button>
   );
 }
