@@ -13,4 +13,6 @@ button {
   all: unset;
   outline: revert;
   cursor: pointer;
+  /* disables the fade out on iOS */
+  -webkit-tap-highlight-color: transparent;
 }
