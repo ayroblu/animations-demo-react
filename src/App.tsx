@@ -22,6 +22,11 @@ function App() {
         <li>
           <Link to={routes.viewPagerWithDrawer}>ViewPager with Drawer</Link>
         </li>
+        <li>
+          <Link to={routes.viewPagerWithDrawerOld}>
+            ViewPager with Drawer Old
+          </Link>
+        </li>
       </ul>
 
       <button onClick={() => window.location.reload()}>Reload</button>

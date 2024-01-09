@@ -4,6 +4,7 @@ import { HalfSheetRoute } from "./HalfSheet";
 import { SegmentedControlRoute } from "./SegmentedControl";
 import { SegmentedControlOldRoute } from "./SegmentedControlOld";
 import { ViewPagerWithDrawerRoute } from "./ViewPagerWithDrawer";
+import { ViewPagerWithDrawerOldRoute } from "./ViewPagerWithDrawerOld";
 
 export const routes = {
   root: "/",
@@ -11,6 +12,7 @@ export const routes = {
   segmentedControl: "/segmented-control",
   segmentedControlOld: "/segmented-control-old",
   viewPagerWithDrawer: "/view-pager-drawer",
+  viewPagerWithDrawerOld: "/view-pager-drawer-old",
 };
 export const router = createBrowserRouter(
   [
@@ -33,6 +35,10 @@ export const router = createBrowserRouter(
     {
       path: routes.viewPagerWithDrawer,
       element: <ViewPagerWithDrawerRoute />,
+    },
+    {
+      path: routes.viewPagerWithDrawerOld,
+      element: <ViewPagerWithDrawerOldRoute />,
     },
   ],
   { basename: import.meta.env.BASE_URL },
