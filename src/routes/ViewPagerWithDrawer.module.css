@@ -1,0 +1,6 @@
+.header {
+  display: flex;
+}
+.header > * {
+  flex: 1 0 1px;
+}

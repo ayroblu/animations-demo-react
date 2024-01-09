@@ -4,6 +4,13 @@ I initially wanted to do this in svelte but it's a bit broken, so doing it in re
 
 See it: https://ayroblu.github.io/animations-demo-react
 
+## Other ideas
+
+- viewpager and drawer (twitter home screen)
+- lock screen
+- messages chat
+- photo gallery
+
 ## Getting Started
 
 ```sh

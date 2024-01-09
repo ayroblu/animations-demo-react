@@ -19,6 +19,9 @@ function App() {
         <li>
           <Link to={routes.segmentedControlOld}>Segmented Control Old</Link>
         </li>
+        <li>
+          <Link to={routes.viewPagerWithDrawer}>ViewPager with Drawer</Link>
+        </li>
       </ul>
 
       <button onClick={() => window.location.reload()}>Reload</button>

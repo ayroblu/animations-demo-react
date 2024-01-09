@@ -1,0 +1,28 @@
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #222;
+}
+.tab {
+  flex-grow: 1;
+  flex-basis: 1px;
+  text-align: center;
+  position: relative;
+  padding: 16px;
+  cursor: pointer;
+}
+.tabName {
+  margin: 0;
+  font-size: 1rem;
+}
+.indicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  border-radius: 1.5px;
+}
+.selected {
+  background-color: #5bf;
+}
