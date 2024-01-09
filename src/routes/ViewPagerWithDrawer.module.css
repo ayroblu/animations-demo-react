@@ -1,6 +1,92 @@
 .header {
   display: flex;
+  height: 36px;
+  align-items: center;
 }
 .header > * {
   flex: 1 0 1px;
+}
+.heading {
+  margin: 0;
+  font-size: 1rem;
+  text-align: center;
+  font-weight: normal;
+}
+.drawerHeading {
+  padding: 16px;
+}
+.drawerLinks {
+  padding: 0;
+  margin: 0;
+}
+.drawerLinks > li {
+  list-style-type: none;
+}
+.drawerLink {
+  padding: 16px;
+  display: block;
+  width: 100%;
+}
+@media (hover: hover) and (pointer: fine) {
+  .drawerLink:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.startControl {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #555;
+  display: inline-block;
+  margin-inline-start: 8px;
+}
+
+.drawerContent {
+  view-transition-name: drawer;
+}
+.content {
+  view-transition-name: content;
+}
+
+.viewPagerContent {
+  view-transition-name: tab;
+}
+.tabRight {
+  view-transition-name: tab-right;
+}
+@keyframes slide-out-left {
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes slide-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes slide-in-left {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes slide-in-right {
+  from {
+    transform: translateX(-100%);
+  }
+}
+@media only screen and (prefers-reduced-motion: no-preference) and (update: fast) {
+  ::view-transition-old(tab) {
+    animation: 0.3s ease-in slide-out-left;
+  }
+  ::view-transition-new(tab) {
+    animation: 0.3s ease-in slide-in-left;
+  }
+}
+@media only screen and (prefers-reduced-motion: no-preference) and (update: fast) {
+  ::view-transition-old(tab-right) {
+    animation: 0.3s ease-in slide-out-right;
+  }
+  ::view-transition-new(tab-right) {
+    animation: 0.3s ease-in slide-in-right;
+  }
 }

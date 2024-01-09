@@ -1,4 +1,5 @@
 import React from "react";
+import { useForceUpdate } from "../utils/hooks";
 
 type Deferred = ReturnType<typeof deferred>;
 function deferred() {
@@ -46,19 +47,24 @@ export function useViewTransitions() {
 
 export function useNestedViewTransitions() {
   const deferredItemsRef: { current: Deferred[] } = React.useRef([]);
-  const wrapInViewTransition = React.useCallback((func: () => void) => {
-    const deferredItems = deferredItemsRef.current;
-    if (!document.startViewTransition) {
-      func();
-    } else {
-      document.startViewTransition(async () => {
-        const def = deferred();
-        deferredItems.push(def);
+  const forceUpdate = useForceUpdate();
+  const wrapInViewTransition = React.useCallback(
+    (func: () => void) => {
+      const deferredItems = deferredItemsRef.current;
+      if (!document.startViewTransition) {
         func();
-        await def.promise;
-      });
-    }
-  }, []);
+      } else {
+        document.startViewTransition(async () => {
+          const def = deferred();
+          deferredItems.push(def);
+          forceUpdate();
+          func();
+          await def.promise;
+        });
+      }
+    },
+    [forceUpdate],
+  );
   React.useEffect(() => {
     const deferredItems = deferredItemsRef.current;
     if (deferredItems.length) {

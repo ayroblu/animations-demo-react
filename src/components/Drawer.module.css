@@ -1,45 +1,36 @@
-.segmentedControlOuter {
-  --padding-size: 16px;
-  padding: var(--padding-size);
-  padding-left: calc(env(safe-area-inset-left) + var(--padding-size));
-  padding-right: calc(env(safe-area-inset-right) + var(--padding-size));
-  background: #333;
-}
-.segmentedControl {
+.sidenavDrawer {
   display: flex;
-  background-color: #444;
-  border-radius: 8px;
-  padding: 2px;
 }
-.segmentedControlItem {
-  padding: 8px;
-  text-align: center;
+.drawerContent {
+  width: 280px;
+}
+.drawerContentWrapper {
+  position: sticky;
+  top: 0;
+}
+.mobileDrawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translateX(-280px);
+}
+.mobileDrawer.visible {
+  transform: translateX(0px);
+}
+.sidenav {
+  flex-shrink: 0;
+}
+.content {
+  position: relative;
+}
+.content.visible {
+  transform: translateX(280px);
+}
+.sidenavContent {
   flex-grow: 1;
-  flex-basis: 1px;
-  position: relative;
 }
-.segmentedControlItem > .background {
-  border-radius: 8px;
-}
-.segmentedControlItem.selected > .background {
+.contentCover {
   position: absolute;
-  inset: 0 0 0 0;
-  background-color: #666;
-}
-.segmentedControlItem:not(:last-child)::after {
-  content: "";
-  border-right: 1px solid #666;
-  position: absolute;
-  right: 0;
-  height: 1lh;
-  top: 50%;
-  transform: translateY(-50%);
-  transition: 0.2s opacity;
-}
-.segmentedControlItem.isAdjacentSelected:not(:last-child)::after {
-  opacity: 0;
-}
-.text {
-  position: relative;
-  z-index: 1;
+  inset: 0;
+  backdrop-filter: blur(8px);
 }

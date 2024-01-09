@@ -1,28 +1,63 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Drawer } from "../components/Drawer";
+import { Drawer, DrawerContext } from "../components/Drawer";
 import { ViewPager } from "../components/ViewPager";
 import styles from "./ViewPagerWithDrawer.module.css";
+import { useNestedViewTransitions } from "../lib/view-transitions";
 
 export function ViewPagerWithDrawerRoute() {
-  const viewRef = React.useRef<HTMLDivElement | null>(null);
-  const shiftRefs = React.useMemo(() => {
-    return [viewRef];
-  }, []);
+  const { wrapInViewTransition } = useNestedViewTransitions();
   return (
     <>
-      <Drawer shiftRefs={shiftRefs}>
-        <div>Heading</div>
-        <div>Links</div>
-      </Drawer>
-      <div ref={viewRef}>
+      <Drawer
+        drawerContent={drawerContent}
+        drawerContentClassName={styles.drawerContent}
+        contentClassName={styles.content}
+        setDrawerWrapper={wrapInViewTransition}
+      >
         <header className={styles.header}>
-          <div>Profile picture circle</div>
-          <div>name</div>
+          <div>
+            <LeftButton />
+          </div>
+          <h1 className={styles.heading}>Demo App</h1>
           <div />
         </header>
-        <ViewPager pages={pages} />
-      </div>
+        <ViewPager
+          pages={pages}
+          rightContentClassName={styles.tabRight}
+          contentClassName={styles.viewPagerContent}
+          wrapSetSelected={wrapInViewTransition}
+        />
+      </Drawer>
+    </>
+  );
+}
+const drawerContent = <DrawerContent />;
+
+function LeftButton() {
+  const drawerContext = React.useContext(DrawerContext);
+  if (!drawerContext) {
+    return <div />;
+  }
+  const { openDrawer } = drawerContext;
+  return <button className={styles.startControl} onClick={openDrawer}></button>;
+}
+
+function DrawerContent() {
+  return (
+    <>
+      <div className={styles.drawerHeading}>Heading</div>
+      <ul className={styles.drawerLinks}>
+        <li>
+          <button className={styles.drawerLink}>Benefits</button>
+        </li>
+        <li>
+          <button className={styles.drawerLink}>Issues</button>
+        </li>
+        <li>
+          <button className={styles.drawerLink}>Electrification</button>
+        </li>
+      </ul>
     </>
   );
 }
