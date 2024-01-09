@@ -8,6 +8,7 @@ type Props = {
     name: string;
     component: React.ReactNode;
   }[];
+  header: React.ReactNode;
   contentClassName?: string;
   rightContentClassName?: string;
   wrapSetSelected?: (func: () => void) => void;
@@ -17,6 +18,7 @@ export function ViewPager({
   contentClassName,
   rightContentClassName,
   wrapSetSelected,
+  header,
 }: Props) {
   const [selected, setSelected] = React.useState<string>(pages[0].name);
   const selectedPage = pages.find(({ name }) => name === selected) ?? pages[0];
@@ -26,19 +28,22 @@ export function ViewPager({
   const [isRight, setIsRight] = React.useState(false);
   return (
     <div>
-      <section className={styles.tabs}>
-        {pages.map(({ name }, index) => (
-          <Tab
-            key={name}
-            name={name}
-            selected={selected}
-            setIsRight={setIsRight}
-            isRight={index < selectedIndex}
-            setSelected={setSelected}
-            wrapSetSelected={wrapSetSelected}
-          />
-        ))}
-      </section>
+      <div className={styles.header}>
+        {header}
+        <section className={styles.tabs}>
+          {pages.map(({ name }, index) => (
+            <Tab
+              key={name}
+              name={name}
+              selected={selected}
+              setIsRight={setIsRight}
+              isRight={index < selectedIndex}
+              setSelected={setSelected}
+              wrapSetSelected={wrapSetSelected}
+            />
+          ))}
+        </section>
+      </div>
       <div
         className={cn(
           contentClassName,

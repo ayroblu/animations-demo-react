@@ -9,6 +9,10 @@ type Props = {
   setDrawerWrapper?: (func: () => void) => void;
   contentClassName?: string;
   drawerContentClassName?: string;
+  drawerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  isOpen?: boolean;
+  setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  contentCoverClassName?: string;
 };
 export function Drawer({ children, drawerContent, ...rest }: Props) {
   const { width } = useDimensions();
@@ -37,40 +41,51 @@ function SideDrawer({
   setDrawerWrapper,
   contentClassName,
   drawerContentClassName,
+  drawerRef,
+  isOpen,
+  setIsOpen,
+  contentCoverClassName,
 }: Props) {
   const isVisibleState = React.useState(false);
-  const [isVisible, setIsVisible] = isVisibleState;
-  const drawerRef = React.useRef<HTMLDivElement | null>(null);
+  const [isVisible2, setIsVisible] = isVisibleState;
+  const isVisible = isOpen ?? isVisible2;
   const contentRef = React.useRef<HTMLDivElement | null>(null);
-  const drawerContextValue = useDrawerValue(setIsVisible, setDrawerWrapper);
+  const drawerContextValue = useDrawerValue(
+    setIsOpen ?? setIsVisible,
+    setDrawerWrapper,
+  );
   return (
     <DrawerContext.Provider value={drawerContextValue}>
-      <div
-        className={cn(
-          styles.drawerContent,
-          styles.mobileDrawer,
-          drawerContentClassName,
-          isVisible && styles.visible,
-        )}
-        ref={drawerRef}
-      >
-        {isVisible ? drawerContent : null}
-      </div>
-      <div
-        className={cn(
-          styles.content,
-          isVisible && styles.visible,
-          contentClassName,
-        )}
-        ref={contentRef}
-      >
-        {children}
-        {isVisible ? (
+      <div className={styles.groupContainer}>
+        <div
+          className={cn(styles.drawer, isVisible && styles.visible)}
+          ref={drawerRef}
+        >
           <div
-            className={styles.contentCover}
-            onClick={drawerContextValue.closeDrawer}
-          />
-        ) : null}
+            className={cn(
+              styles.drawerContent,
+              styles.mobileDrawer,
+              drawerContentClassName,
+            )}
+          >
+            <div className={styles.sticky}>{drawerContent}</div>
+            <div className={styles.fill} />
+          </div>
+          <div
+            className={cn(styles.content, contentClassName)}
+            ref={contentRef}
+          >
+            {children}
+            <div
+              className={cn(
+                styles.contentCover,
+                contentCoverClassName,
+                isVisible && styles.visible,
+              )}
+              onClick={drawerContextValue.closeDrawer}
+            />
+          </div>
+        </div>
       </div>
     </DrawerContext.Provider>
   );

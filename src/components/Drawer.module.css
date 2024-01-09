@@ -9,13 +9,13 @@
   top: 0;
 }
 .mobileDrawer {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
+  bottom: 0;
   transform: translateX(-280px);
-}
-.mobileDrawer.visible {
-  transform: translateX(0px);
+  display: flex;
+  flex-direction: column;
 }
 .sidenav {
   flex-shrink: 0;
@@ -33,4 +33,23 @@
   position: absolute;
   inset: 0;
   backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+}
+.contentCover.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+.groupContainer {
+  contain: paint;
+}
+.drawer.visible {
+  transform: translateX(280px);
+}
+.sticky {
+  position: sticky;
+  top: 0;
+}
+.fill {
+  flex-grow: 1;
 }

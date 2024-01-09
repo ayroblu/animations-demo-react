@@ -1,54 +1,39 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Drawer, DrawerContext } from "../components/Drawer";
+import { Drawer } from "../components/Drawer";
 import { ViewPager } from "../components/ViewPager";
-import styles from "./ViewPagerWithDrawer.module.css";
+import styles from "./ViewPagerWithDrawerOld.module.css";
+import {
+  DrawerContent,
+  LeftButton,
+  Page,
+} from "../components/ViewPagerWithDrawerShared";
+import React from "react";
 
 export function ViewPagerWithDrawerOldRoute() {
+  const { drawerRef, isOpen, setIsOpen, setDrawerWrapper } = useDragDrawer();
   return (
-    <>
-      <Drawer drawerContent={drawerContent}>
-        <header className={styles.header}>
-          <div>
-            <LeftButton />
-          </div>
-          <h1 className={styles.heading}>Demo App</h1>
-          <div />
-        </header>
-        <ViewPager pages={pages} />
-      </Drawer>
-    </>
+    <Drawer
+      drawerContent={drawerContent}
+      drawerRef={drawerRef}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      setDrawerWrapper={setDrawerWrapper}
+      contentCoverClassName={styles.contentCover}
+    >
+      <ViewPager pages={pages} header={header} />
+    </Drawer>
   );
 }
+
 const drawerContent = <DrawerContent />;
-
-function LeftButton() {
-  const drawerContext = React.useContext(DrawerContext);
-  if (!drawerContext) {
-    return <div />;
-  }
-  const { openDrawer } = drawerContext;
-  return <button className={styles.startControl} onClick={openDrawer}></button>;
-}
-
-function DrawerContent() {
-  return (
-    <>
-      <div className={styles.drawerHeading}>Heading</div>
-      <ul className={styles.drawerLinks}>
-        <li>
-          <button className={styles.drawerLink}>Benefits</button>
-        </li>
-        <li>
-          <button className={styles.drawerLink}>Issues</button>
-        </li>
-        <li>
-          <button className={styles.drawerLink}>Electrification</button>
-        </li>
-      </ul>
-    </>
-  );
-}
+const header = (
+  <header className={styles.header}>
+    <div>
+      <LeftButton />
+    </div>
+    <h1 className={styles.heading}>Demo App</h1>
+    <div />
+  </header>
+);
 
 const pages = [
   {
@@ -64,86 +49,176 @@ const pages = [
     component: <Page name="Buses" />,
   },
 ];
-function Page({ name }: { name: string }) {
-  return (
-    <>
-      <Link to="/">&lt; Home</Link>
-      <h1>ViewPager with Drawer ({name})</h1>
 
-      <p>
-        This is tricky because there are two touch / swipeable elements, either
-        you can swipe inside the ViewPager, or you can swipe on the side for the
-        drawer (unless you're already on the left side).
-      </p>
-
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Odio facilisis
-        mauris sit amet massa vitae tortor. Ipsum faucibus vitae aliquet nec
-        ullamcorper sit amet. At tempor commodo ullamcorper a lacus vestibulum.
-        Tempor id eu nisl nunc mi ipsum faucibus vitae aliquet. Netus et
-        malesuada fames ac turpis. Nullam vehicula ipsum a arcu cursus. Justo
-        donec enim diam vulputate ut. Molestie at elementum eu facilisis sed
-        odio. Ac orci phasellus egestas tellus rutrum tellus pellentesque.
-        Dignissim suspendisse in est ante. Et odio pellentesque diam volutpat
-        commodo sed. Feugiat nisl pretium fusce id velit ut. Duis tristique
-        sollicitudin nibh sit amet.
-      </p>
-
-      <p>
-        Sit ipsum ut minim in irure minim cillum enim ut consequat nulla non
-        cillum. Deserunt magna sit fugiat qui quis ex fugiat tempor consectetur
-        occaecat deserunt id nisi. Sunt esse cillum nostrud mollit pariatur
-        exercitation eu anim consectetur ex incididunt dolore aute. Ullamco
-        laborum excepteur dolor irure ut in labore dolore ipsum in occaecat.
-      </p>
-      <p>
-        Eiusmod ullamco do nulla Lorem non laborum consectetur deserunt cillum.
-        Fugiat voluptate qui deserunt sit anim non ex ipsum ad aute magna. Elit
-        exercitation consectetur duis. Amet fugiat ipsum tempor duis adipisicing
-        enim culpa ipsum culpa culpa fugiat elit.
-      </p>
-      <p>
-        Ullamco nulla proident fugiat laborum Lorem cillum officia ullamco nisi
-        ea nulla irure adipisicing. Dolor non esse eiusmod dolor exercitation et
-        dolore tempor fugiat aute minim culpa ea nulla. Commodo ut sit amet
-        dolor proident reprehenderit laborum magna tempor. In ea ea officia
-        commodo nulla irure cupidatat. Commodo amet deserunt veniam esse anim ad
-        laboris nulla et id fugiat amet. Velit voluptate consequat tempor aliqua
-        officia cupidatat pariatur est deserunt sit reprehenderit amet Lorem.
-      </p>
-      <p>
-        Commodo occaecat nisi ut sit ut eu ut ex. Enim tempor laborum pariatur.
-        Aliqua amet occaecat dolore reprehenderit excepteur elit velit sit
-        incididunt cillum consequat et nulla. Nisi veniam laborum dolor qui
-        aliqua voluptate.
-      </p>
-      <p>
-        Occaecat consequat nulla cillum qui ut anim aliquip. Nulla cillum dolore
-        est consequat nostrud dolor ullamco quis velit id officia eiusmod elit
-        excepteur. Elit velit nostrud commodo sit minim labore est veniam et
-        ipsum in ad tempor. Anim do laboris dolore aliquip. Id occaecat elit
-        sint ullamco sit ullamco sunt anim commodo tempor exercitation. Nulla ut
-        et ea sint magna aute eiusmod id sit. Sunt dolor Lorem consectetur dolor
-        voluptate excepteur aute enim adipisicing incididunt velit enim amet et
-        ex. Cupidatat ullamco occaecat pariatur proident nostrud in veniam.
-      </p>
-      <p>
-        Nulla ut velit id cupidatat dolore nulla duis voluptate reprehenderit
-        dolore. Officia nisi pariatur ullamco reprehenderit. Non Lorem non elit
-        qui aliquip aute adipisicing officia ut ut. Nisi qui culpa reprehenderit
-        labore esse est sint pariatur nostrud labore. Aute id tempor labore
-        reprehenderit. Duis ut velit fugiat esse velit tempor culpa. Ex in
-        aliqua nisi mollit fugiat nulla nostrud eu. Aute elit ea sit mollit
-        laboris elit consequat anim commodo irure reprehenderit consequat.
-      </p>
-      <p>
-        Occaecat nulla officia cillum enim. Sint aliquip qui aliqua laborum
-        tempor. Velit cupidatat ut do aliquip. Officia consectetur incididunt eu
-        quis. Eu in magna occaecat elit ipsum occaecat culpa culpa. Qui occaecat
-        duis occaecat. Culpa quis duis do dolore reprehenderit anim est amet
-        esse non ut. Esse ea aliquip ullamco exercitation aliqua.
-      </p>
-    </>
+function useTransformsManager() {
+  // it's typed as a string, but isn't actually
+  type Transform = string;
+  const wmapRef = React.useRef(new WeakMap<HTMLElement, Transform>());
+  const drag = React.useCallback(
+    (element: HTMLElement, transform: Transform) => {
+      const wmap = wmapRef.current;
+      let original = wmap.get(element);
+      if (original === undefined) {
+        original = getComputedStyle(element).transform;
+        wmap.set(element, original);
+      }
+      if (original === "none") {
+        element.style.transform = transform;
+      } else {
+        element.style.transform = original;
+        element.style.transform += transform;
+      }
+    },
+    [],
   );
+  const dragReset = React.useCallback((element: HTMLElement) => {
+    const wmap = wmapRef.current;
+    const original = wmap.get(element);
+    if (original === "none") {
+      element.style.transform = "";
+    } else if (original !== undefined) {
+      element.style.transform = original;
+    }
+    wmap.delete(element);
+  }, []);
+  return React.useMemo(
+    () => ({
+      drag,
+      dragReset,
+    }),
+    [drag, dragReset],
+  );
+}
+function useDragDrawer() {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { drag, dragReset } = useTransformsManager();
+  const drawerRef = React.useRef<HTMLDivElement | null>(null);
+  const setDrawerWrapper = React.useCallback((func: () => void) => {
+    const drawer = drawerRef.current;
+    if (!drawer) {
+      return;
+    }
+    drawer.style.transition = "0.2s transform";
+    const transitionend = () => {
+      drawer.style.transition = "";
+    };
+    drawer.addEventListener("transitionend", transitionend, { once: true });
+    requestAnimationFrame(() => {
+      func();
+    });
+  }, []);
+  const dragHandler: DragHandler = React.useCallback(() => {
+    let startPoint: { x: number; y: number } | null = null;
+    let lastPoint: { x: number; y: number } | null = null;
+    const isOpen = false;
+    let isOpening = false;
+    let isScrolling = false;
+    let isSwiping = false;
+    function reset() {
+      startPoint = null;
+      isSwiping = false;
+      isScrolling = false;
+    }
+    function start(_e: TouchEvent, touch: Touch) {
+      startPoint = { x: touch.pageX, y: touch.pageY };
+    }
+    function move(e: TouchEvent, touch: Touch) {
+      if (!startPoint) {
+        return;
+      }
+      const x = touch.pageX;
+      const isWrongWay =
+        (!isOpen && x < startPoint.x) ||
+        (isOpen && x > startPoint.x) ||
+        isScrolling;
+      if (isWrongWay) {
+        reset();
+        return;
+      }
+      if (Math.abs(x - startPoint.x) > 10) {
+        isSwiping = true;
+      }
+      if (!isSwiping && Math.abs(touch.pageY - startPoint.y) > 10) {
+        isScrolling = true;
+      }
+      if (!isSwiping) {
+        return;
+      }
+      const drawer = drawerRef.current;
+      if (!drawer) {
+        return;
+      }
+
+      e.preventDefault();
+      if (lastPoint) {
+        isOpening = x > lastPoint.x;
+      }
+      lastPoint = { x: touch.pageX, y: touch.pageY };
+      const moveX = touch.pageX - startPoint.x;
+      drag(drawer, `translateX(${moveX}px)`);
+      // uiDragHandler.move({
+      //   x: touch.pageX - startPoint.x,
+      //   y: touch.pageY - startPoint.y,
+      // });
+    }
+    function end() {
+      setDrawerWrapper(() => {
+        setIsOpen(isOpening);
+      });
+      const drawer = drawerRef.current;
+      if (!drawer) {
+        return;
+      }
+      dragReset(drawer);
+      // uiDragHandler.release(isOpen);
+    }
+
+    return {
+      reset,
+      start,
+      move,
+      end,
+    };
+  }, [drag, dragReset, setDrawerWrapper]);
+  useDragEvent({ dragHandler });
+  return { drawerRef, isOpen, setIsOpen, setDrawerWrapper };
+}
+type DragHandler = () => {
+  reset: () => void;
+  start: (e: TouchEvent, touch: Touch) => void;
+  move: (e: TouchEvent, touch: Touch) => void;
+  end: (e: TouchEvent) => void;
+};
+function useDragEvent({ dragHandler }: { dragHandler: DragHandler }) {
+  React.useEffect(() => {
+    const handler = dragHandler();
+    function touchstart(e: TouchEvent) {
+      if (e.touches.length !== 1) {
+        handler.reset();
+        return;
+      }
+      const [touch] = e.touches;
+      handler.start(e, touch);
+    }
+    function touchmove(e: TouchEvent) {
+      if (e.touches.length !== 1) {
+        handler.reset();
+        return;
+      }
+      const [touch] = e.touches;
+      handler.move(e, touch);
+    }
+    function touchend(e: TouchEvent) {
+      handler.end(e);
+      handler.reset();
+    }
+    window.addEventListener("touchstart", touchstart, { passive: false });
+    window.addEventListener("touchmove", touchmove, { passive: false });
+    window.addEventListener("touchend", touchend, { passive: false });
+    return () => {
+      window.removeEventListener("touchstart", touchstart);
+      window.removeEventListener("touchmove", touchmove);
+      window.removeEventListener("touchend", touchend);
+    };
+  }, [dragHandler]);
 }

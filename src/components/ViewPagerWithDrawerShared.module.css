@@ -1,0 +1,28 @@
+.drawerHeading {
+  padding: 16px;
+}
+.drawerLinks {
+  padding: 0;
+  margin: 0;
+}
+.drawerLinks > li {
+  list-style-type: none;
+}
+.drawerLink {
+  padding: 16px;
+  display: block;
+  width: 100%;
+}
+@media (hover: hover) and (pointer: fine) {
+  .drawerLink:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.startControl {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #555;
+  display: inline-block;
+  margin-inline-start: 8px;
+}
