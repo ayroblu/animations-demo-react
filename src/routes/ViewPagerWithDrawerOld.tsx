@@ -72,13 +72,8 @@ function useTransformsManager() {
     [],
   );
   const dragReset = React.useCallback((element: HTMLElement) => {
+    element.style.transform = "";
     const wmap = wmapRef.current;
-    const original = wmap.get(element);
-    if (original === "none") {
-      element.style.transform = "";
-    } else if (original !== undefined) {
-      element.style.transform = original;
-    }
     wmap.delete(element);
   }, []);
   return React.useMemo(
@@ -91,6 +86,8 @@ function useTransformsManager() {
 }
 function useDragDrawer() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const isOpenRef = React.useRef(false);
+  isOpenRef.current = isOpen;
   const { drag, dragReset } = useTransformsManager();
   const drawerRef = React.useRef<HTMLDivElement | null>(null);
   const setDrawerWrapper = React.useCallback((func: () => void) => {
@@ -110,7 +107,6 @@ function useDragDrawer() {
   const dragHandler: DragHandler = React.useCallback(() => {
     let startPoint: { x: number; y: number } | null = null;
     let lastPoint: { x: number; y: number } | null = null;
-    const isOpen = false;
     let isOpening = false;
     let isScrolling = false;
     let isSwiping = false;
@@ -127,6 +123,7 @@ function useDragDrawer() {
         return;
       }
       const x = touch.pageX;
+      const isOpen = isOpenRef.current;
       const isWrongWay =
         (!isOpen && x < startPoint.x) ||
         (isOpen && x > startPoint.x) ||
@@ -156,10 +153,6 @@ function useDragDrawer() {
       lastPoint = { x: touch.pageX, y: touch.pageY };
       const moveX = touch.pageX - startPoint.x;
       drag(drawer, `translateX(${moveX}px)`);
-      // uiDragHandler.move({
-      //   x: touch.pageX - startPoint.x,
-      //   y: touch.pageY - startPoint.y,
-      // });
     }
     function end() {
       setDrawerWrapper(() => {
@@ -170,7 +163,6 @@ function useDragDrawer() {
         return;
       }
       dragReset(drawer);
-      // uiDragHandler.release(isOpen);
     }
 
     return {
