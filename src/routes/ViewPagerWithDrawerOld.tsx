@@ -151,18 +151,18 @@ function useDragDrawer() {
         isOpening = x > lastPoint.x;
       }
       lastPoint = { x: touch.pageX, y: touch.pageY };
-      const moveX = touch.pageX - startPoint.x;
+      const moveX = Math.max(
+        -maxDragX,
+        Math.min(touch.pageX - startPoint.x, maxDragX),
+      );
       drag(drawer, `translateX(${moveX}px)`);
     }
     function end() {
+      const drawer = drawerRef.current;
       setDrawerWrapper(() => {
+        drawer && dragReset(drawer);
         setIsOpen(isOpening);
       });
-      const drawer = drawerRef.current;
-      if (!drawer) {
-        return;
-      }
-      dragReset(drawer);
     }
 
     return {
@@ -175,6 +175,7 @@ function useDragDrawer() {
   useDragEvent({ dragHandler });
   return { drawerRef, isOpen, setIsOpen, setDrawerWrapper };
 }
+const maxDragX = 280;
 type DragHandler = () => {
   reset: () => void;
   start: (e: TouchEvent, touch: Touch) => void;
