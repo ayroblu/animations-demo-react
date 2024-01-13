@@ -7,6 +7,11 @@ import {
   Page,
 } from "../components/ViewPagerWithDrawerShared";
 import React from "react";
+import {
+  DragHandler,
+  useDragEvent,
+  useTransformsManager,
+} from "../lib/utils/hooks";
 
 export function ViewPagerWithDrawerOldRoute() {
   const drawerProps = useDragDrawer();
@@ -35,7 +40,7 @@ const header = (
 const pages = [
   {
     name: "Trams",
-    component: <Page name="Trams" />,
+    component: <Page name="Trams" withoutLoremIpsum />,
   },
   {
     name: "Cycling",
@@ -47,40 +52,6 @@ const pages = [
   },
 ];
 
-function useTransformsManager() {
-  // it's typed as a string, but isn't actually
-  type Transform = string;
-  const wmapRef = React.useRef(new WeakMap<HTMLElement, Transform>());
-  const drag = React.useCallback(
-    (element: HTMLElement, transform: Transform) => {
-      const wmap = wmapRef.current;
-      let original = wmap.get(element);
-      if (original === undefined) {
-        original = getComputedStyle(element).transform;
-        wmap.set(element, original);
-      }
-      if (original === "none") {
-        element.style.transform = transform;
-      } else {
-        element.style.transform = original;
-        element.style.transform += transform;
-      }
-    },
-    [],
-  );
-  const dragReset = React.useCallback((element: HTMLElement) => {
-    element.style.transform = "";
-    const wmap = wmapRef.current;
-    wmap.delete(element);
-  }, []);
-  return React.useMemo(
-    () => ({
-      drag,
-      dragReset,
-    }),
-    [drag, dragReset],
-  );
-}
 function useDragDrawer() {
   const [isOpen, setIsOpen] = React.useState(false);
   const isOpenRef = React.useRef(false);
@@ -182,42 +153,3 @@ function useDragDrawer() {
   return { drawerRef, isOpen, setIsOpen, setDrawerWrapper, contentCoverRef };
 }
 const maxDragX = 280;
-type DragHandler = () => {
-  reset: () => void;
-  start: (e: TouchEvent, touch: Touch) => void;
-  move: (e: TouchEvent, touch: Touch) => void;
-  end: (e: TouchEvent) => void;
-};
-function useDragEvent({ dragHandler }: { dragHandler: DragHandler }) {
-  React.useEffect(() => {
-    const handler = dragHandler();
-    function touchstart(e: TouchEvent) {
-      if (e.touches.length !== 1) {
-        handler.reset();
-        return;
-      }
-      const [touch] = e.touches;
-      handler.start(e, touch);
-    }
-    function touchmove(e: TouchEvent) {
-      if (e.touches.length !== 1) {
-        handler.reset();
-        return;
-      }
-      const [touch] = e.touches;
-      handler.move(e, touch);
-    }
-    function touchend(e: TouchEvent) {
-      handler.end(e);
-      handler.reset();
-    }
-    window.addEventListener("touchstart", touchstart, { passive: false });
-    window.addEventListener("touchmove", touchmove, { passive: false });
-    window.addEventListener("touchend", touchend, { passive: false });
-    return () => {
-      window.removeEventListener("touchstart", touchstart);
-      window.removeEventListener("touchmove", touchmove);
-      window.removeEventListener("touchend", touchend);
-    };
-  }, [dragHandler]);
-}

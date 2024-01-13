@@ -1,9 +1,15 @@
+.viewPager {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
 .header {
   border-bottom: 1px solid #222;
   background-color: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
+  z-index: 1;
 }
 .tabs {
   display: flex;
@@ -31,4 +37,18 @@
 }
 .selected {
   background-color: #5bf;
+}
+.content {
+  contain: paint;
+  flex-grow: 1;
+}
+.contentWrapper {
+  min-height: 60vh;
+  /* transition: 0.2s transform; */
+}
+.page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(calc(var(--i) * 100%));
 }

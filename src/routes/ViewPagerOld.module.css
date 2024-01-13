@@ -1,0 +1,17 @@
+.header {
+  display: flex;
+  height: 36px;
+  align-items: center;
+}
+.header > * {
+  flex: 1 0 1px;
+}
+.heading {
+  margin: 0;
+  font-size: 1rem;
+  text-align: center;
+  font-weight: normal;
+}
+.contentCover {
+  transition: 0.2s opacity;
+}

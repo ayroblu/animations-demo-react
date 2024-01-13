@@ -12,6 +12,9 @@ type Props = {
   contentClassName?: string;
   rightContentClassName?: string;
   wrapSetSelected?: (func: () => void) => void;
+  pageIndex?: number;
+  setPageIndex?: React.Dispatch<React.SetStateAction<number>>;
+  contentWrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 export function ViewPager({
   pages,
@@ -19,15 +22,27 @@ export function ViewPager({
   rightContentClassName,
   wrapSetSelected,
   header,
+  pageIndex,
+  setPageIndex,
+  contentWrapperRef,
 }: Props) {
-  const [selected, setSelected] = React.useState<string>(pages[0].name);
-  const selectedPage = pages.find(({ name }) => name === selected) ?? pages[0];
-  const selectedIndex = pages.findIndex(
-    ({ name }) => name === selectedPage.name,
-  );
+  const [selected, setSelected] = React.useState(0);
+  const selectedIndex = pageIndex ?? selected;
   const [isRight, setIsRight] = React.useState(false);
+  const { onRef, refs } = usePageRef();
+  const pageEl = refs[selectedIndex];
+  const height = pageEl ? getPageHeight(pageEl) : 60;
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
+  React.useEffect(() => {
+    const content = contentRef.current;
+    if (!content) {
+      return;
+    }
+    content.style.height = height + "px";
+  }, [height]);
+
   return (
-    <div>
+    <div className={styles.viewPager}>
       <div className={styles.header}>
         {header}
         <section className={styles.tabs}>
@@ -35,10 +50,11 @@ export function ViewPager({
             <Tab
               key={name}
               name={name}
-              selected={selected}
+              index={index}
+              isSelected={selectedIndex === index}
               setIsRight={setIsRight}
               isRight={index < selectedIndex}
-              setSelected={setSelected}
+              setSelected={setPageIndex ?? setSelected}
               wrapSetSelected={wrapSetSelected}
             />
           ))}
@@ -50,11 +66,47 @@ export function ViewPager({
           isRight ? rightContentClassName : undefined,
           styles.content,
         )}
+        ref={contentRef}
+        style={{ minHeight: height + "px" }}
       >
-        {selectedPage.component}
+        <div
+          className={styles.contentWrapper}
+          style={{ transform: `translateX(-${selectedIndex * 100}%)` }}
+          ref={contentWrapperRef}
+        >
+          {pages.map(({ component, name }, i) => (
+            <div
+              key={name}
+              className={styles.page}
+              style={{ "--i": i } as CSSVariables}
+              ref={onRef(i)}
+            >
+              {component}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
+}
+function getPageHeight(page: HTMLElement) {
+  return page.getBoundingClientRect().height;
+}
+function usePageRef() {
+  const refs = React.useRef<Record<number, HTMLElement | null>>({});
+
+  function onRef(key: number) {
+    return (ref: HTMLElement | null) => {
+      refs.current[key] = ref;
+    };
+  }
+  return {
+    onRef,
+    refs: refs.current,
+  };
+}
+interface CSSVariables extends React.CSSProperties {
+  "--i": number;
 }
 
 function identity(func: () => void) {
@@ -62,39 +114,38 @@ function identity(func: () => void) {
 }
 type TabProps = {
   name: string;
-  selected: string;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  isSelected: boolean;
+  setSelected: React.Dispatch<React.SetStateAction<number>>;
   setIsRight: React.Dispatch<React.SetStateAction<boolean>>;
   isRight: boolean;
   wrapSetSelected?: (func: () => void) => void;
+  index: number;
 };
 function Tab({
   name,
-  selected,
+  isSelected,
   setSelected,
   setIsRight,
   isRight,
   wrapSetSelected = identity,
+  index,
 }: TabProps) {
-  const nameRef = React.useRef(name);
-  nameRef.current = name;
   const tabNameSpanRef = React.useRef<HTMLSpanElement | null>(null);
   const indicatorRef = React.useRef<HTMLDivElement | null>(null);
   useMatchWidth(tabNameSpanRef, indicatorRef, 16);
   const handleClick = React.useCallback(() => {
-    const name = nameRef.current;
     setIsRight(isRight);
     wrapSetSelected(() => {
-      setSelected(name);
+      setSelected(index);
     });
-  }, [isRight, setIsRight, setSelected, wrapSetSelected]);
+  }, [index, isRight, setIsRight, setSelected, wrapSetSelected]);
   return (
     <div className={styles.tab} onClick={handleClick}>
       <h3 className={styles.tabName}>
         <span ref={tabNameSpanRef}>{name}</span>
       </h3>
       <div
-        className={cn(styles.indicator, selected === name && styles.selected)}
+        className={cn(styles.indicator, isSelected && styles.selected)}
         ref={indicatorRef}
       />
     </div>
