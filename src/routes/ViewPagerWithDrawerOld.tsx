@@ -9,15 +9,12 @@ import {
 import React from "react";
 
 export function ViewPagerWithDrawerOldRoute() {
-  const { drawerRef, isOpen, setIsOpen, setDrawerWrapper } = useDragDrawer();
+  const drawerProps = useDragDrawer();
   return (
     <Drawer
       drawerContent={drawerContent}
-      drawerRef={drawerRef}
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      setDrawerWrapper={setDrawerWrapper}
       contentCoverClassName={styles.contentCover}
+      {...drawerProps}
     >
       <ViewPager pages={pages} header={header} />
     </Drawer>
@@ -90,6 +87,7 @@ function useDragDrawer() {
   isOpenRef.current = isOpen;
   const { drag, dragReset } = useTransformsManager();
   const drawerRef = React.useRef<HTMLDivElement | null>(null);
+  const contentCoverRef = React.useRef<HTMLDivElement | null>(null);
   const setDrawerWrapper = React.useCallback((func: () => void) => {
     const drawer = drawerRef.current;
     if (!drawer) {
@@ -156,11 +154,19 @@ function useDragDrawer() {
         Math.min(touch.pageX - startPoint.x, maxDragX),
       );
       drag(drawer, `translateX(${moveX}px)`);
+      const contentCover = contentCoverRef.current;
+      if (contentCover) {
+        contentCover.style.opacity = `${((moveX + 280) % 280) / 280}`;
+      }
     }
     function end() {
       const drawer = drawerRef.current;
+      const contentCover = contentCoverRef.current;
       setDrawerWrapper(() => {
         drawer && dragReset(drawer);
+        if (contentCover) {
+          contentCover.style.opacity = "";
+        }
         setIsOpen(isOpening);
       });
     }
@@ -173,7 +179,7 @@ function useDragDrawer() {
     };
   }, [drag, dragReset, setDrawerWrapper]);
   useDragEvent({ dragHandler });
-  return { drawerRef, isOpen, setIsOpen, setDrawerWrapper };
+  return { drawerRef, isOpen, setIsOpen, setDrawerWrapper, contentCoverRef };
 }
 const maxDragX = 280;
 type DragHandler = () => {

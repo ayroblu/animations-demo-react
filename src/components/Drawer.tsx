@@ -13,6 +13,7 @@ type Props = {
   isOpen?: boolean;
   setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   contentCoverClassName?: string;
+  contentCoverRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 export function Drawer({ children, drawerContent, ...rest }: Props) {
   const { width } = useDimensions();
@@ -45,6 +46,7 @@ function SideDrawer({
   isOpen,
   setIsOpen,
   contentCoverClassName,
+  contentCoverRef,
 }: Props) {
   const isVisibleState = React.useState(false);
   const [isVisible2, setIsVisible] = isVisibleState;
@@ -82,6 +84,7 @@ function SideDrawer({
                 contentCoverClassName,
                 isVisible && styles.visible,
               )}
+              ref={contentCoverRef}
               onClick={drawerContextValue.closeDrawer}
             />
           </div>
