@@ -3,6 +3,8 @@ import styles from "./DragDrawerOld.module.css";
 import React from "react";
 import {
   DragHandler,
+  GestureOnEndParams,
+  GestureOnMoveParams,
   getLinearGestureManager,
   getTransformsManager,
   transitionWrapper,
@@ -29,15 +31,11 @@ function useDragDrawer() {
   const contentCoverRef = React.useRef<HTMLDivElement | null>(null);
   const dragHandler: DragHandler = React.useCallback(() => {
     const { transformTo, transformReset } = getTransformsManager();
-    function onMove(
-      e: TouchEvent,
-      _touch: Touch,
-      { moveX }: { moveX: number; moveY: number },
-    ) {
+    function onMove({ touchEvent, moveX }: GestureOnMoveParams) {
       const drawer = drawerRef.current;
       if (!drawer) return;
 
-      e.preventDefault();
+      touchEvent.preventDefault();
       moveX = Math.max(-maxDragX, Math.min(moveX, maxDragX));
       transformTo(drawer, `translateX(${moveX}px)`);
       const contentCover = contentCoverRef.current;
@@ -45,10 +43,7 @@ function useDragDrawer() {
         contentCover.style.opacity = `${((moveX + 280) % 280) / 280}`;
       }
     }
-    function onEnd(
-      _e: TouchEvent,
-      { isReturningX }: { isReturningX: boolean; isReturningY: boolean },
-    ) {
+    function onEnd({ isReturningX }: GestureOnEndParams) {
       const drawer = drawerRef.current;
       const contentCover = contentCoverRef.current;
       drawer &&

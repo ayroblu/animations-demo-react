@@ -35,6 +35,7 @@
   backdrop-filter: blur(8px);
   opacity: 0;
   pointer-events: none;
+  z-index: 1;
 }
 .contentCover.visible {
   opacity: 1;

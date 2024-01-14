@@ -3,6 +3,8 @@ import React from "react";
 import { useArrayRef } from "../lib/utils/hooks";
 import {
   DragHandler,
+  GestureOnEndParams,
+  GestureOnMoveParams,
   getLinearGestureManager,
   getTransformsManager,
   transitionWrapper,
@@ -16,7 +18,6 @@ export function DragViewPagerOld(props: Props) {
   return <ViewPager {...props} {...viewPagerProps} />;
 }
 
-type Point = { x: number; y: number };
 function useDragViewPager(pagesLength: number) {
   const [pageIndex, setPageIndex] = React.useState(0);
   const pageIndexRef = React.useRef(pageIndex);
@@ -28,16 +29,13 @@ function useDragViewPager(pagesLength: number) {
   const dragHandler: DragHandler = React.useCallback(() => {
     const { transformTo, transformReset } = getTransformsManager();
 
-    function onMove(
-      e: TouchEvent,
-      _touch: Touch,
-      { moveX }: { moveX: number; moveY: number },
-    ) {
+    function onMove({ touchEvent, moveX }: GestureOnMoveParams) {
       const contentWrapper = contentWrapperRef.current;
       if (!contentWrapper) return;
 
       const pageIndex = pageIndexRef.current;
-      e.preventDefault();
+      touchEvent.preventDefault();
+      touchEvent.stopPropagation();
       transformTo(contentWrapper, `translateX(${moveX}px)`);
       const fromEl = indicatorRefs[pageIndex];
       const toEl = indicatorRefs[moveX > 0 ? pageIndex - 1 : pageIndex + 1];
@@ -54,18 +52,7 @@ function useDragViewPager(pagesLength: number) {
         transformTo(fromEl, transform);
       }
     }
-    function onEnd(
-      _e: TouchEvent,
-      {
-        isReturningX,
-        moveX,
-      }: {
-        startPoint: Point;
-        isReturningX: boolean;
-        isReturningY: boolean;
-        moveX: number;
-      },
-    ) {
+    function onEnd({ isReturningX, moveX }: GestureOnEndParams) {
       const contentWrapper = contentWrapperRef.current;
       const pageIndex = pageIndexRef.current;
       const nextIndex = isReturningX

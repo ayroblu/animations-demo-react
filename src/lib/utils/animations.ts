@@ -84,15 +84,39 @@ export function getTransformsManager() {
   return { transformTo, transformReset };
 }
 
+const transitionMap = new WeakMap<HTMLElement, () => void>();
+function withSingleTransition(
+  element: HTMLElement,
+  func: (cleanup: () => void) => () => void,
+) {
+  const dispose = transitionMap.get(element);
+  dispose?.();
+
+  const callback = func(() => {
+    transitionMap.delete(element);
+  });
+
+  transitionMap.set(element, () => {
+    callback();
+  });
+}
 export function transitionWrapper(element: HTMLElement, func: () => void) {
-  const originalTransition = element.style.transition;
-  element.style.transition = "0.3s transform";
-  const transitionend = () => {
-    element.style.transition = originalTransition;
-  };
-  element.addEventListener("transitionend", transitionend, { once: true });
-  requestAnimationFrame(() => {
-    func();
+  withSingleTransition(element, (cleanup) => {
+    const originalTransition = element.style.transition;
+    element.style.transition = "0.3s transform";
+    const transitionend = () => {
+      element.style.transition = originalTransition;
+      cleanup();
+    };
+    element.addEventListener("transitionend", transitionend, { once: true });
+
+    requestAnimationFrame(() => {
+      func();
+    });
+    return () => {
+      transitionend();
+      element.removeEventListener("transitionend", transitionend);
+    };
   });
 }
 
@@ -103,24 +127,24 @@ type Constraints = {
   left?: boolean;
   right?: boolean;
 };
+export type GestureOnMoveParams = {
+  touchEvent: TouchEvent;
+  moveX: number;
+  moveY: number;
+};
+export type GestureOnEndParams = {
+  touchEvent: TouchEvent;
+  startPoint: Point;
+  isReturningX: boolean;
+  isReturningY: boolean;
+  moveX: number;
+  moveY: number;
+};
 export type GestureManagerParams = {
-  getConstraints: ()=>Constraints;
+  getConstraints: () => Constraints;
   handlers: {
-    onMove: (
-      e: TouchEvent,
-      touch: Touch,
-      attributes: { moveX: number; moveY: number },
-    ) => void;
-    onEnd: (
-      e: TouchEvent,
-      params: {
-        startPoint: Point;
-        isReturningX: boolean;
-        isReturningY: boolean;
-        moveX: number;
-        moveY: number;
-      },
-    ) => void;
+    onMove: (params: GestureOnMoveParams) => void;
+    onEnd: (params: GestureOnEndParams) => void;
   };
 };
 export function getLinearGestureManager({
@@ -146,7 +170,7 @@ export function getLinearGestureManager({
     if (!startPoint) {
       return;
     }
-    const {up, down, left, right} = constraints;
+    const { up, down, left, right } = constraints;
     const x = touch.pageX;
     const y = touch.pageY;
     // coordinates is top left going right and down
@@ -187,7 +211,7 @@ export function getLinearGestureManager({
     if (!isSwiping) {
       return;
     }
-    onMove(e, touch, { moveX, moveY });
+    onMove({ touchEvent: e, moveX, moveY });
   }
   function end(e: TouchEvent) {
     if (!isSwiping || !startPoint || !lastPoint) return;
@@ -199,7 +223,14 @@ export function getLinearGestureManager({
     const isReturningX = movingHorizRight !== lastDirection.horizRight;
     const isReturningY = movingVertDown !== !lastDirection.vertDown;
     reset();
-    onEnd(e, { startPoint, isReturningX, isReturningY, moveX, moveY });
+    onEnd({
+      touchEvent: e,
+      startPoint,
+      isReturningX,
+      isReturningY,
+      moveX,
+      moveY,
+    });
   }
   return {
     start,
