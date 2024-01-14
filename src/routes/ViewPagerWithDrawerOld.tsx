@@ -64,7 +64,7 @@ function useDragDrawer() {
     if (!drawer) {
       return;
     }
-    drawer.style.transition = "0.2s transform";
+    drawer.style.transition = "0.3s transform";
     const transitionend = () => {
       drawer.style.transition = "";
     };

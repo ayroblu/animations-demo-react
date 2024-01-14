@@ -284,7 +284,7 @@ function createAxisPointsTracker() {
 function createTransition() {
   let callback: (() => void) | null = null;
   function transition(element: HTMLElement) {
-    element.style.transition = "0.2s transform";
+    element.style.transition = "0.3s transform";
     function transitionEndCallback() {
       element.style.transition = "";
       element.removeEventListener("transitionend", transitionEndCallback);

@@ -23,17 +23,17 @@
 }
 @media only screen and (max-width: 600px) and (prefers-reduced-motion: no-preference) and (update: fast) {
   ::view-transition-old(half-sheet) {
-    animation: 0.2s ease-in both slide-down;
+    animation: 0.3s ease-in both slide-down;
   }
   ::view-transition-new(half-sheet) {
-    animation: 0.2s ease-in both slide-up;
+    animation: 0.3s ease-in both slide-up;
   }
 }
 @media only screen and (min-width: 601px) and (prefers-reduced-motion: no-preference) and (update: fast) {
   ::view-transition-old(half-sheet) {
-    animation: 0.2s ease-in both slide-down-centered;
+    animation: 0.3s ease-in both slide-down-centered;
   }
   ::view-transition-new(half-sheet) {
-    animation: 0.2s ease-in both slide-up-centered;
+    animation: 0.3s ease-in both slide-up-centered;
   }
 }

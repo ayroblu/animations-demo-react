@@ -43,7 +43,7 @@ function useSelectedElement() {
         const originalTransform = element.style.transform;
         element.style.transform += `translate(${left}px, ${top}px) scale(${scale})`;
         window.requestAnimationFrame(() => {
-          element.style.transition = "0.2s transform";
+          element.style.transition = "0.3s transform";
           element.style.transform = originalTransform;
           function removeTransition() {
             element.style.transition = "";

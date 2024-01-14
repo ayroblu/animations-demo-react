@@ -127,7 +127,7 @@ export function useArrayRef(): ArrayRef {
 }
 export function transitionWrapper(element: HTMLElement, func: () => void) {
   const originalTransition = element.style.transition;
-  element.style.transition = "0.2s transform";
+  element.style.transition = "0.3s transform";
   const transitionend = () => {
     element.style.transition = originalTransition;
   };
