@@ -12,6 +12,3 @@
   text-align: center;
   font-weight: normal;
 }
-.contentCover {
-  transition: var(--animate-duration) opacity;
-}

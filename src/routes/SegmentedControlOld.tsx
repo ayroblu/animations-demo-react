@@ -1,7 +1,10 @@
 import React from "react";
 import { SegmentedControl } from "../components/SegmentedControl";
 import { Link } from "react-router-dom";
-import { getTransformsManager, transitionWrapper } from "../lib/utils/hooks";
+import {
+  getTransformsManager,
+  transitionWrapper,
+} from "../lib/utils/animations";
 import { getTransform } from "../lib/utils";
 
 export function SegmentedControlOldRoute() {

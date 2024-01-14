@@ -1,29 +1,17 @@
-import { Drawer } from "../components/Drawer";
-import { ViewPager } from "../components/ViewPager";
 import styles from "./ViewPagerWithDrawerOld.module.css";
 import {
   DrawerContent,
   LeftButton,
   Page,
 } from "../components/ViewPagerWithDrawerShared";
-import React from "react";
-import {
-  DragHandler,
-  getTransformsManager,
-  transitionWrapper,
-  useDragEvent,
-} from "../lib/utils/hooks";
+import { DragDrawerOld } from "../components/DragDrawerOld";
+import { DragViewPagerOld } from "../components/DragViewPagerOld";
 
 export function ViewPagerWithDrawerOldRoute() {
-  const drawerProps = useDragDrawer();
   return (
-    <Drawer
-      drawerContent={drawerContent}
-      contentCoverClassName={styles.contentCover}
-      {...drawerProps}
-    >
-      <ViewPager pages={pages} header={header} />
-    </Drawer>
+    <DragDrawerOld drawerContent={drawerContent}>
+      <DragViewPagerOld pages={pages} header={header} />
+    </DragDrawerOld>
   );
 }
 
@@ -52,104 +40,3 @@ const pages = [
     component: <Page name="Buses" />,
   },
 ];
-
-function useDragDrawer() {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const isOpenRef = React.useRef(false);
-  isOpenRef.current = isOpen;
-  const drawerRef = React.useRef<HTMLDivElement | null>(null);
-  const contentCoverRef = React.useRef<HTMLDivElement | null>(null);
-  const dragHandler: DragHandler = React.useCallback(() => {
-    const { transformTo, transformReset } = getTransformsManager();
-    let startPoint: { x: number; y: number } | null = null;
-    let lastPoint: { x: number; y: number } | null = null;
-    let isOpening = false;
-    let isScrolling = false;
-    let isSwiping = false;
-    function reset() {
-      startPoint = null;
-      isSwiping = false;
-      isScrolling = false;
-    }
-    function start(_e: TouchEvent, touch: Touch) {
-      startPoint = { x: touch.pageX, y: touch.pageY };
-    }
-    function move(e: TouchEvent, touch: Touch) {
-      if (!startPoint) {
-        return;
-      }
-      const x = touch.pageX;
-      const isOpen = isOpenRef.current;
-      const isWrongWay =
-        (!isOpen && x < startPoint.x) ||
-        (isOpen && x > startPoint.x) ||
-        isScrolling;
-      if (isWrongWay) {
-        reset();
-        return;
-      }
-      if (Math.abs(x - startPoint.x) > 10) {
-        isSwiping = true;
-      }
-      if (!isSwiping && Math.abs(touch.pageY - startPoint.y) > 10) {
-        isScrolling = true;
-      }
-      if (!isSwiping) {
-        return;
-      }
-      const drawer = drawerRef.current;
-      if (!drawer) {
-        return;
-      }
-
-      e.preventDefault();
-      if (lastPoint) {
-        isOpening = x > lastPoint.x;
-      }
-      lastPoint = { x: touch.pageX, y: touch.pageY };
-      const moveX = Math.max(
-        -maxDragX,
-        Math.min(touch.pageX - startPoint.x, maxDragX),
-      );
-      transformTo(drawer, `translateX(${moveX}px)`);
-      const contentCover = contentCoverRef.current;
-      if (contentCover) {
-        contentCover.style.opacity = `${((moveX + 280) % 280) / 280}`;
-      }
-    }
-    function end() {
-      if (!isSwiping) return;
-      const drawer = drawerRef.current;
-      const contentCover = contentCoverRef.current;
-      drawer &&
-        transitionWrapper(drawer, () => {
-          drawer && transformReset(drawer);
-          if (contentCover) {
-            contentCover.style.opacity = "";
-          }
-          setIsOpen(isOpening);
-        });
-    }
-
-    return {
-      reset,
-      start,
-      move,
-      end,
-    };
-  }, []);
-  useDragEvent({ dragHandler, getElement: () => document.body });
-
-  const setIsOpenWrapped = React.useCallback(
-    (isOpen: Parameters<typeof setIsOpen>[0]) => {
-      const drawer = drawerRef.current;
-      drawer &&
-        transitionWrapper(drawer, () => {
-          setIsOpen(isOpen);
-        });
-    },
-    [],
-  );
-  return { drawerRef, isOpen, setIsOpen: setIsOpenWrapped, contentCoverRef };
-}
-const maxDragX = 280;
