@@ -1,5 +1,5 @@
 import { Drawer } from "../components/Drawer";
-import styles from "./DragDrawerOld.module.css";
+import styles from "./DragDrawerImperative.module.css";
 import React from "react";
 import {
   DragHandler,
@@ -12,7 +12,7 @@ import {
 } from "../lib/utils/animations";
 
 type Props = { drawerContent: React.ReactNode; children: React.ReactNode };
-export function DragDrawerOld(props: Props) {
+export function DragDrawerImperative(props: Props) {
   const drawerProps = useDragDrawer();
   return (
     <Drawer

@@ -1,11 +1,11 @@
-import styles from "./ViewPagerOld.module.css";
+import styles from "./ViewPagerImperative.module.css";
 import { LeftButton, Page } from "../components/ViewPagerWithDrawerShared";
-import { DragViewPagerOld } from "../components/DragViewPagerOld";
+import { DragViewPagerImperative } from "../components/DragViewPagerImperative";
 import iosStyles from "../components/IosPadding.module.css";
 import { cn } from "../lib/utils";
 
-export function ViewPagerOldRoute() {
-  return <DragViewPagerOld pages={pages} header={header} />;
+export function ViewPagerImperativeRoute() {
+  return <DragViewPagerImperative pages={pages} header={header} />;
 }
 
 const header = (

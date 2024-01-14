@@ -13,7 +13,7 @@ import {
 import { getTransform } from "../lib/utils";
 
 type Props = Pick<React.ComponentProps<typeof ViewPager>, "pages" | "header">;
-export function DragViewPagerOld(props: Props) {
+export function DragViewPagerImperative(props: Props) {
   const viewPagerProps = useDragViewPager(props.pages.length);
   return <ViewPager {...props} {...viewPagerProps} />;
 }

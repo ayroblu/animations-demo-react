@@ -2,19 +2,19 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import { HalfSheetRoute } from "./HalfSheet";
 import { SegmentedControlRoute } from "./SegmentedControl";
-import { SegmentedControlOldRoute } from "./SegmentedControlOld";
+import { SegmentedControlImperativeRoute } from "./SegmentedControlImperative";
 import { ViewPagerWithDrawerRoute } from "./ViewPagerWithDrawer";
-import { ViewPagerWithDrawerOldRoute } from "./ViewPagerWithDrawerOld";
-import { ViewPagerOldRoute } from "./ViewPagerOld";
+import { ViewPagerWithDrawerImperativeRoute } from "./ViewPagerWithDrawerImperative";
+import { ViewPagerImperativeRoute } from "./ViewPagerImperative";
 
 export const routes = {
   root: "/",
   halfSheet: "/half-sheet",
   segmentedControl: "/segmented-control",
-  segmentedControlOld: "/segmented-control-old",
-  viewPagerOld: "/view-pager-old",
+  segmentedControlImperative: "/segmented-control-imperative",
+  viewPagerImperative: "/view-pager-imperative",
   viewPagerWithDrawer: "/view-pager-drawer",
-  viewPagerWithDrawerOld: "/view-pager-drawer-old",
+  viewPagerWithDrawerImperative: "/view-pager-drawer-imperative",
 };
 export const router = createBrowserRouter(
   [
@@ -31,20 +31,20 @@ export const router = createBrowserRouter(
       element: <SegmentedControlRoute />,
     },
     {
-      path: routes.segmentedControlOld,
-      element: <SegmentedControlOldRoute />,
+      path: routes.segmentedControlImperative,
+      element: <SegmentedControlImperativeRoute />,
     },
     {
-      path: routes.viewPagerOld,
-      element: <ViewPagerOldRoute />,
+      path: routes.viewPagerImperative,
+      element: <ViewPagerImperativeRoute />,
     },
     {
       path: routes.viewPagerWithDrawer,
       element: <ViewPagerWithDrawerRoute />,
     },
     {
-      path: routes.viewPagerWithDrawerOld,
-      element: <ViewPagerWithDrawerOldRoute />,
+      path: routes.viewPagerWithDrawerImperative,
+      element: <ViewPagerWithDrawerImperativeRoute />,
     },
   ],
   { basename: import.meta.env.BASE_URL },

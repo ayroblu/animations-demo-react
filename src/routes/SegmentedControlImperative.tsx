@@ -8,7 +8,7 @@ import {
 import { getTransform } from "../lib/utils";
 import iosStyles from "../components/IosPadding.module.css";
 
-export function SegmentedControlOldRoute() {
+export function SegmentedControlImperativeRoute() {
   const [, setValue] = React.useState<string>();
   const handleChange = React.useCallback((value: string) => {
     setValue(value);
@@ -17,11 +17,11 @@ export function SegmentedControlOldRoute() {
   return (
     <div className={iosStyles.fullPadding}>
       <Link to="/">&lt; Home</Link>
-      <h1>Segmented Control Old demo</h1>
+      <h1>Segmented Control Imperative demo</h1>
 
       <p>
-        This is "old" in the sense that it uses traditional translate transition
-        rather than view transitions api
+        This is "imperative" in the sense that it uses traditional translate
+        transition rather than view transitions api
       </p>
 
       <SegmentedControl

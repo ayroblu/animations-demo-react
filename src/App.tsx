@@ -18,18 +18,18 @@ function App() {
           <Link to={routes.segmentedControl}>Segmented Control</Link>
         </li>
         <li>
-          <Link to={routes.segmentedControlOld}>Segmented Control Old</Link>
+          <Link to={routes.segmentedControlImperative}>Segmented Control Imperative</Link>
         </li>
         <li>
           <Link to={routes.viewPagerWithDrawer}>ViewPager with Drawer</Link>
         </li>
         <li>
-          <Link to={routes.viewPagerWithDrawerOld}>
-            ViewPager with Drawer Old
+          <Link to={routes.viewPagerWithDrawerImperative}>
+            ViewPager with Drawer Imperative
           </Link>
         </li>
         <li>
-          <Link to={routes.viewPagerOld}>ViewPager Old</Link>
+          <Link to={routes.viewPagerImperative}>ViewPager Imperative</Link>
         </li>
       </ul>
 
