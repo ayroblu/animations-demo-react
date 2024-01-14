@@ -3,6 +3,7 @@ import { HalfSheet } from "../components/HalfSheet";
 import { useViewTransitions } from "../lib/view-transitions";
 import style from "./HalfSheet.module.css";
 import { Link } from "react-router-dom";
+import iosStyles from "../components/IosPadding.module.css";
 
 export function HalfSheetRoute() {
   const [visible, setVisible] = React.useState(false);
@@ -14,7 +15,7 @@ export function HalfSheetRoute() {
   }, [wrapInViewTransition]);
 
   return (
-    <>
+    <div className={iosStyles.fullPadding}>
       <Link to="/">&lt; Home</Link>
       <h1>Half Sheet demo</h1>
 
@@ -25,6 +26,6 @@ export function HalfSheetRoute() {
       {visible && (
         <HalfSheet dialogClassName={style.halfSheet} dismiss={toggleVisible} />
       )}
-    </>
+    </div>
   );
 }

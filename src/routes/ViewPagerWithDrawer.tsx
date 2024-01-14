@@ -7,6 +7,8 @@ import {
   LeftButton,
   Page,
 } from "../components/ViewPagerWithDrawerShared";
+import iosStyles from "../components/IosPadding.module.css";
+import { cn } from "../lib/utils";
 
 export function ViewPagerWithDrawerRoute() {
   const { wrapInViewTransition } = useNestedViewTransitions();
@@ -29,7 +31,13 @@ export function ViewPagerWithDrawerRoute() {
 }
 const drawerContent = <DrawerContent />;
 const header = (
-  <header className={styles.header}>
+  <header
+    className={cn(
+      styles.header,
+      iosStyles.topPadding,
+      iosStyles.horizontalPadding,
+    )}
+  >
     <div>
       <LeftButton />
     </div>

@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { routes } from "./routes";
+import iosStyles from "./components/IosPadding.module.css";
 
 function App() {
   return (
-    <>
+    <div className={iosStyles.fullPadding}>
       <h1>Animations Demo</h1>
       <p>
         This is a collections of UI animations coming from common UI patterns.
@@ -33,7 +34,7 @@ function App() {
       </ul>
 
       <button onClick={() => window.location.reload()}>Reload</button>
-    </>
+    </div>
   );
 }
 

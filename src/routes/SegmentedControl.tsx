@@ -3,6 +3,7 @@ import { SegmentedControl } from "../components/SegmentedControl";
 import { useNestedViewTransitions } from "../lib/view-transitions";
 import styles from "./SegmentedControl.module.css";
 import { Link } from "react-router-dom";
+import iosStyles from "../components/IosPadding.module.css";
 
 export function SegmentedControlRoute() {
   const { wrapInViewTransition } = useNestedViewTransitions();
@@ -16,7 +17,7 @@ export function SegmentedControlRoute() {
     [wrapInViewTransition],
   );
   return (
-    <>
+    <div className={iosStyles.fullPadding}>
       <Link to="/">&lt; Home</Link>
       <h1>Segmented Control demo</h1>
 
@@ -26,7 +27,7 @@ export function SegmentedControlRoute() {
         onChange={handleChange}
         value={value}
       />
-    </>
+    </div>
   );
 }
 const items = [

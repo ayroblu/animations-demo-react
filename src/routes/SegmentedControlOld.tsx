@@ -6,6 +6,7 @@ import {
   transitionWrapper,
 } from "../lib/utils/animations";
 import { getTransform } from "../lib/utils";
+import iosStyles from "../components/IosPadding.module.css";
 
 export function SegmentedControlOldRoute() {
   const [, setValue] = React.useState<string>();
@@ -14,7 +15,7 @@ export function SegmentedControlOldRoute() {
   }, []);
   const { selectedRef } = useSelectedElement();
   return (
-    <>
+    <div className={iosStyles.fullPadding}>
       <Link to="/">&lt; Home</Link>
       <h1>Segmented Control Old demo</h1>
 
@@ -28,7 +29,7 @@ export function SegmentedControlOldRoute() {
         items={items}
         onChange={handleChange}
       />
-    </>
+    </div>
   );
 }
 function useSelectedElement() {

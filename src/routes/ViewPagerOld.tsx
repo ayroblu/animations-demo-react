@@ -1,13 +1,21 @@
 import styles from "./ViewPagerOld.module.css";
 import { LeftButton, Page } from "../components/ViewPagerWithDrawerShared";
 import { DragViewPagerOld } from "../components/DragViewPagerOld";
+import iosStyles from "../components/IosPadding.module.css";
+import { cn } from "../lib/utils";
 
 export function ViewPagerOldRoute() {
   return <DragViewPagerOld pages={pages} header={header} />;
 }
 
 const header = (
-  <header className={styles.header}>
+  <header
+    className={cn(
+      styles.header,
+      iosStyles.topPadding,
+      iosStyles.horizontalPadding,
+    )}
+  >
     <div>
       <LeftButton />
     </div>

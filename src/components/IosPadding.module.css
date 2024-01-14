@@ -1,0 +1,26 @@
+.topPadding {
+  padding-top: env(safe-area-inset-top);
+}
+.bottomPadding {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.leftPadding {
+  padding-left: env(safe-area-inset-left);
+}
+.bottomPadding {
+  padding-right: env(safe-area-inset-right);
+}
+.horizontalPadding {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+.verticalPadding {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.fullPadding {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}

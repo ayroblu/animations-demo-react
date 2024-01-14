@@ -6,6 +6,8 @@ import {
 } from "../components/ViewPagerWithDrawerShared";
 import { DragDrawerOld } from "../components/DragDrawerOld";
 import { DragViewPagerOld } from "../components/DragViewPagerOld";
+import iosStyles from "../components/IosPadding.module.css";
+import { cn } from "../lib/utils";
 
 export function ViewPagerWithDrawerOldRoute() {
   return (
@@ -17,7 +19,13 @@ export function ViewPagerWithDrawerOldRoute() {
 
 const drawerContent = <DrawerContent />;
 const header = (
-  <header className={styles.header}>
+  <header
+    className={cn(
+      styles.header,
+      iosStyles.topPadding,
+      iosStyles.horizontalPadding,
+    )}
+  >
     <div>
       <LeftButton />
     </div>

@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./Drawer.module.css";
 import { useDimensions } from "../lib/utils/hooks";
 import { cn } from "../lib/utils";
+import iosStyles from "../components/IosPadding.module.css";
 
 type Props = {
   children: React.ReactNode;
@@ -20,7 +21,14 @@ export function Drawer({ children, drawerContent, ...rest }: Props) {
   if (width > 700) {
     return (
       <div className={styles.sidenavDrawer}>
-        <div className={cn(styles.drawerContent, styles.sidenav)}>
+        <div
+          className={cn(
+            iosStyles.topPadding,
+            iosStyles.leftPadding,
+            styles.drawerContent,
+            styles.sidenav,
+          )}
+        >
           <div className={styles.drawerContentWrapper}>{drawerContent}</div>
         </div>
         <div className={cn(styles.sidenavContent, styles.content)}>
@@ -65,6 +73,8 @@ function SideDrawer({
         >
           <div
             className={cn(
+              iosStyles.topPadding,
+              iosStyles.leftPadding,
               styles.drawerContent,
               styles.mobileDrawer,
               drawerContentClassName,

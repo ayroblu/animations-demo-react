@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./ViewPager.module.css";
 import { cn } from "../lib/utils";
 import { useArrayRef } from "../lib/utils/hooks";
+import iosStyles from "./IosPadding.module.css";
 
 type Props = {
   pages: {
@@ -87,7 +88,7 @@ export function ViewPager({
           {pages.map(({ component, name }, i) => (
             <div
               key={name}
-              className={styles.page}
+              className={cn(styles.page, iosStyles.bottomPadding)}
               style={{ "--i": i } as React.CSSProperties}
               ref={onPageRef(i)}
             >
