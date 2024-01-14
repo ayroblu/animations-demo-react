@@ -47,10 +47,9 @@ function useSelectedElement() {
         const transform = getTransform(box, prevBox);
         transformTo(element, transform);
 
-        requestAnimationFrame(() => {
-          transitionWrapper(element, () => {
-            transformReset(element);
-          });
+        element.getBoundingClientRect();
+        transitionWrapper(element, () => {
+          transformReset(element);
         });
       });
     }

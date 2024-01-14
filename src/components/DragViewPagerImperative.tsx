@@ -77,10 +77,9 @@ function useDragViewPager(pagesLength: number) {
 
           const transform = getTransform(toBox, fromBox);
           transformTo(toEl, transform);
-          requestAnimationFrame(() => {
-            transitionWrapper(toEl, () => {
-              transformReset(toEl);
-            });
+          toEl.getBoundingClientRect();
+          transitionWrapper(toEl, () => {
+            transformReset(toEl);
           });
         }
       }
@@ -118,15 +117,14 @@ function useDragViewPager(pagesLength: number) {
               ? pageIndex(originalPageIndex)
               : pageIndex
           ];
-        if (fromEl && toEl) {
+        if (fromEl && toEl && fromEl !== toEl) {
           const fromBox = fromEl.getBoundingClientRect();
           const toBox = toEl.getBoundingClientRect();
           const transform = getTransform(toBox, fromBox);
           transformTo(toEl, transform);
-          requestAnimationFrame(() => {
-            transitionWrapper(toEl, () => {
-              transformReset(toEl);
-            });
+          toEl.getBoundingClientRect();
+          transitionWrapper(toEl, () => {
+            transformReset(toEl);
           });
         }
       }
