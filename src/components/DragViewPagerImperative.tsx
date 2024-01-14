@@ -60,31 +60,37 @@ function useDragViewPager(pagesLength: number) {
         : moveX > 0
           ? pageIndex - 1
           : pageIndex + 1;
-      const fromEl = indicatorRefs[pageIndex];
-      const toEl = indicatorRefs[nextIndex];
-      if (fromEl && toEl) {
-        const fromBox = fromEl.getBoundingClientRect();
-        const toBox = toEl.getBoundingClientRect();
-        const transform = getTransform(toBox, fromBox);
-        transformTo(toEl, transform);
-        requestAnimationFrame(() => {
+
+      function transitionIndicator() {
+        const fromEl = indicatorRefs[pageIndex];
+        const toEl = indicatorRefs[nextIndex];
+        if (fromEl && toEl) {
+          if (pageIndex === nextIndex) {
+            transitionWrapper(fromEl, () => {
+              transformReset(fromEl);
+            });
+            return;
+          }
+          const fromBox = fromEl.getBoundingClientRect();
+          const toBox = toEl.getBoundingClientRect();
+          transformReset(fromEl);
+
+          const transform = getTransform(toBox, fromBox);
+          transformTo(toEl, transform);
           requestAnimationFrame(() => {
             transitionWrapper(toEl, () => {
               transformReset(toEl);
             });
           });
-        });
+        }
       }
 
       contentWrapper &&
         transitionWrapper(contentWrapper, () => {
-          contentWrapper && transformReset(contentWrapper);
-          requestAnimationFrame(() => {
-            // wait a frame after pageIndex has been set to avoid jitter
-            fromEl && transformReset(fromEl);
-          });
-          setPageIndex(nextIndex);
+          transformReset(contentWrapper);
         });
+      transitionIndicator();
+      setPageIndex(nextIndex);
     }
     return getLinearGestureManager({
       getConstraints: () => {
@@ -102,12 +108,35 @@ function useDragViewPager(pagesLength: number) {
   const setPageIndexWrapped = React.useCallback(
     (pageIndex: Parameters<typeof setPageIndex>[0]) => {
       const contentWrapper = contentWrapperRef.current;
+      function transformIndicators() {
+        const { transformTo, transformReset } = getTransformsManager();
+        const originalPageIndex = pageIndexRef.current;
+        const fromEl = indicatorRefs[originalPageIndex];
+        const toEl =
+          indicatorRefs[
+            typeof pageIndex === "function"
+              ? pageIndex(originalPageIndex)
+              : pageIndex
+          ];
+        if (fromEl && toEl) {
+          const fromBox = fromEl.getBoundingClientRect();
+          const toBox = toEl.getBoundingClientRect();
+          const transform = getTransform(toBox, fromBox);
+          transformTo(toEl, transform);
+          requestAnimationFrame(() => {
+            transitionWrapper(toEl, () => {
+              transformReset(toEl);
+            });
+          });
+        }
+      }
       contentWrapper &&
         transitionWrapper(contentWrapper, () => {
           setPageIndex(pageIndex);
+          transformIndicators();
         });
     },
-    [],
+    [indicatorRefs],
   );
   return {
     pageIndex,

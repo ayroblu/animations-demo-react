@@ -50,7 +50,10 @@ export function useDragEvent({
 export function getTransformsManager() {
   // it's typed as a string, but may also be a "matrix"
   type Transform = string;
-  type Saved = { computed: Transform; style: Transform };
+  type Saved = {
+    computed: Transform;
+    style: Transform;
+  };
   const wmap = new WeakMap<HTMLElement, Saved>();
 
   function transformTo(element: HTMLElement, transform: Transform) {
@@ -63,6 +66,8 @@ export function getTransformsManager() {
         style: element.style.transform,
       });
     }
+    // needed if we scale up and down
+    element.style.transformOrigin = "top left";
     if (original === "none") {
       element.style.transform = transform;
     } else {
@@ -106,9 +111,7 @@ export function transitionWrapper(element: HTMLElement, func: () => void) {
     };
     element.addEventListener("transitionend", transitionend, { once: true });
 
-    requestAnimationFrame(() => {
-      func();
-    });
+    func();
     return () => {
       transitionend();
       element.removeEventListener("transitionend", transitionend);
