@@ -149,7 +149,7 @@ function useDragDrawer() {
       end,
     };
   }, [drag, dragReset, setDrawerWrapper]);
-  useDragEvent({ dragHandler });
+  useDragEvent({ dragHandler, getElement: () => document.body });
   return { drawerRef, isOpen, setIsOpen, setDrawerWrapper, contentCoverRef };
 }
 const maxDragX = 280;

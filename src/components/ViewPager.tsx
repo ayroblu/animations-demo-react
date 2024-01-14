@@ -29,7 +29,7 @@ export function ViewPager({
   setPageIndex,
   contentWrapperRef,
   onIndicatorRef,
-  onPageRef,
+  onPageRef: onPageRefProp,
   pageRefs,
 }: Props) {
   const [selected, setSelected] = React.useState(0);
@@ -38,7 +38,7 @@ export function ViewPager({
 
   const { onRef: onLocalPageRef, refs: localPageRefs } = useArrayRef();
   pageRefs = pageRefs ?? localPageRefs;
-  onPageRef = onPageRef ?? onLocalPageRef;
+  const onPageRef = onPageRefProp ?? onLocalPageRef;
   const pageEl = pageRefs[selectedIndex];
   const height = pageEl ? getPageHeight(pageEl) : 60;
   const contentRef = React.useRef<HTMLDivElement | null>(null);
