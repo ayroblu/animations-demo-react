@@ -9,8 +9,9 @@ import {
 import React from "react";
 import {
   DragHandler,
+  getTransformsManager,
+  transitionWrapper,
   useDragEvent,
-  useTransformsManager,
 } from "../lib/utils/hooks";
 
 export function ViewPagerWithDrawerOldRoute() {
@@ -56,24 +57,10 @@ function useDragDrawer() {
   const [isOpen, setIsOpen] = React.useState(false);
   const isOpenRef = React.useRef(false);
   isOpenRef.current = isOpen;
-  const { drag, dragReset } = useTransformsManager();
   const drawerRef = React.useRef<HTMLDivElement | null>(null);
   const contentCoverRef = React.useRef<HTMLDivElement | null>(null);
-  const setDrawerWrapper = React.useCallback((func: () => void) => {
-    const drawer = drawerRef.current;
-    if (!drawer) {
-      return;
-    }
-    drawer.style.transition = "0.3s transform";
-    const transitionend = () => {
-      drawer.style.transition = "";
-    };
-    drawer.addEventListener("transitionend", transitionend, { once: true });
-    requestAnimationFrame(() => {
-      func();
-    });
-  }, []);
   const dragHandler: DragHandler = React.useCallback(() => {
+    const { transformTo, transformReset } = getTransformsManager();
     let startPoint: { x: number; y: number } | null = null;
     let lastPoint: { x: number; y: number } | null = null;
     let isOpening = false;
@@ -124,22 +111,24 @@ function useDragDrawer() {
         -maxDragX,
         Math.min(touch.pageX - startPoint.x, maxDragX),
       );
-      drag(drawer, `translateX(${moveX}px)`);
+      transformTo(drawer, `translateX(${moveX}px)`);
       const contentCover = contentCoverRef.current;
       if (contentCover) {
         contentCover.style.opacity = `${((moveX + 280) % 280) / 280}`;
       }
     }
     function end() {
+      if (!isSwiping) return;
       const drawer = drawerRef.current;
       const contentCover = contentCoverRef.current;
-      setDrawerWrapper(() => {
-        drawer && dragReset(drawer);
-        if (contentCover) {
-          contentCover.style.opacity = "";
-        }
-        setIsOpen(isOpening);
-      });
+      drawer &&
+        transitionWrapper(drawer, () => {
+          drawer && transformReset(drawer);
+          if (contentCover) {
+            contentCover.style.opacity = "";
+          }
+          setIsOpen(isOpening);
+        });
     }
 
     return {
@@ -148,8 +137,19 @@ function useDragDrawer() {
       move,
       end,
     };
-  }, [drag, dragReset, setDrawerWrapper]);
+  }, []);
   useDragEvent({ dragHandler, getElement: () => document.body });
-  return { drawerRef, isOpen, setIsOpen, setDrawerWrapper, contentCoverRef };
+
+  const setIsOpenWrapped = React.useCallback(
+    (isOpen: Parameters<typeof setIsOpen>[0]) => {
+      const drawer = drawerRef.current;
+      drawer &&
+        transitionWrapper(drawer, () => {
+          setIsOpen(isOpen);
+        });
+    },
+    [],
+  );
+  return { drawerRef, isOpen, setIsOpen: setIsOpenWrapped, contentCoverRef };
 }
 const maxDragX = 280;

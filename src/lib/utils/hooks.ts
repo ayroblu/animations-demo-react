@@ -66,46 +66,40 @@ export function useDragEvent({
 }
 
 export function useTransformsManager() {
+  const [transformsManager] = React.useState(() => getTransformsManager());
+  return transformsManager;
+}
+export function getTransformsManager() {
   // it's typed as a string, but isn't actually
   type Transform = string;
   type Saved = { computed: Transform; style: Transform };
-  const wmapRef = React.useRef(new WeakMap<HTMLElement, Saved>());
-  const drag = React.useCallback(
-    (element: HTMLElement, transform: Transform) => {
-      const wmap = wmapRef.current;
-      const saved = wmap.get(element);
-      let original = saved?.computed ?? "";
-      if (!saved) {
-        original = getComputedStyle(element).transform;
-        wmap.set(element, {
-          computed: original,
-          style: element.style.transform,
-        });
-      }
-      if (original === "none") {
-        element.style.transform = transform;
-      } else {
-        element.style.transform = original;
-        element.style.transform += transform;
-      }
-    },
-    [],
-  );
-  const dragReset = React.useCallback((element: HTMLElement) => {
-    const wmap = wmapRef.current;
+  const wmap = new WeakMap<HTMLElement, Saved>();
+
+  function transformTo(element: HTMLElement, transform: Transform) {
+    const saved = wmap.get(element);
+    let original = saved?.computed ?? "";
+    if (!saved) {
+      original = getComputedStyle(element).transform;
+      wmap.set(element, {
+        computed: original,
+        style: element.style.transform,
+      });
+    }
+    if (original === "none") {
+      element.style.transform = transform;
+    } else {
+      element.style.transform = original;
+      element.style.transform += transform;
+    }
+  }
+  function transformReset(element: HTMLElement) {
     const saved = wmap.get(element);
     if (saved) {
       element.style.transform = saved.style;
     }
     wmap.delete(element);
-  }, []);
-  return React.useMemo(
-    () => ({
-      drag,
-      dragReset,
-    }),
-    [drag, dragReset],
-  );
+  }
+  return { transformTo, transformReset };
 }
 
 type ArrayRef = {

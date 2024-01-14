@@ -4,11 +4,12 @@ import { LeftButton, Page } from "../components/ViewPagerWithDrawerShared";
 import React from "react";
 import {
   DragHandler,
+  getTransformsManager,
   transitionWrapper,
   useArrayRef,
   useDragEvent,
-  useTransformsManager,
 } from "../lib/utils/hooks";
+import { getTransform } from "../lib/utils";
 
 export function ViewPagerOldRoute() {
   const viewPagerProps = useDragViewPager();
@@ -40,32 +41,16 @@ const pages = [
   },
 ];
 
-type Box = {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-};
-function getTransform(from: Box, to: Box, partial?: number): string {
-  const portion = partial ?? 1;
-  const translate = `translate(${(to.left - from.left) * portion}px, ${
-    (to.top - from.top) * portion
-  })`;
-  const scale = `scale(${
-    1 + ((to.width - from.width) / from.width) * portion
-  }, ${1 + ((to.height - from.height) / from.height) * portion})`;
-  return `${translate} ${scale}`;
-}
 function useDragViewPager() {
   const [pageIndex, setPageIndex] = React.useState(0);
   const pageIndexRef = React.useRef(pageIndex);
   pageIndexRef.current = pageIndex;
-  const { drag, dragReset } = useTransformsManager();
   const contentWrapperRef = React.useRef<HTMLDivElement | null>(null);
   const { onRef: onPageRef, refs: pageRefs } = useArrayRef();
   const { onRef: onIndicatorRef, refs: indicatorRefs } = useArrayRef();
 
   const dragHandler: DragHandler = React.useCallback(() => {
+    const { transformTo, transformReset } = getTransformsManager();
     let startPoint: { x: number; y: number } | null = null;
     let lastPoint: { x: number; y: number } | null = null;
     let isRight = false;
@@ -115,7 +100,7 @@ function useDragViewPager() {
       }
       lastPoint = { x: touch.pageX, y: touch.pageY };
       moveX = touch.pageX - startPoint.x;
-      drag(contentWrapper, `translateX(${moveX}px)`);
+      transformTo(contentWrapper, `translateX(${moveX}px)`);
       const fromEl = indicatorRefs[pageIndex];
       const toEl = indicatorRefs[moveX > 0 ? pageIndex - 1 : pageIndex + 1];
       const pageEl = pageRefs[pageIndex];
@@ -128,7 +113,7 @@ function useDragViewPager() {
           toBox,
           Math.abs(moveX) / pageBox.width,
         );
-        drag(fromEl, transform);
+        transformTo(fromEl, transform);
       }
     }
     function end() {
@@ -150,11 +135,11 @@ function useDragViewPager() {
         const fromBox = fromEl.getBoundingClientRect();
         const toBox = toEl.getBoundingClientRect();
         const transform = getTransform(toBox, fromBox);
-        drag(toEl, transform);
+        transformTo(toEl, transform);
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             transitionWrapper(toEl, () => {
-              dragReset(toEl);
+              transformReset(toEl);
             });
           });
         });
@@ -162,10 +147,10 @@ function useDragViewPager() {
 
       contentWrapper &&
         transitionWrapper(contentWrapper, () => {
-          contentWrapper && dragReset(contentWrapper);
+          contentWrapper && transformReset(contentWrapper);
           requestAnimationFrame(() => {
             // wait a frame after pageIndex has been set to avoid jitter
-            fromEl && dragReset(fromEl);
+            fromEl && transformReset(fromEl);
           });
           setPageIndex(nextIndex);
         });
@@ -177,7 +162,7 @@ function useDragViewPager() {
       move,
       end,
     };
-  }, [drag, dragReset, indicatorRefs, pageRefs]);
+  }, [indicatorRefs, pageRefs]);
   const getElement = () => contentWrapperRef.current ?? document.body;
   useDragEvent({ dragHandler, getElement });
   const setPageIndexWrapped = React.useCallback(

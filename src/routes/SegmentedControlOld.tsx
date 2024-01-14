@@ -1,6 +1,8 @@
 import React from "react";
 import { SegmentedControl } from "../components/SegmentedControl";
 import { Link } from "react-router-dom";
+import { getTransformsManager, transitionWrapper } from "../lib/utils/hooks";
+import { getTransform } from "../lib/utils";
 
 export function SegmentedControlOldRoute() {
   const [, setValue] = React.useState<string>();
@@ -33,23 +35,18 @@ function useSelectedElement() {
       const element = el;
       const prevElement = selectedElementRef.current;
       const prevBox = prevElement.getBoundingClientRect();
+      const { transformTo, transformReset } = getTransformsManager();
       window.requestAnimationFrame(() => {
-        // requestAnimationFrame: Not always true, but in this case, needed to
+        // requestAnimationFrame: Not usually needed, but in this case, needed to
         // wait till element got some height
         const box = element.getBoundingClientRect();
-        const scale = prevBox.height / box.height;
-        const top = prevBox.top - box.top;
-        const left = prevBox.left - box.left;
-        const originalTransform = element.style.transform;
-        element.style.transform += `translate(${left}px, ${top}px) scale(${scale})`;
-        window.requestAnimationFrame(() => {
-          element.style.transition = "0.3s transform";
-          element.style.transform = originalTransform;
-          function removeTransition() {
-            element.style.transition = "";
-            element.removeEventListener("transitionend", removeTransition);
-          }
-          element.addEventListener("transitionend", removeTransition);
+        const transform = getTransform(box, prevBox);
+        transformTo(element, transform);
+
+        requestAnimationFrame(() => {
+          transitionWrapper(element, () => {
+            transformReset(element);
+          });
         });
       });
     }
