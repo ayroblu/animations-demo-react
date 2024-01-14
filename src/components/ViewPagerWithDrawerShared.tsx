@@ -34,20 +34,36 @@ export function DrawerContent() {
 export function Page({
   name,
   withoutLoremIpsum,
+  withoutDrawer,
 }: {
   name: string;
   withoutLoremIpsum?: boolean;
+  withoutDrawer?: boolean;
 }) {
   return (
     <>
       <Link to="/">&lt; Home</Link>
-      <h1>ViewPager with Drawer ({name})</h1>
+      {withoutDrawer ? (
+        <>
+          <h1>ViewPager ({name})</h1>
 
-      <p>
-        This is tricky because there are two touch / swipeable elements, either
-        you can swipe inside the ViewPager, or you can swipe on the side for the
-        drawer (unless you're already on the left side).
-      </p>
+          <p>
+            Fairly standard ViewPager, note the tabs indicator moves as you
+            swipe, and the contents of the page also moves. Same goes for
+            tapping the tabs
+          </p>
+        </>
+      ) : (
+        <>
+          <h1>ViewPager with Drawer ({name})</h1>
+
+          <p>
+            This is tricky because there are two touch / swipeable elements,
+            either you can swipe inside the ViewPager, or you can swipe on the
+            side for the drawer (unless you're already on the left side).
+          </p>
+        </>
+      )}
 
       {!withoutLoremIpsum && (
         <>

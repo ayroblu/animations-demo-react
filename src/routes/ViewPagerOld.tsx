@@ -29,15 +29,15 @@ const header = (
 const pages = [
   {
     name: "Trams",
-    component: <Page name="Trams" withoutLoremIpsum />,
+    component: <Page name="Trams" withoutLoremIpsum withoutDrawer />,
   },
   {
     name: "Cycling",
-    component: <Page name="Cycling" />,
+    component: <Page name="Cycling" withoutDrawer />,
   },
   {
     name: "Buses",
-    component: <Page name="Buses" />,
+    component: <Page name="Buses" withoutDrawer />,
   },
 ];
 
