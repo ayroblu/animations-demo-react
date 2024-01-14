@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./ViewPager.module.css";
 import { cn } from "../lib/utils";
-import { globalResizeObserver } from "../lib/global-resize-observer";
+import { useArrayRef } from "../lib/utils/hooks";
 
 type Props = {
   pages: {
@@ -15,6 +15,9 @@ type Props = {
   pageIndex?: number;
   setPageIndex?: React.Dispatch<React.SetStateAction<number>>;
   contentWrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
+  onIndicatorRef?: (index: number) => (ref: HTMLElement | null) => void;
+  onPageRef?: (index: number) => (ref: HTMLElement | null) => void;
+  pageRefs?: (HTMLElement | null)[];
 };
 export function ViewPager({
   pages,
@@ -25,12 +28,18 @@ export function ViewPager({
   pageIndex,
   setPageIndex,
   contentWrapperRef,
+  onIndicatorRef,
+  onPageRef,
+  pageRefs,
 }: Props) {
   const [selected, setSelected] = React.useState(0);
   const selectedIndex = pageIndex ?? selected;
   const [isRight, setIsRight] = React.useState(false);
-  const { onRef, refs } = usePageRef();
-  const pageEl = refs[selectedIndex];
+
+  const { onRef: onLocalPageRef, refs: localPageRefs } = useArrayRef();
+  pageRefs = pageRefs ?? localPageRefs;
+  onPageRef = onPageRef ?? onLocalPageRef;
+  const pageEl = pageRefs[selectedIndex];
   const height = pageEl ? getPageHeight(pageEl) : 60;
   const contentRef = React.useRef<HTMLDivElement | null>(null);
   React.useEffect(() => {
@@ -56,6 +65,7 @@ export function ViewPager({
               isRight={index < selectedIndex}
               setSelected={setPageIndex ?? setSelected}
               wrapSetSelected={wrapSetSelected}
+              onIndicatorRef={onIndicatorRef}
             />
           ))}
         </section>
@@ -78,8 +88,8 @@ export function ViewPager({
             <div
               key={name}
               className={styles.page}
-              style={{ "--i": i } as CSSVariables}
-              ref={onRef(i)}
+              style={{ "--i": i } as React.CSSProperties}
+              ref={onPageRef(i)}
             >
               {component}
             </div>
@@ -91,22 +101,6 @@ export function ViewPager({
 }
 function getPageHeight(page: HTMLElement) {
   return page.getBoundingClientRect().height;
-}
-function usePageRef() {
-  const refs = React.useRef<Record<number, HTMLElement | null>>({});
-
-  function onRef(key: number) {
-    return (ref: HTMLElement | null) => {
-      refs.current[key] = ref;
-    };
-  }
-  return {
-    onRef,
-    refs: refs.current,
-  };
-}
-interface CSSVariables extends React.CSSProperties {
-  "--i": number;
 }
 
 function identity(func: () => void) {
@@ -120,6 +114,7 @@ type TabProps = {
   isRight: boolean;
   wrapSetSelected?: (func: () => void) => void;
   index: number;
+  onIndicatorRef?: (i: number) => (ref: HTMLElement | null) => void;
 };
 function Tab({
   name,
@@ -129,10 +124,8 @@ function Tab({
   isRight,
   wrapSetSelected = identity,
   index,
+  onIndicatorRef,
 }: TabProps) {
-  const tabNameSpanRef = React.useRef<HTMLSpanElement | null>(null);
-  const indicatorRef = React.useRef<HTMLDivElement | null>(null);
-  useMatchWidth(tabNameSpanRef, indicatorRef, 16);
   const handleClick = React.useCallback(() => {
     setIsRight(isRight);
     wrapSetSelected(() => {
@@ -141,30 +134,13 @@ function Tab({
   }, [index, isRight, setIsRight, setSelected, wrapSetSelected]);
   return (
     <div className={styles.tab} onClick={handleClick}>
-      <h3 className={styles.tabName}>
-        <span ref={tabNameSpanRef}>{name}</span>
-      </h3>
-      <div
-        className={cn(styles.indicator, isSelected && styles.selected)}
-        ref={indicatorRef}
-      />
+      <div className={styles.tabNameContainer}>
+        <h3 className={styles.tabName}>{name}</h3>
+        <div
+          ref={onIndicatorRef?.(index)}
+          className={cn(styles.indicator, isSelected && styles.selected)}
+        />
+      </div>
     </div>
   );
-}
-function useMatchWidth<T extends React.MutableRefObject<HTMLElement | null>>(
-  ref1: T,
-  ref2: T,
-  padding: number,
-) {
-  React.useEffect(() => {
-    const element1 = ref1.current;
-    const element2 = ref2.current;
-    if (!element1 || !element2) return;
-    element2.style.width =
-      element1.getBoundingClientRect().width + padding + "px";
-    return globalResizeObserver.observe(element1, () => {
-      element2.style.width =
-        element1.getBoundingClientRect().width + padding + "px";
-    });
-  }, [padding, ref1, ref2]);
 }

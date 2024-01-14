@@ -17,10 +17,15 @@
 .tab {
   flex-grow: 1;
   flex-basis: 1px;
-  text-align: center;
-  position: relative;
-  padding: 16px;
+  justify-content: center;
+  display: flex;
   cursor: pointer;
+}
+.tabNameContainer {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding: 16px 8px;
+  position: relative;
 }
 .tabName {
   margin: 0;
@@ -29,9 +34,8 @@
 .indicator {
   position: absolute;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
+  left: 0;
+  right: 0;
   height: 3px;
   border-radius: 1.5px;
 }
@@ -44,7 +48,6 @@
 }
 .contentWrapper {
   min-height: 60vh;
-  /* transition: 0.2s transform; */
 }
 .page {
   position: absolute;

@@ -24,7 +24,13 @@ export type DragHandler = () => {
   move: (e: TouchEvent, touch: Touch) => void;
   end: (e: TouchEvent) => void;
 };
-export function useDragEvent({ dragHandler }: { dragHandler: DragHandler }) {
+export function useDragEvent({
+  dragHandler,
+  getElement,
+}: {
+  dragHandler: DragHandler;
+  getElement: () => HTMLElement;
+}) {
   React.useEffect(() => {
     const handler = dragHandler();
     function touchstart(e: TouchEvent) {
@@ -47,15 +53,16 @@ export function useDragEvent({ dragHandler }: { dragHandler: DragHandler }) {
       handler.end(e);
       handler.reset();
     }
-    window.addEventListener("touchstart", touchstart, { passive: false });
-    window.addEventListener("touchmove", touchmove, { passive: false });
-    window.addEventListener("touchend", touchend, { passive: false });
+    const element = getElement();
+    element.addEventListener("touchstart", touchstart, { passive: false });
+    element.addEventListener("touchmove", touchmove, { passive: false });
+    element.addEventListener("touchend", touchend, { passive: false });
     return () => {
-      window.removeEventListener("touchstart", touchstart);
-      window.removeEventListener("touchmove", touchmove);
-      window.removeEventListener("touchend", touchend);
+      element.removeEventListener("touchstart", touchstart);
+      element.removeEventListener("touchmove", touchmove);
+      element.removeEventListener("touchend", touchend);
     };
-  }, [dragHandler]);
+  }, [dragHandler, getElement]);
 }
 
 export function useTransformsManager() {
@@ -99,4 +106,33 @@ export function useTransformsManager() {
     }),
     [drag, dragReset],
   );
+}
+
+type ArrayRef = {
+  onRef: (index: number) => (ref: HTMLElement | null) => void;
+  refs: (HTMLElement | null)[];
+};
+export function useArrayRef(): ArrayRef {
+  const refs = React.useRef<(HTMLElement | null)[]>([]);
+
+  function onRef(key: number) {
+    return (ref: HTMLElement | null) => {
+      refs.current[key] = ref;
+    };
+  }
+  return {
+    onRef,
+    refs: refs.current,
+  };
+}
+export function transitionWrapper(element: HTMLElement, func: () => void) {
+  const originalTransition = element.style.transition;
+  element.style.transition = "0.2s transform";
+  const transitionend = () => {
+    element.style.transition = originalTransition;
+  };
+  element.addEventListener("transitionend", transitionend, { once: true });
+  requestAnimationFrame(() => {
+    func();
+  });
 }
