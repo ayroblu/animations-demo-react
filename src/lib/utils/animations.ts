@@ -47,12 +47,8 @@ export function useDragEvent({
   }, [dragHandler, getElement]);
 }
 
-export function useTransformsManager() {
-  const [transformsManager] = React.useState(() => getTransformsManager());
-  return transformsManager;
-}
 export function getTransformsManager() {
-  // it's typed as a string, but isn't actually
+  // it's typed as a string, but may also be a "matrix"
   type Transform = string;
   type Saved = { computed: Transform; style: Transform };
   const wmap = new WeakMap<HTMLElement, Saved>();

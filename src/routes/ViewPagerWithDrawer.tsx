@@ -31,19 +31,15 @@ export function ViewPagerWithDrawerRoute() {
 }
 const drawerContent = <DrawerContent />;
 const header = (
-  <header
-    className={cn(
-      styles.header,
-      iosStyles.topPadding,
-      iosStyles.horizontalPadding,
-    )}
-  >
-    <div>
-      <LeftButton />
-    </div>
-    <h1 className={styles.heading}>Demo App</h1>
-    <div />
-  </header>
+  <div className={cn(iosStyles.topPadding, iosStyles.horizontalPadding)}>
+    <header className={styles.header}>
+      <div>
+        <LeftButton />
+      </div>
+      <h1 className={styles.heading}>Demo App</h1>
+      <div />
+    </header>
+  </div>
 );
 
 const pages = [
