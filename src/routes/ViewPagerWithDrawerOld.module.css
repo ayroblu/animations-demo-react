@@ -13,5 +13,5 @@
   font-weight: normal;
 }
 .contentCover {
-  transition: 0.3s opacity;
+  transition: var(--animate-duration) opacity;
 }

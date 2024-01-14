@@ -48,17 +48,17 @@
 }
 @media only screen and (prefers-reduced-motion: no-preference) and (update: fast) {
   ::view-transition-old(tab) {
-    animation: 0.3s ease-in slide-out-left;
+    animation: var(--animate-duration) ease-in slide-out-left;
   }
   ::view-transition-new(tab) {
-    animation: 0.3s ease-in slide-in-left;
+    animation: var(--animate-duration) ease-in slide-in-left;
   }
 }
 @media only screen and (prefers-reduced-motion: no-preference) and (update: fast) {
   ::view-transition-old(tab-right) {
-    animation: 0.3s ease-in slide-out-right;
+    animation: var(--animate-duration) ease-in slide-out-right;
   }
   ::view-transition-new(tab-right) {
-    animation: 0.3s ease-in slide-in-right;
+    animation: var(--animate-duration) ease-in slide-in-right;
   }
 }
