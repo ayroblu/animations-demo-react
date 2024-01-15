@@ -66,6 +66,7 @@ export function getTransformsManager() {
         style: element.style.transform,
       });
     }
+    ensureNoTransition(element);
     // needed if we scale up and down
     element.style.transformOrigin = "top left";
     if (original === "none") {
@@ -101,6 +102,11 @@ function withSingleTransition(
     callback();
   });
 }
+function ensureNoTransition(element: HTMLElement) {
+  const dispose = transitionMap.get(element);
+  dispose?.();
+}
+
 export function transitionWrapper(element: HTMLElement, func: () => void) {
   withSingleTransition(element, (cleanup) => {
     const originalTransition = element.style.transition;
@@ -164,7 +170,8 @@ export function getLinearGestureManager({
     lastDirection = { vertDown: false, horizRight: false };
   }
   function start(e: TouchEvent, touch: Touch) {
-    if (touch.screenX < 10) {
+    if (touch.screenX < 25) {
+      // 25 from manual testing back swipe
       if (withMargin) {
         // disable back swipe on iOS
         // Note that this also disables other actions like scroll actions
