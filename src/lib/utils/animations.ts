@@ -145,10 +145,12 @@ export type GestureManagerParams = {
     onMove: (params: GestureOnMoveParams) => void;
     onEnd: (params: GestureOnEndParams) => void;
   };
+  withMargin?: boolean;
 };
 export function getLinearGestureManager({
   getConstraints,
   handlers: { onMove, onEnd },
+  withMargin,
 }: GestureManagerParams): ReturnType<DragHandler> {
   let startPoint: Point | null = null;
   let lastPoint: Point | null = null;
@@ -161,7 +163,16 @@ export function getLinearGestureManager({
     isSwiping = false;
     lastDirection = { vertDown: false, horizRight: false };
   }
-  function start(_e: TouchEvent, touch: Touch) {
+  function start(e: TouchEvent, touch: Touch) {
+    if (touch.screenX < 10) {
+      if (withMargin) {
+        // disable back swipe on iOS
+        // Note that this also disables other actions like scroll actions
+        e.preventDefault();
+      } else {
+        return;
+      }
+    }
     startPoint = { x: touch.pageX, y: touch.pageY };
     constraints = getConstraints();
   }

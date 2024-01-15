@@ -40,7 +40,8 @@ function useDragDrawer() {
       transformTo(drawer, `translateX(${moveX}px)`);
       const contentCover = contentCoverRef.current;
       if (contentCover) {
-        contentCover.style.opacity = `${((moveX + 280) % 280) / 280}`;
+        contentCover.style.opacity =
+          moveX >= 0 ? `${moveX / 280}` : `${(moveX + 280) / 280}`;
       }
     }
     function onEnd({ isReturningX }: GestureOnEndParams) {
@@ -63,6 +64,7 @@ function useDragDrawer() {
         return { left: isOpen, right: !isOpen };
       },
       handlers: { onMove, onEnd },
+      withMargin: true,
     });
   }, []);
   useDragEvent({ dragHandler, getElement: () => document.body });
