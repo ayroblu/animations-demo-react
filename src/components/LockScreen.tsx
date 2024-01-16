@@ -7,6 +7,7 @@ type Props = {
 };
 export function LockScreen({ notifications }: Props) {
   const time = useTime();
+  usePreventDefaultTouch();
   return (
     <div className={styles.lockScreen}>
       <div className={styles.statusBar} />
@@ -62,4 +63,16 @@ function useTime() {
     };
   }, []);
   return time;
+}
+function usePreventDefaultTouch() {
+  React.useEffect(() => {
+    function touchstart(e: TouchEvent) {
+      e.preventDefault();
+    }
+    function touchmove(e: TouchEvent) {
+      e.preventDefault();
+    }
+    document.body.addEventListener("touchstart", touchstart);
+    document.body.addEventListener("touchmove", touchmove);
+  }, []);
 }
