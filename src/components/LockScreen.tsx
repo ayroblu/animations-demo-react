@@ -8,6 +8,7 @@ import {
   getLinearGestureManager,
   useDragEvent,
 } from "../lib/utils/animations";
+import { Link } from "react-router-dom";
 
 type Props = {
   notifications: string[];
@@ -32,9 +33,9 @@ export function LockScreen({ notifications }: Props) {
           <div className={cn(styles.itemPadding, styles.widgetsContainer)}>
             <div className={styles.widgets}>
               <div className={styles.widgetSpan2}>
-                <a href={routes.root} className={styles.widgetPlaceholder}>
+                <Link to={routes.root} className={styles.widgetPlaceholder}>
                   &lt; Home
-                </a>
+                </Link>
               </div>
               <div className={styles.widget}>
                 <div className={styles.widgetPlaceholder}>Widget</div>
