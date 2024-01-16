@@ -1,6 +1,13 @@
 import React from "react";
 import styles from "./LockScreen.module.css";
 import { cn } from "../lib/utils";
+import { routes } from "../routes";
+import {
+  DragHandler,
+  GestureOnMoveParams,
+  getLinearGestureManager,
+  useDragEvent,
+} from "../lib/utils/animations";
 
 type Props = {
   notifications: string[];
@@ -24,12 +31,25 @@ export function LockScreen({ notifications }: Props) {
           </div>
           <div className={cn(styles.itemPadding, styles.widgetsContainer)}>
             <div className={styles.widgets}>
-              <div className={styles.widget}>Widget</div>
-              <div className={styles.widget}>Widget</div>
-              <div className={styles.widget}>Widget</div>
-              <div className={styles.widget}>Widget</div>
+              <div className={styles.widgetSpan2}>
+                <a href={routes.root} className={styles.widgetPlaceholder}>
+                  &lt; Home
+                </a>
+              </div>
+              <div className={styles.widget}>
+                <div className={styles.widgetPlaceholder}>Widget</div>
+              </div>
+              <div className={styles.widget}>
+                <div className={styles.widgetPlaceholder}>Widget</div>
+              </div>
             </div>
           </div>
+        </div>
+        <div className={styles.notifItemPadding}>
+          <Notification />
+        </div>
+        <div className={styles.notifItemPadding}>
+          <Notification />
         </div>
         {isVisible ? notifications.map((n) => <div key={n}>{n}</div>) : null}
       </div>
@@ -65,20 +85,51 @@ function useTime() {
   return time;
 }
 function usePreventDefaultTouch() {
-  React.useEffect(() => {
-    function touchstart(e: TouchEvent) {
-      e.preventDefault();
+  const dragHandler: DragHandler = React.useCallback(() => {
+    // const { transformTo, transformReset } = getTransformsManager();
+    function onMove({ touchEvent }: GestureOnMoveParams) {
+      touchEvent.preventDefault();
     }
-    function touchmove(e: TouchEvent) {
-      e.preventDefault();
-    }
-    document.body.addEventListener("touchstart", touchstart, {
-      passive: false,
+    function onEnd() {}
+    return getLinearGestureManager({
+      getConstraints: () => {
+        return { left: true, right: true, up: true, down: true };
+      },
+      handlers: { onMove, onEnd },
+      withMargin: true,
     });
-    document.body.addEventListener("touchmove", touchmove, { passive: false });
-    return () => {
-      document.body.removeEventListener("touchstart", touchstart);
-      document.body.removeEventListener("touchmove", touchmove);
-    };
   }, []);
+  useDragEvent({ dragHandler, getElement: () => document.body });
+}
+
+type NotificationProps = {
+  timeSensitive?: boolean;
+};
+function Notification({ timeSensitive }: NotificationProps) {
+  const notificationContent = [
+    timeSensitive && <div className={styles.fadedText}>TIME SENSITIVE</div>,
+    <div>Title</div>,
+    <div>Message</div>,
+  ].filter(Boolean);
+  return (
+    <div className={styles.notification}>
+      <div className={styles.iconContainer}>
+        <div className={styles.icon}>Icon</div>
+      </div>
+      <div className={styles.notifContent}>
+        {notificationContent.map((content, i) =>
+          i === 0 ? (
+            <div className={styles.notifTop}>
+              <div className={styles.flexGrow}>{content}</div>
+              <div className={cn(styles.fadedText, styles.smallerFont)}>
+                3m ago
+              </div>
+            </div>
+          ) : (
+            content
+          ),
+        )}
+      </div>
+    </div>
+  );
 }
