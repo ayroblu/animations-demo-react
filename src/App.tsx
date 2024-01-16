@@ -18,7 +18,9 @@ function App() {
           <Link to={routes.segmentedControl}>Segmented Control</Link>
         </li>
         <li>
-          <Link to={routes.segmentedControlImperative}>Segmented Control Imperative</Link>
+          <Link to={routes.segmentedControlImperative}>
+            Segmented Control Imperative
+          </Link>
         </li>
         <li>
           <Link to={routes.viewPagerWithDrawer}>ViewPager with Drawer</Link>
@@ -30,6 +32,9 @@ function App() {
         </li>
         <li>
           <Link to={routes.viewPagerImperative}>ViewPager Imperative</Link>
+        </li>
+        <li>
+          <Link to={routes.lockScreen}>iOS Lock Screen</Link>
         </li>
       </ul>
 

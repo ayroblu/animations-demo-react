@@ -6,6 +6,7 @@ import { SegmentedControlImperativeRoute } from "./SegmentedControlImperative";
 import { ViewPagerWithDrawerRoute } from "./ViewPagerWithDrawer";
 import { ViewPagerWithDrawerImperativeRoute } from "./ViewPagerWithDrawerImperative";
 import { ViewPagerImperativeRoute } from "./ViewPagerImperative";
+import { LockScreenRoute } from "./LockScreen";
 
 export const routes = {
   root: "/",
@@ -15,6 +16,7 @@ export const routes = {
   viewPagerImperative: "/view-pager-imperative",
   viewPagerWithDrawer: "/view-pager-drawer",
   viewPagerWithDrawerImperative: "/view-pager-drawer-imperative",
+  lockScreen: "/lock-screen",
 };
 export const router = createBrowserRouter(
   [
@@ -45,6 +47,10 @@ export const router = createBrowserRouter(
     {
       path: routes.viewPagerWithDrawerImperative,
       element: <ViewPagerWithDrawerImperativeRoute />,
+    },
+    {
+      path: routes.lockScreen,
+      element: <LockScreenRoute />,
     },
   ],
   { basename: import.meta.env.BASE_URL },

@@ -1,0 +1,62 @@
+.lockScreen {
+  background-image: url("../assets/iphone-background.jpg");
+  background-size: cover;
+  height: 100lvh;
+  display: flex;
+  flex-direction: column;
+}
+.statusBar {
+  height: env(safe-area-inset-top);
+}
+
+.scrollableContent {
+  flex-grow: 1;
+}
+.infoContent {
+  text-align: center;
+}
+.itemPadding {
+  padding: 4px;
+}
+.lock {
+  height: 1.5rem;
+}
+.widgetTop {
+}
+.time {
+  font-size: 5rem;
+  line-height: 5rem;
+  font-weight: 300;
+}
+.widgetsContainer {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+.widgets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.widget {
+  aspect-ratio: 1/ 1;
+}
+
+.bottomControls {
+  display: flex;
+  justify-content: space-between;
+  padding: 32px;
+}
+.control {
+  padding: 16px;
+  border-radius: 50%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.35);
+  width: 52px;
+  height: 52px;
+  text-align: center;
+}
+
+.homeArea {
+  height: env(safe-area-inset-bottom);
+}
