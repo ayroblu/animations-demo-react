@@ -72,7 +72,13 @@ function usePreventDefaultTouch() {
     function touchmove(e: TouchEvent) {
       e.preventDefault();
     }
-    document.body.addEventListener("touchstart", touchstart);
-    document.body.addEventListener("touchmove", touchmove);
+    document.body.addEventListener("touchstart", touchstart, {
+      passive: false,
+    });
+    document.body.addEventListener("touchmove", touchmove, { passive: false });
+    return () => {
+      document.body.removeEventListener("touchstart", touchstart);
+      document.body.removeEventListener("touchmove", touchmove);
+    };
   }, []);
 }
