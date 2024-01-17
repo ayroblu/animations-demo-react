@@ -166,12 +166,14 @@ export function getLinearGestureManager({
   let lastDirection = { vertDown: false, horizRight: false };
   let isSwiping = false;
   let constraints = getConstraints();
-  function reset() {
+  function reset(withoutReset?: boolean) {
     startPoint = null;
     lastPoint = null;
     isSwiping = false;
     lastDirection = { vertDown: false, horizRight: false };
-    onReset();
+    if (!withoutReset) {
+      onReset();
+    }
   }
   function start(e: TouchEvent, touch: Touch) {
     if (touch.screenX < 25) {
@@ -245,7 +247,7 @@ export function getLinearGestureManager({
     const movingVertDown = y >= startPoint.y;
     const isReturningX = movingHorizRight !== lastDirection.horizRight;
     const isReturningY = movingVertDown !== !lastDirection.vertDown;
-    reset();
+    reset(true);
     onEnd({
       touchEvent: e,
       startPoint,
