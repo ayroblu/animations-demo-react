@@ -58,12 +58,20 @@ function useDragDrawer() {
           }
         });
     }
+    function onReset() {
+      const drawer = drawerRef.current;
+      drawer && transformReset(drawer);
+      const contentCover = contentCoverRef.current;
+      if (contentCover) {
+        contentCover.style.opacity = "";
+      }
+    }
     return getLinearGestureManager({
       getConstraints: () => {
         const isOpen = isOpenRef.current;
         return { left: isOpen, right: !isOpen };
       },
-      handlers: { onMove, onEnd },
+      handlers: { onReset, onMove, onEnd },
       withMargin: true,
     });
   }, []);

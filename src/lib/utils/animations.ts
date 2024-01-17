@@ -16,6 +16,9 @@ export function useDragEvent({
   React.useEffect(() => {
     const handler = dragHandler();
     function touchstart(e: TouchEvent) {
+      if (e.touches.length > 1) {
+        return;
+      }
       if (e.touches.length !== 1) {
         handler.reset();
         return;
@@ -24,14 +27,13 @@ export function useDragEvent({
       handler.start(e, touch);
     }
     function touchmove(e: TouchEvent) {
-      if (e.touches.length !== 1) {
-        handler.reset();
-        return;
-      }
       const [touch] = e.touches;
       handler.move(e, touch);
     }
     function touchend(e: TouchEvent) {
+      if (e.touches.length > 0) {
+        return;
+      }
       handler.end(e);
       handler.reset();
     }
@@ -148,6 +150,7 @@ export type GestureOnEndParams = {
 export type GestureManagerParams = {
   getConstraints: () => Constraints;
   handlers: {
+    onReset: () => void;
     onMove: (params: GestureOnMoveParams) => void;
     onEnd: (params: GestureOnEndParams) => void;
   };
@@ -155,7 +158,7 @@ export type GestureManagerParams = {
 };
 export function getLinearGestureManager({
   getConstraints,
-  handlers: { onMove, onEnd },
+  handlers: { onReset, onMove, onEnd },
   withMargin,
 }: GestureManagerParams): ReturnType<DragHandler> {
   let startPoint: Point | null = null;
@@ -168,6 +171,7 @@ export function getLinearGestureManager({
     lastPoint = null;
     isSwiping = false;
     lastDirection = { vertDown: false, horizRight: false };
+    onReset();
   }
   function start(e: TouchEvent, touch: Touch) {
     if (touch.screenX < 25) {
@@ -197,7 +201,9 @@ export function getLinearGestureManager({
       (!up && down && y < startPoint.y) ||
       (!down && up && y > startPoint.y);
     if (isWrongWay) {
-      reset();
+      if (!isSwiping) {
+        reset();
+      }
       return;
     }
     const moveX = x - startPoint.x;

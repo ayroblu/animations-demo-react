@@ -92,11 +92,12 @@ function usePreventDefaultTouch() {
       touchEvent.preventDefault();
     }
     function onEnd() {}
+    function onReset() {}
     return getLinearGestureManager({
       getConstraints: () => {
         return { left: true, right: true, up: true, down: true };
       },
-      handlers: { onMove, onEnd },
+      handlers: { onReset, onMove, onEnd },
       withMargin: true,
     });
   }, []);

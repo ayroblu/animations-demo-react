@@ -91,6 +91,16 @@ function useDragViewPager(pagesLength: number) {
       transitionIndicator();
       setPageIndex(nextIndex);
     }
+    function onReset() {
+      const contentWrapper = contentWrapperRef.current;
+      const pageIndex = pageIndexRef.current;
+      const indicatorEl = indicatorRefs[pageIndex];
+      indicatorEl && transformReset(indicatorEl);
+      contentWrapper &&
+        transitionWrapper(contentWrapper, () => {
+          transformReset(contentWrapper);
+        });
+    }
     return getLinearGestureManager({
       getConstraints: () => {
         const pageIndex = pageIndexRef.current;
@@ -99,7 +109,7 @@ function useDragViewPager(pagesLength: number) {
           right: pageIndex !== 0,
         };
       },
-      handlers: { onMove, onEnd },
+      handlers: { onReset, onMove, onEnd },
     });
   }, [indicatorRefs, pageRefs, pagesLength]);
   const getElement = () => contentWrapperRef.current ?? document.body;
