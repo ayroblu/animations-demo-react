@@ -20,3 +20,11 @@ export function getTransform(from: Box, to: Box, partial?: number): string {
   }, ${1 + ((to.height - from.height) / from.height) * portion})`;
   return `${translate} ${scale}`;
 }
+
+type Point = { x: number; y: number };
+export function getScrollPosition(el: HTMLElement | Window = window): Point {
+  return {
+    x: "scrollX" in el ? el.scrollX : el.scrollLeft,
+    y: "scrollY" in el ? el.scrollY : el.scrollTop,
+  };
+}

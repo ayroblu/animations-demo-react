@@ -148,6 +148,7 @@ export type GestureOnEndParams = {
 export type GestureManagerParams = {
   getConstraints: () => Constraints;
   handlers: {
+    onReset?: () => void;
     onMove: (params: GestureOnMoveParams) => void;
     onEnd: (params: GestureOnEndParams) => void;
   };
@@ -155,7 +156,7 @@ export type GestureManagerParams = {
 };
 export function getLinearGestureManager({
   getConstraints,
-  handlers: { onMove, onEnd },
+  handlers: { onReset, onMove, onEnd },
   withMargin,
 }: GestureManagerParams): ReturnType<DragHandler> {
   let startPoint: Point | null = null;
@@ -168,6 +169,7 @@ export function getLinearGestureManager({
     lastPoint = null;
     isSwiping = false;
     lastDirection = { vertDown: false, horizRight: false };
+    onReset?.();
   }
   function start(e: TouchEvent, touch: Touch) {
     if (touch.screenX < 25) {
@@ -202,6 +204,9 @@ export function getLinearGestureManager({
     }
     const moveX = x - startPoint.x;
     const moveY = y - startPoint.y;
+    if (down && moveY) {
+      e.preventDefault();
+    }
     if (!isSwiping) {
       if (Math.abs(moveX) > 10) {
         if (left || right) {
@@ -210,8 +215,7 @@ export function getLinearGestureManager({
           reset();
           return;
         }
-      }
-      if (Math.abs(moveY) > 10) {
+      } else if (Math.abs(moveY) > 10) {
         if (up || down) {
           isSwiping = true;
         } else {

@@ -1,11 +1,16 @@
 :root {
   font-family: system-ui, sans-serif;
-  color-scheme: light dark;
   --animate-duration: 0.3s;
 }
 body {
   margin: 0;
 }
+
+/* html, */
+/* body { */
+/*   overscroll-behavior-y: none; */
+/* } */
+
 * {
   box-sizing: border-box;
 }

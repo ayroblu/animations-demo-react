@@ -11,6 +11,7 @@ import {
   useDragEvent,
 } from "../lib/utils/animations";
 import { getTransform } from "../lib/utils";
+// import styles from "./DragViewPagerImperative.module.css";
 
 type Props = Pick<React.ComponentProps<typeof ViewPager>, "pages" | "header">;
 export function DragViewPagerImperative(props: Props) {
@@ -18,6 +19,10 @@ export function DragViewPagerImperative(props: Props) {
   return <ViewPager {...props} {...viewPagerProps} />;
 }
 
+// TODO: pull down while scroll is at top should translate
+// if scroll is at top, always preventDefault if causes overscroll
+// CASE: scroll down a bit, then drag down so that you scroll to top then should continue to pull to refresh. Includes momentum from scrolling
+// TODO: handle two finger reset / do nothing?
 function useDragViewPager(pagesLength: number) {
   const [pageIndex, setPageIndex] = React.useState(0);
   const pageIndexRef = React.useRef(pageIndex);
@@ -104,6 +109,38 @@ function useDragViewPager(pagesLength: number) {
   }, [indicatorRefs, pageRefs, pagesLength]);
   const getElement = () => contentWrapperRef.current ?? document.body;
   useDragEvent({ dragHandler, getElement });
+
+  // const pullToRefreshDragHandler: DragHandler = React.useCallback(() => {
+  //   const { transformTo, transformReset } = getTransformsManager();
+
+  //   function onMove({ touchEvent, moveY }: GestureOnMoveParams) {
+  //     const contentWrapper = contentWrapperRef.current;
+  //     if (!contentWrapper) return;
+  //     touchEvent.preventDefault();
+  //     touchEvent.stopPropagation();
+  //     moveY = Math.pow(moveY, 0.8);
+  //     transformTo(contentWrapper, `translateY(${moveY}px)`);
+  //   }
+  //   function onEnd() {
+  //     const contentWrapper = contentWrapperRef.current;
+  //     contentWrapper &&
+  //       transitionWrapper(contentWrapper, () => {
+  //         transformReset(contentWrapper);
+  //       });
+  //   }
+  //   return getLinearGestureManager({
+  //     getConstraints: () => {
+  //       console.log("scrollY", window.scrollY);
+  //       return {
+  //         down: window.scrollY < 10,
+  //       };
+  //     },
+  //     handlers: { onMove, onEnd },
+  //   });
+  // }, []);
+  // useDragEvent({ dragHandler: pullToRefreshDragHandler, getElement });
+
+  // The on click effect of moving the indicator
   const setPageIndexWrapped = React.useCallback(
     (pageIndex: Parameters<typeof setPageIndex>[0]) => {
       const contentWrapper = contentWrapperRef.current;

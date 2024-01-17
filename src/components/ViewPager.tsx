@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./ViewPager.module.css";
 import { cn } from "../lib/utils";
-import { useArrayRef } from "../lib/utils/hooks";
+import { useArrayRef, useSyncElements } from "../lib/utils/hooks";
 import iosStyles from "./IosPadding.module.css";
 
 type Props = {
@@ -40,20 +40,32 @@ export function ViewPager({
   const { onRef: onLocalPageRef, refs: localPageRefs } = useArrayRef();
   pageRefs = pageRefs ?? localPageRefs;
   const onPageRef = onPageRefProp ?? onLocalPageRef;
-  const pageEl = pageRefs[selectedIndex];
-  const height = pageEl ? getPageHeight(pageEl) : 60;
   const contentRef = React.useRef<HTMLDivElement | null>(null);
+  const headerRef = React.useRef<HTMLDivElement | null>(null);
   React.useEffect(() => {
     const content = contentRef.current;
-    if (!content) {
+    if (!content || !pageRefs) {
       return;
     }
+    const pageEl = pageRefs[selectedIndex];
+    const height = pageEl ? getPageHeight(pageEl) : 60;
     content.style.height = height + "px";
-  }, [height]);
+  }, [pageRefs, selectedIndex]);
+  const spacerRefs = React.useRef<(HTMLElement | null)[]>([]);
+  const onSpacerRef = (index: number) => (ref: HTMLElement | null) => {
+    spacerRefs.current[index] = ref;
+  };
+  useSyncElements(headerRef, spacerRefs, (source, targets) => {
+    for (const target of targets) {
+      if (target) {
+        target.style.height = source.clientHeight + "px";
+      }
+    }
+  });
 
   return (
     <div className={styles.viewPager}>
-      <div className={styles.header}>
+      <div className={styles.header} ref={headerRef}>
         {header}
         <section className={styles.tabs}>
           {pages.map(({ name }, index) => (
@@ -71,30 +83,32 @@ export function ViewPager({
           ))}
         </section>
       </div>
-      <div
-        className={cn(
-          contentClassName,
-          isRight ? rightContentClassName : undefined,
-          styles.content,
-        )}
-        ref={contentRef}
-        style={{ minHeight: height + "px" }}
-      >
+      <div className={styles.contentContainer}>
         <div
-          className={styles.contentWrapper}
-          style={{ transform: `translateX(-${selectedIndex * 100}%)` }}
-          ref={contentWrapperRef}
+          className={cn(
+            contentClassName,
+            isRight ? rightContentClassName : undefined,
+            styles.content,
+          )}
+          ref={contentRef}
         >
-          {pages.map(({ component, name }, i) => (
-            <div
-              key={name}
-              className={cn(styles.page, iosStyles.bottomPadding)}
-              style={{ "--i": i } as React.CSSProperties}
-              ref={onPageRef(i)}
-            >
-              {component}
-            </div>
-          ))}
+          <div
+            className={styles.contentWrapper}
+            style={{ transform: `translateX(-${selectedIndex * 100}%)` }}
+            ref={contentWrapperRef}
+          >
+            {pages.map(({ component, name }, i) => (
+              <div
+                key={name}
+                className={cn(styles.page, iosStyles.bottomPadding)}
+                style={{ "--i": i } as React.CSSProperties}
+                ref={onPageRef(i)}
+              >
+                <div ref={onSpacerRef(i)} />
+                {component}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
