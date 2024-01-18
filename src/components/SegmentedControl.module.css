@@ -3,11 +3,11 @@
   padding: var(--padding-size);
   padding-left: calc(env(safe-area-inset-left) + var(--padding-size));
   padding-right: calc(env(safe-area-inset-right) + var(--padding-size));
-  background: #333;
+  background: #ddd;
 }
 .segmentedControl {
   display: flex;
-  background-color: #444;
+  background-color: #ccc;
   border-radius: 8px;
   padding: 2px;
 }
@@ -24,11 +24,11 @@
 .segmentedControlItem.selected > .background {
   position: absolute;
   inset: 0 0 0 0;
-  background-color: #666;
+  background-color: #aaa;
 }
 .segmentedControlItem:not(:last-child)::after {
   content: "";
-  border-right: 1px solid #666;
+  border-right: 1px solid #aaa;
   position: absolute;
   right: 0;
   height: 1lh;
@@ -42,4 +42,19 @@
 .text {
   position: relative;
   z-index: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  .segmentedControlOuter {
+    background: #333;
+  }
+  .segmentedControl {
+    background-color: #444;
+  }
+  .segmentedControlItem.selected > .background {
+    background-color: #666;
+  }
+  .segmentedControlItem:not(:last-child)::after {
+    border-right: 1px solid #666;
+  }
 }

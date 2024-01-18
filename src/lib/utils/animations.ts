@@ -193,10 +193,19 @@ export function getLinearGestureManager({
     if (touch.screenX < 25) {
       // 25 from manual testing back swipe
       if (withMargin) {
-        // disable back swipe on iOS
-        // Note that this also disables other actions like scroll actions
-        e.preventDefault();
+        if (
+          e.target instanceof HTMLAnchorElement ||
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        ) {
+          // compromise: don't prevent default for tappable elements
+        } else {
+          // disable back swipe on iOS
+          // Note that this also disables other actions like scroll actions
+          e.preventDefault();
+        }
       } else {
+        // don't mix back swipe and movement
         return;
       }
     }
