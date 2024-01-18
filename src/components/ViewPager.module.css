@@ -1,7 +1,7 @@
 .viewPager {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  min-height: 100lvh;
 }
 .header {
   border-bottom: 1px solid #eee;
