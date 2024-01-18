@@ -1,9 +1,10 @@
 .lockScreen {
   background-image: url("../assets/iphone-background.jpg");
   background-size: cover;
-  height: 100lvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 .statusBar {
   height: env(safe-area-inset-top);
@@ -12,10 +13,16 @@
 .scrollableContent {
   flex-grow: 1;
   overflow-y: auto;
+  overscroll-behavior-y: none;
 }
 .infoContent {
   text-align: center;
   margin-bottom: 16px;
+  position: sticky;
+  top: 0;
+}
+.infoSpacer {
+  height: 200px;
 }
 .itemPadding {
   padding: 4px;
@@ -61,12 +68,23 @@
   justify-content: space-between;
   padding: 32px;
 }
+.leftControl {
+  left: 32px;
+}
+.rightControl {
+  right: 32px;
+}
 .control {
+  position: absolute;
+  bottom: 32px;
+  margin-bottom: env(safe-area-inset-bottom);
+  z-index: 99999;
+
   padding: 16px;
   border-radius: 50%;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: rgba(255, 255, 255, 0.35);
   width: 52px;
   height: 52px;
   text-align: center;
@@ -79,10 +97,11 @@
 .notification {
   border-radius: 16px;
   display: flex;
-  background-color: rgba(0, 0, 0, 0.33);
+  background-color: rgba(255, 255, 255, 0.33);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   padding: 12px 16px;
+  position: relative;
 }
 .iconContainer {
   margin-right: 16px;
@@ -94,6 +113,7 @@
 }
 .notifItemPadding {
   padding: 4px 8px;
+  margin-top: -20px;
 }
 .flexGrow {
   flex-grow: 1;
@@ -105,8 +125,19 @@
   flex-grow: 1;
 }
 .fadedText {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(0, 0, 0, 0.5);
 }
 .smallerFont {
   font-size: 0.88rem;
+}
+@media (prefers-color-scheme: dark) {
+  .control {
+    background-color: rgba(0, 0, 0, 0.35);
+  }
+  .notification {
+    background-color: rgba(0, 0, 0, 0.33);
+  }
+  .fadedText {
+    color: rgba(255, 255, 255, 0.5);
+  }
 }

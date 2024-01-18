@@ -11,7 +11,7 @@ export function useDragEvent({
   getElement,
 }: {
   dragHandler: DragHandler;
-  getElement: () => HTMLElement;
+  getElement: () => HTMLElement | null;
 }) {
   React.useEffect(() => {
     const handler = dragHandler();
@@ -45,6 +45,7 @@ export function useDragEvent({
       handler.end(e);
     }
     const element = getElement();
+    if (!element) return;
     element.addEventListener("touchstart", touchstart, { passive: false });
     element.addEventListener("touchmove", touchmove, { passive: false });
     element.addEventListener("touchend", touchend, { passive: false });
