@@ -1,4 +1,5 @@
 import React from "react";
+import { globalResizeObserver } from "../global-resize-observer";
 
 export function useForceUpdate() {
   const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
@@ -34,4 +35,26 @@ export function useArrayRef(): ArrayRef {
     onRef,
     refs: refs.current,
   };
+}
+
+export function useSyncElements(
+  sourceRef: React.MutableRefObject<HTMLElement | null>,
+  targetRef: React.MutableRefObject<(HTMLElement | null)[]>,
+  callback: (source: HTMLElement, target: (HTMLElement | null)[]) => void,
+) {
+  const callbackRef = React.useRef(callback);
+  callbackRef.current = callback;
+  React.useEffect(() => {
+    const source = sourceRef.current;
+    const target = targetRef.current;
+    if (!source || !target) {
+      return;
+    }
+    const callback = callbackRef.current;
+
+    callback(source, target);
+    globalResizeObserver.observe(source, () => {
+      callback(source, target);
+    });
+  }, [sourceRef, targetRef]);
 }

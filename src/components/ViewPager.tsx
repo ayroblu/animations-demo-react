@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./ViewPager.module.css";
 import { cn } from "../lib/utils";
-import { useArrayRef } from "../lib/utils/hooks";
+import { useArrayRef, useSyncElements } from "../lib/utils/hooks";
 import iosStyles from "./IosPadding.module.css";
 
 type Props = {
@@ -19,6 +19,7 @@ type Props = {
   onIndicatorRef?: (index: number) => (ref: HTMLElement | null) => void;
   onPageRef?: (index: number) => (ref: HTMLElement | null) => void;
   pageRefs?: (HTMLElement | null)[];
+  onPullDownRef?: (index: number) => (ref: HTMLElement | null) => void;
 };
 export function ViewPager({
   pages,
@@ -32,6 +33,7 @@ export function ViewPager({
   onIndicatorRef,
   onPageRef: onPageRefProp,
   pageRefs,
+  onPullDownRef,
 }: Props) {
   const [selected, setSelected] = React.useState(0);
   const selectedIndex = pageIndex ?? selected;
@@ -50,10 +52,22 @@ export function ViewPager({
     }
     content.style.height = height + "px";
   }, [height]);
+  const spacerRefs = React.useRef<(HTMLElement | null)[]>([]);
+  const headerRef = React.useRef<HTMLDivElement | null>(null);
+  const onSpacerRef = (index: number) => (ref: HTMLElement | null) => {
+    spacerRefs.current[index] = ref;
+  };
+  useSyncElements(headerRef, spacerRefs, (source, targets) => {
+    for (const target of targets) {
+      if (target) {
+        target.style.height = source.clientHeight + "px";
+      }
+    }
+  });
 
   return (
     <div className={styles.viewPager}>
-      <div className={styles.header}>
+      <div className={styles.header} ref={headerRef}>
         {header}
         <section className={styles.tabs}>
           {pages.map(({ name }, index) => (
@@ -92,6 +106,11 @@ export function ViewPager({
               style={{ "--i": i } as React.CSSProperties}
               ref={onPageRef(i)}
             >
+              <div className={styles.spacer} ref={onSpacerRef(i)}>
+                <div className={styles.pullDown} ref={onPullDownRef?.(i)}>
+                  Arrow
+                </div>
+              </div>
               {component}
             </div>
           ))}

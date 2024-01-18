@@ -11,6 +11,7 @@ import {
   useDragEvent,
 } from "../lib/utils/animations";
 import { getTransform } from "../lib/utils";
+import styles from "./DragViewPagerImperative.module.css";
 
 type Props = Pick<React.ComponentProps<typeof ViewPager>, "pages" | "header">;
 export function DragViewPagerImperative(props: Props) {
@@ -114,6 +115,88 @@ function useDragViewPager(pagesLength: number) {
   }, [indicatorRefs, pageRefs, pagesLength]);
   const getElement = () => contentWrapperRef.current ?? document.body;
   useDragEvent({ dragHandler, getElement });
+
+  const { refs: pullDownRefs, onRef: onPullDownRef } = useArrayRef();
+  const pullToRefreshDragHandler: DragHandler = React.useCallback(() => {
+    const { transformTo, transformReset } = getTransformsManager();
+    const maxPullDown = 60;
+    let activeState: "no" | "active" | "done" = "no";
+    let activeCallback = () => {};
+
+    function onReset() {
+      activeState = "no";
+      const pageIndex = pageIndexRef.current;
+      const pullDownEl = pullDownRefs[pageIndex];
+      if (pullDownEl) {
+        pullDownEl.style.opacity = "";
+      }
+    }
+    function onMove({ touchEvent, moveY }: GestureOnMoveParams) {
+      const contentWrapper = contentWrapperRef.current;
+      if (!contentWrapper) return;
+      touchEvent.preventDefault();
+      touchEvent.stopPropagation();
+      moveY = Math.pow(moveY, 0.8);
+      transformTo(contentWrapper, `translateY(${moveY}px)`);
+      const pageIndex = pageIndexRef.current;
+      const pullDownEl = pullDownRefs[pageIndex];
+      if (pullDownEl) {
+        pullDownEl.style.opacity = Math.min(1, moveY / maxPullDown) + "";
+        if (moveY > maxPullDown && activeState === "no") {
+          activeState = "active";
+          pullDownEl.classList.add(styles.rotate);
+          setTimeout(() => {
+            pullDownEl.classList.remove(styles.rotate);
+            if (activeState === "active") {
+              activeState = "done";
+            }
+            activeCallback();
+          }, 1000);
+        }
+      }
+    }
+    function onEnd() {
+      const contentWrapper = contentWrapperRef.current;
+      function returnToOriginal() {
+        contentWrapper &&
+          transitionWrapper(contentWrapper, () => {
+            transformReset(contentWrapper);
+          });
+        const pageIndex = pageIndexRef.current;
+        const pullDownEl = pullDownRefs[pageIndex];
+        if (pullDownEl) {
+          transformReset(pullDownEl);
+          pullDownEl.getBoundingClientRect();
+          transitionWrapper(pullDownEl, () => {
+            pullDownEl.style.opacity = "";
+          });
+        }
+        activeCallback = () => {};
+      }
+      if (activeState === "active") {
+        contentWrapper &&
+          transitionWrapper(contentWrapper, () => {
+            transformTo(contentWrapper, `translateY(${maxPullDown}px)`);
+          });
+        activeCallback = returnToOriginal;
+      } else {
+        returnToOriginal();
+      }
+      activeState = "no";
+    }
+    return getLinearGestureManager({
+      getConstraints: () => {
+        const pageIndex = pageIndexRef.current;
+        const pageEl = pageRefs[pageIndex];
+        return {
+          down: pageEl?.scrollTop === 0,
+        };
+      },
+      handlers: { onReset, onMove, onEnd },
+    });
+  }, [pageRefs, pullDownRefs]);
+  useDragEvent({ dragHandler: pullToRefreshDragHandler, getElement });
+
   const setPageIndexWrapped = React.useCallback(
     (pageIndex: Parameters<typeof setPageIndex>[0]) => {
       const contentWrapper = contentWrapperRef.current;
@@ -153,5 +236,6 @@ function useDragViewPager(pagesLength: number) {
     onIndicatorRef,
     pageRefs,
     onPageRef,
+    onPullDownRef,
   };
 }

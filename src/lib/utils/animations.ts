@@ -16,7 +16,12 @@ export function useDragEvent({
   React.useEffect(() => {
     const handler = dragHandler();
     function touchstart(e: TouchEvent) {
+      if (getSelection()?.toString()) {
+        return;
+      }
       if (e.touches.length > 1) {
+        // Disable pinch to zoom
+        e.preventDefault();
         return;
       }
       if (e.touches.length !== 1) {
@@ -27,6 +32,9 @@ export function useDragEvent({
       handler.start(e, touch);
     }
     function touchmove(e: TouchEvent) {
+      if (getSelection()?.toString()) {
+        return;
+      }
       const [touch] = e.touches;
       handler.move(e, touch);
     }
@@ -35,7 +43,6 @@ export function useDragEvent({
         return;
       }
       handler.end(e);
-      handler.reset();
     }
     const element = getElement();
     element.addEventListener("touchstart", touchstart, { passive: false });
@@ -69,8 +76,10 @@ export function getTransformsManager() {
       });
     }
     ensureNoTransition(element);
-    // needed if we scale up and down
-    element.style.transformOrigin = "top left";
+    if (transform.includes("scale(")) {
+      // needed if we scale up and down
+      element.style.transformOrigin = "top left";
+    }
     if (original === "none") {
       element.style.transform = transform;
     } else {
@@ -109,13 +118,18 @@ function ensureNoTransition(element: HTMLElement) {
   dispose?.();
 }
 
-export function transitionWrapper(element: HTMLElement, func: () => void) {
+export function transitionWrapper(
+  element: HTMLElement,
+  func: () => void,
+  { transition, onEnd }: { transition?: string; onEnd?: () => void } = {},
+) {
   withSingleTransition(element, (cleanup) => {
     const originalTransition = element.style.transition;
-    element.style.transition = "0.3s transform";
+    element.style.transition = transition ?? "0.3s transform, 0.3s opacity";
     const transitionend = () => {
       element.style.transition = originalTransition;
       cleanup();
+      onEnd?.();
     };
     element.addEventListener("transitionend", transitionend, { once: true });
 
@@ -218,8 +232,7 @@ export function getLinearGestureManager({
           reset();
           return;
         }
-      }
-      if (Math.abs(moveY) > 10) {
+      } else if (Math.abs(moveY) > 10) {
         if (up || down) {
           isSwiping = true;
         } else {

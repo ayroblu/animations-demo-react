@@ -6,6 +6,11 @@
 body {
   margin: 0;
 }
+
+html {
+  overscroll-behavior-y: none;
+}
+
 * {
   box-sizing: border-box;
 }
