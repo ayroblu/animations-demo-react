@@ -26,14 +26,31 @@ export function LockScreen(_props: Props) {
     Array(20)
       .fill(null)
       .map(() => ({
-        isFixed: true,
+        isFixed: false,
       })),
   );
   const notificationsRef = React.useRef(notifications);
   notificationsRef.current = notifications;
   const transformManagerRef = React.useRef(getTransformsManager());
+  const scrollStateRef = React.useRef({
+    lastScrollTop: 0,
+    lastTime: Date.now(),
+  });
   function scrollHandler() {
     const { transformTo } = transformManagerRef.current;
+    const scrollState = scrollStateRef.current;
+    const scroll = scrollRef.current;
+    const currentScrollTop = scroll?.scrollTop;
+    const currentTime = Date.now();
+    function getNextFrameDiff() {
+      if (typeof currentScrollTop !== "number") return 0;
+      const timeDiff = currentTime - scrollState.lastTime;
+      if (timeDiff === 0) return 0;
+      return ((currentScrollTop - scrollState.lastScrollTop) / timeDiff) * 20;
+    }
+    // scroll is out of sync with render, so try offset by a frame
+    const nextFrameDiff = getNextFrameDiff();
+
     const result = notifRefs.map((placeholder, i) => {
       const fixed = fixedNotifRefs[i];
       if (!placeholder || !fixed) {
@@ -43,7 +60,7 @@ export function LockScreen(_props: Props) {
       }
       const pBox = placeholder.getBoundingClientRect();
       // const diff = document.documentElement.clientHeight - pBox.bottom;
-      const diff = window.innerHeight - pBox.bottom;
+      const diff = window.innerHeight - pBox.bottom + nextFrameDiff;
       const normDiff = Math.min(1, Math.max(0, diff / distanceFromBottom));
       fixed.style.opacity = normDiff + "";
       const scale = normDiff * 0.2 + 0.8;
@@ -59,6 +76,10 @@ export function LockScreen(_props: Props) {
     );
     if (isDifferent) {
       setNotifications(result);
+    }
+    if (currentScrollTop) {
+      scrollState.lastTime = currentTime;
+      scrollState.lastScrollTop = currentScrollTop;
     }
   }
   useScrollListener(scrollRef, scrollHandler);
@@ -234,16 +255,26 @@ function useScrollListener(
     if (!el) return;
     const element = el;
     let timeoutId = 0;
+    let isScrolling = false;
     function onScroll() {
+      isScrolling = true;
       cancelAnimationFrame(timeoutId);
       timeoutId = requestAnimationFrame(() => {
         const callback = callbackRef.current;
         callback(element);
+        if (isScrolling) {
+          onScroll();
+        }
       });
     }
+    function onScrollEnd() {
+      isScrolling = false;
+    }
+    element.addEventListener("scrollend", onScrollEnd, { passive: true });
     element.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       element.removeEventListener("scroll", onScroll);
+      element.removeEventListener("scrollend", onScrollEnd);
     };
   }, [scrollRef]);
 }

@@ -20,6 +20,7 @@
   flex-grow: 1;
   overflow-y: auto;
   overscroll-behavior-y: none;
+  padding-bottom: 150px;
 }
 .infoContent {
   text-align: center;
