@@ -42,7 +42,8 @@ export function LockScreen(_props: Props) {
         };
       }
       const pBox = placeholder.getBoundingClientRect();
-      const diff = document.documentElement.clientHeight - pBox.bottom;
+      // const diff = document.documentElement.clientHeight - pBox.bottom;
+      const diff = window.innerHeight - pBox.bottom;
       const normDiff = Math.min(1, Math.max(0, diff / distanceFromBottom));
       fixed.style.opacity = normDiff + "";
       const scale = normDiff * 0.2 + 0.8;

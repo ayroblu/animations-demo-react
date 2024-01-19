@@ -1,6 +1,7 @@
 .lockScreen {
   background-image: url("../assets/iphone-background.jpg");
   background-size: cover;
+  background-position: center;
   height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -38,13 +39,16 @@
 .widgetTop {
 }
 .time {
-  font-size: 5rem;
-  line-height: 5rem;
+  --font-size: clamp(5rem, 18vw, 10rem);
+  font-size: var(--font-size);
+  line-height: var(--font-size);
   font-weight: 300;
 }
 .widgetsContainer {
   padding-left: 32px;
   padding-right: 32px;
+  max-width: 450px;
+  margin: auto;
 }
 .widgets {
   display: grid;
@@ -121,6 +125,8 @@
 }
 .notifItemPadding {
   padding: 4px 8px;
+  max-width: 450px;
+  margin: auto;
 }
 .flexGrow {
   flex-grow: 1;
