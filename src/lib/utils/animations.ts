@@ -57,7 +57,7 @@ export function useDragEvent({
   }, [dragHandler, getElement]);
 }
 
-export function getTransformsManager() {
+export function getTransformsManager(transformOrigin?: string) {
   // it's typed as a string, but may also be a "matrix"
   type Transform = string;
   type Saved = {
@@ -77,9 +77,9 @@ export function getTransformsManager() {
       });
     }
     ensureNoTransition(element);
-    if (transform.includes("scale(")) {
+    if (transformOrigin) {
       // needed if we scale up and down
-      element.style.transformOrigin = "top left";
+      element.style.transformOrigin = transformOrigin;
     }
     if (original === "none") {
       element.style.transform = transform;

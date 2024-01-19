@@ -28,7 +28,7 @@ function useDragViewPager(pagesLength: number) {
   const { onRef: onIndicatorRef, refs: indicatorRefs } = useArrayRef();
 
   const dragHandler: DragHandler = React.useCallback(() => {
-    const { transformTo, transformReset } = getTransformsManager();
+    const { transformTo, transformReset } = getTransformsManager("top left");
 
     function onMove({ touchEvent, moveX }: GestureOnMoveParams) {
       const contentWrapper = contentWrapperRef.current;
@@ -38,6 +38,7 @@ function useDragViewPager(pagesLength: number) {
       touchEvent.preventDefault();
       touchEvent.stopPropagation();
       transformTo(contentWrapper, `translateX(${moveX}px)`);
+
       const fromEl = indicatorRefs[pageIndex];
       const toEl = indicatorRefs[moveX > 0 ? pageIndex - 1 : pageIndex + 1];
       const pageEl = pageRefs[pageIndex];
@@ -201,7 +202,8 @@ function useDragViewPager(pagesLength: number) {
     (pageIndex: Parameters<typeof setPageIndex>[0]) => {
       const contentWrapper = contentWrapperRef.current;
       function transformIndicators() {
-        const { transformTo, transformReset } = getTransformsManager();
+        const { transformTo, transformReset } =
+          getTransformsManager("top left");
         const originalPageIndex = pageIndexRef.current;
         const fromEl = indicatorRefs[originalPageIndex];
         const toEl =

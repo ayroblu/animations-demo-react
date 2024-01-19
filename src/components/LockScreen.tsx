@@ -11,18 +11,61 @@ import {
   useDragEvent,
 } from "../lib/utils/animations";
 import { Link } from "react-router-dom";
+import { useArrayRef, useJoinRefs } from "../lib/utils/hooks";
+import { FixedWithPlaceholder } from "./FixedWithPlaceholder";
 
 type Props = {
   notifications: string[];
 };
-export function LockScreen({ notifications }: Props) {
+export function LockScreen(_props: Props) {
   const time = useTime();
-  // usePreventDefaultTouch();
-  // infoContent is sticky until notifications catch up
+  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const { refs: notifRefs, onRef: onNotifRef } = useArrayRef();
+  const { refs: fixedNotifRefs, onRef: onFixedNotifRef } = useArrayRef();
+  const [notifications, setNotifications] = React.useState(() =>
+    Array(20)
+      .fill(null)
+      .map(() => ({
+        isFixed: true,
+      })),
+  );
+  const notificationsRef = React.useRef(notifications);
+  notificationsRef.current = notifications;
+  const transformManagerRef = React.useRef(getTransformsManager());
+  function scrollHandler() {
+    const { transformTo } = transformManagerRef.current;
+    const result = notifRefs.map((placeholder, i) => {
+      const fixed = fixedNotifRefs[i];
+      if (!placeholder || !fixed) {
+        return {
+          isFixed: false,
+        };
+      }
+      const pBox = placeholder.getBoundingClientRect();
+      const diff = document.documentElement.clientHeight - pBox.bottom;
+      const normDiff = Math.min(1, Math.max(0, diff / distanceFromBottom));
+      fixed.style.opacity = normDiff + "";
+      const scale = normDiff * 0.2 + 0.8;
+      const translateY = (1 - normDiff) * 0.2 * distanceFromBottom;
+      transformTo(fixed, `scale(${scale}) translateY(${translateY}px)`);
+      return {
+        isFixed: diff < distanceFromBottom,
+      };
+    });
+    const notifications = notificationsRef.current;
+    const isDifferent = notifications.some(
+      ({ isFixed }, i) => isFixed !== result[i].isFixed,
+    );
+    if (isDifferent) {
+      setNotifications(result);
+    }
+  }
+  useScrollListener(scrollRef, scrollHandler);
+  React.useLayoutEffect(scrollHandler, [fixedNotifRefs, notifRefs]);
   return (
     <div className={styles.lockScreen}>
       <div className={styles.statusBar} />
-      <div className={styles.scrollableContent}>
+      <div className={styles.scrollableContent} ref={scrollRef}>
         <div>
           <div className={styles.infoContent}>
             <div className={styles.itemPadding}>
@@ -52,14 +95,16 @@ export function LockScreen({ notifications }: Props) {
           </div>
           <div className={styles.infoSpacer} />
         </div>
-        {Array(20)
-          .fill(null)
-          .map((_, i) => (
-            <div className={styles.notifItemPadding} key={i}>
-              <Notification revIndex={20 - i} />
-            </div>
-          ))}
-        {isVisible ? notifications.map((n) => <div key={n}>{n}</div>) : null}
+        {notifications.map(({ isFixed }, i) => (
+          <div className={cn(styles.notifItemPadding)} key={i}>
+            <Notification
+              isFixed={isFixed}
+              revIndex={notifications.length - i}
+              onNotifRef={onNotifRef(i)}
+              onFixedNotifRef={onFixedNotifRef(i)}
+            />
+          </div>
+        ))}
       </div>
       <button className={cn(styles.leftControl, styles.control)}>T</button>
       <button className={cn(styles.rightControl, styles.control)}>C</button>
@@ -67,7 +112,8 @@ export function LockScreen({ notifications }: Props) {
     </div>
   );
 }
-const isVisible = false;
+
+const distanceFromBottom = 150;
 
 function useTime() {
   const [time, setTime] = React.useState(() =>
@@ -94,19 +140,37 @@ function useTime() {
 type NotificationProps = {
   timeSensitive?: boolean;
   revIndex: number;
+  onNotifRef: (element: HTMLElement | null) => void;
+  onFixedNotifRef: (element: HTMLElement | null) => void;
+  isFixed: boolean;
 };
-function Notification({ timeSensitive, revIndex }: NotificationProps) {
+function Notification({
+  timeSensitive,
+  revIndex,
+  onNotifRef,
+  onFixedNotifRef,
+  isFixed,
+}: NotificationProps) {
   const { notifRef } = useNotificationDrag();
+  const handleNotifRef = useJoinRefs([notifRef, onNotifRef]);
   const notificationContent = [
     timeSensitive && <div className={styles.fadedText}>TIME SENSITIVE</div>,
     <div>Title</div>,
     <div>Message</div>,
   ].filter(Boolean);
+  const style = React.useMemo(() => {
+    return {
+      zIndex: revIndex,
+      bottom: isFixed ? distanceFromBottom + "px" : undefined,
+    };
+  }, [isFixed, revIndex]);
   return (
-    <div
-      className={styles.notification}
-      ref={notifRef}
-      style={{ zIndex: revIndex }}
+    <FixedWithPlaceholder
+      isFixed={isFixed}
+      className={cn(styles.notification, isFixed && styles.noPointer)}
+      placeholderRef={handleNotifRef}
+      fixedRef={onFixedNotifRef}
+      style={style}
     >
       <div className={styles.iconContainer}>
         <div className={styles.icon}>Icon</div>
@@ -125,7 +189,7 @@ function Notification({ timeSensitive, revIndex }: NotificationProps) {
           ),
         )}
       </div>
-    </div>
+    </FixedWithPlaceholder>
   );
 }
 function useNotificationDrag() {
@@ -157,3 +221,29 @@ function useNotificationDrag() {
   useDragEvent({ dragHandler, getElement: () => notifRef.current });
   return { notifRef };
 }
+
+function useScrollListener(
+  scrollRef: React.MutableRefObject<HTMLElement | null>,
+  callback: (element: HTMLElement) => void,
+) {
+  const callbackRef = React.useRef(callback);
+  callbackRef.current = callback;
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const element = el;
+    let timeoutId = 0;
+    function onScroll() {
+      cancelAnimationFrame(timeoutId);
+      timeoutId = requestAnimationFrame(() => {
+        const callback = callbackRef.current;
+        callback(element);
+      });
+    }
+    element.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      element.removeEventListener("scroll", onScroll);
+    };
+  }, [scrollRef]);
+}
+// position fixed with placeholder component

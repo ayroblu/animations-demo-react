@@ -38,10 +38,26 @@ export function useArrayRef(): ArrayRef {
 }
 
 export function useSyncElements(
-  sourceRef: React.MutableRefObject<HTMLElement | null>,
-  targetRef: React.MutableRefObject<(HTMLElement | null)[]>,
+  sourceRef: React.RefObject<HTMLElement | null>,
+  targetRef: React.RefObject<HTMLElement | null>,
+  callback: (source: HTMLElement, target: HTMLElement) => void,
+): void;
+export function useSyncElements(
+  sourceRef: React.RefObject<HTMLElement | null>,
+  targetRef: React.RefObject<(HTMLElement | null)[]>,
   callback: (source: HTMLElement, target: (HTMLElement | null)[]) => void,
-) {
+): void;
+export function useSyncElements(
+  sourceRef: React.RefObject<HTMLElement | null>,
+  targetRef: React.RefObject<(HTMLElement | null)[] | (HTMLElement | null)>,
+  callback: (
+    source: HTMLElement,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    target: any,
+    // TS Can't narrow callbacks for overloads
+    // target: (HTMLElement | null)[] | HTMLElement,
+  ) => void,
+): void {
   const callbackRef = React.useRef(callback);
   callbackRef.current = callback;
   React.useEffect(() => {
@@ -57,4 +73,17 @@ export function useSyncElements(
       callback(source, target);
     });
   }, [sourceRef, targetRef]);
+}
+
+export function useJoinRefs<T extends HTMLElement>(
+  refs: React.ForwardedRef<T | null>[],
+) {
+  const stableRefs = React.useRef(refs);
+  return React.useCallback((ref: T | null) => {
+    for (const refItem of stableRefs.current) {
+      if (refItem) {
+        typeof refItem === "function" ? refItem(ref) : (refItem.current = ref);
+      }
+    }
+  }, []);
 }
