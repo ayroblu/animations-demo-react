@@ -1,5 +1,5 @@
 .lockScreen {
-  background-image: url("../assets/iphone-background.jpg");
+  background-image: url("../../assets/iphone-background.jpg");
   background-size: cover;
   background-position: center;
   height: 100dvh;
@@ -147,6 +147,16 @@
 .smallerFont {
   font-size: 0.88rem;
 }
+
+.cutBox {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  bottom: 4px;
+  contain: paint;
+  border-radius: 16px;
+  pointer-events: none;
+}
 .notifOptions {
   position: relative;
   right: 0px;
@@ -156,7 +166,7 @@
   display: flex;
   gap: 8px;
   height: 100%;
-  transform: translateX(calc(-100% - 8px));
+  /* transform: translateX(calc(-100% - 8px)); */
 }
 .notifControl {
   background-color: rgba(255, 255, 255, 0.33);
@@ -168,15 +178,7 @@
   align-items: center;
   justify-content: center;
 }
-.cutBox {
-  position: absolute;
-  top: 4px;
-  left: 100%;
-  bottom: 4px;
-  contain: paint;
-  border-radius: 16px;
-  will-change: width;
-}
+
 @media (prefers-color-scheme: dark) {
   .control {
     background-color: rgba(0, 0, 0, 0.35);

@@ -1,5 +1,5 @@
 import React from "react";
-import { HalfSheet } from "../components/HalfSheet";
+import { HalfSheet } from "../components/HalfSheet/HalfSheet";
 import { useViewTransitions } from "../lib/view-transitions";
 import style from "./HalfSheet.module.css";
 import { Link } from "react-router-dom";

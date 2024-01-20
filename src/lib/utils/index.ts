@@ -24,3 +24,26 @@ export function getTransform(from: Box, to: Box, partial?: number): string {
 export function clamp(low: number, value: number, high: number) {
   return Math.max(low, Math.min(high, value));
 }
+
+export function getScrollParent(element: HTMLElement, includeHidden?: boolean) {
+  let style = getComputedStyle(element);
+  const excludeStaticParent = style.position === "absolute";
+  const overflowRegex = includeHidden
+    ? /(auto|scroll|hidden)/
+    : /(auto|scroll)/;
+
+  if (style.position === "fixed") return document.documentElement;
+  let parent = element.parentElement;
+  while (parent) {
+    style = getComputedStyle(parent);
+    if (!(excludeStaticParent && style.position === "static")) {
+      if (
+        overflowRegex.test(style.overflow + style.overflowY + style.overflowX)
+      )
+        return parent;
+    }
+    parent = parent.parentElement;
+  }
+
+  return document.documentElement;
+}

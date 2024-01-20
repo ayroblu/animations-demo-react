@@ -6,13 +6,11 @@ export type DragHandler = () => {
   move: (e: TouchEvent, touch: Touch) => void;
   end: (e: TouchEvent) => void;
 };
-export function useDragEvent({
-  dragHandler,
-  getElement,
-}: {
+type UseDragEventParams = {
   dragHandler: DragHandler;
   getElement: () => HTMLElement | null;
-}) {
+};
+export function useDragEvent({ dragHandler, getElement }: UseDragEventParams) {
   React.useEffect(() => {
     const handler = dragHandler();
     function touchstart(e: TouchEvent) {
@@ -57,6 +55,12 @@ export function useDragEvent({
     };
   }, [dragHandler, getElement]);
 }
+export const noopDragHandler: ReturnType<DragHandler> = {
+  reset: () => {},
+  start: () => {},
+  move: () => {},
+  end: () => {},
+};
 
 export function getTransformsManager(transformOrigin?: string) {
   // it's typed as a string, but may also be a "matrix"
@@ -288,5 +292,65 @@ export function getLinearGestureManager({
     reset,
     end,
     move,
+  };
+}
+
+export function useAnimationScrollListener(
+  callback: () => { element: HTMLElement | null; onScroll: () => void },
+) {
+  const callbackRef = React.useRef(callback);
+  callbackRef.current = callback;
+  React.useEffect(() => {
+    const callback = callbackRef.current;
+    const { element: el, onScroll } = callback();
+    if (!el) return;
+    const element = el;
+    let timeoutId = 0;
+    let isScrolling = false;
+    function handleScroll() {
+      isScrolling = true;
+      cancelAnimationFrame(timeoutId);
+      timeoutId = requestAnimationFrame(() => {
+        onScroll();
+        if (isScrolling) {
+          handleScroll();
+        }
+      });
+    }
+    function onScrollEnd() {
+      isScrolling = false;
+    }
+    element.addEventListener("scroll", handleScroll, { passive: true });
+    element.addEventListener("scrollend", onScrollEnd, { passive: true });
+    return () => {
+      element.removeEventListener("scroll", handleScroll);
+      element.removeEventListener("scrollend", onScrollEnd);
+    };
+  }, []);
+}
+
+export type GestureHandler = Partial<GestureManagerParams["handlers"]>;
+export function composeGestureHandlers(
+  handlers: GestureHandler[],
+): GestureManagerParams["handlers"] {
+  function onReset() {
+    for (const handler of handlers) {
+      handler.onReset?.();
+    }
+  }
+  function onMove(params: GestureOnMoveParams) {
+    for (const handler of handlers) {
+      handler.onMove?.(params);
+    }
+  }
+  function onEnd(params: GestureOnEndParams) {
+    for (const handler of handlers) {
+      handler.onEnd?.(params);
+    }
+  }
+  return {
+    onReset,
+    onMove,
+    onEnd,
   };
 }

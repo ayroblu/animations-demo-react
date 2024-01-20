@@ -1,5 +1,5 @@
 import React from "react";
-import { SegmentedControl } from "../components/SegmentedControl";
+import { SegmentedControl } from "../components/SegmentedControl/SegmentedControl";
 import { Link } from "react-router-dom";
 import {
   getTransformsManager,

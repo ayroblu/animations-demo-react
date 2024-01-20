@@ -1,7 +1,7 @@
 import React from "react";
-import { cn } from "../lib/utils";
+import { cn } from "../../lib/utils";
 import style from "./HalfSheet.module.css";
-import { globalResizeObserver } from "../lib/global-resize-observer";
+import { globalResizeObserver } from "../../lib/global-resize-observer";
 
 type Props = {
   dismiss: () => void;

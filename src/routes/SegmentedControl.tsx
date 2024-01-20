@@ -1,5 +1,5 @@
 import React from "react";
-import { SegmentedControl } from "../components/SegmentedControl";
+import { SegmentedControl } from "../components/SegmentedControl/SegmentedControl";
 import { useNestedViewTransitions } from "../lib/view-transitions";
 import styles from "./SegmentedControl.module.css";
 import { Link } from "react-router-dom";

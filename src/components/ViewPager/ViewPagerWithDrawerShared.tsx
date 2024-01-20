@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { DrawerContext } from "./ViewPager/Drawer";
+import { DrawerContext } from "./Drawer";
 import styles from "./ViewPagerWithDrawerShared.module.css";
 
 export function LeftButton() {

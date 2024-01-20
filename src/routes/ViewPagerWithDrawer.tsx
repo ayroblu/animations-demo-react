@@ -1,12 +1,12 @@
-import { Drawer } from "../components/Drawer";
-import { ViewPager } from "../components/ViewPager";
+import { Drawer } from "../components/ViewPager/Drawer";
+import { ViewPager } from "../components/ViewPager/ViewPager";
 import styles from "./ViewPagerWithDrawer.module.css";
 import { useNestedViewTransitions } from "../lib/view-transitions";
 import {
   DrawerContent,
   LeftButton,
   Page,
-} from "../components/ViewPagerWithDrawerShared";
+} from "../components/ViewPager/ViewPagerWithDrawerShared";
 import iosStyles from "../components/IosPadding.module.css";
 import { cn } from "../lib/utils";
 

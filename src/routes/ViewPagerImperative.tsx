@@ -1,6 +1,9 @@
 import styles from "./ViewPagerImperative.module.css";
-import { LeftButton, Page } from "../components/ViewPagerWithDrawerShared";
-import { DragViewPagerImperative } from "../components/DragViewPagerImperative";
+import {
+  LeftButton,
+  Page,
+} from "../components/ViewPager/ViewPagerWithDrawerShared";
+import { DragViewPagerImperative } from "../components/ViewPager/DragViewPagerImperative";
 import iosStyles from "../components/IosPadding.module.css";
 import { cn } from "../lib/utils";
 

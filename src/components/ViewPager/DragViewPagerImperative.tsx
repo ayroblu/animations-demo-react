@@ -1,6 +1,6 @@
-import { ViewPager } from "../components/ViewPager";
+import { ViewPager } from "./ViewPager";
 import React from "react";
-import { useArrayRef } from "../lib/utils/hooks";
+import { useArrayRef } from "../../lib/utils/hooks";
 import {
   DragHandler,
   GestureOnEndParams,
@@ -9,8 +9,8 @@ import {
   getTransformsManager,
   transitionWrapper,
   useDragEvent,
-} from "../lib/utils/animations";
-import { getTransform } from "../lib/utils";
+} from "../../lib/utils/animations";
+import { getTransform } from "../../lib/utils";
 import styles from "./DragViewPagerImperative.module.css";
 
 type Props = Pick<React.ComponentProps<typeof ViewPager>, "pages" | "header">;

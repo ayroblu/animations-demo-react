@@ -1,4 +1,4 @@
-import { Drawer } from "../components/Drawer";
+import { Drawer } from "./Drawer";
 import styles from "./DragDrawerImperative.module.css";
 import React from "react";
 import {
@@ -9,7 +9,7 @@ import {
   getTransformsManager,
   transitionWrapper,
   useDragEvent,
-} from "../lib/utils/animations";
+} from "../../lib/utils/animations";
 
 type Props = { drawerContent: React.ReactNode; children: React.ReactNode };
 export function DragDrawerImperative(props: Props) {

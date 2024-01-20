@@ -1,8 +1,8 @@
 import React from "react";
 import styles from "./Drawer.module.css";
-import { useDimensions } from "../lib/utils/hooks";
-import { cn } from "../lib/utils";
-import iosStyles from "../components/IosPadding.module.css";
+import { useDimensions } from "../../lib/utils/hooks";
+import { cn } from "../../lib/utils";
+import iosStyles from "../IosPadding.module.css";
 
 type Props = {
   children: React.ReactNode;

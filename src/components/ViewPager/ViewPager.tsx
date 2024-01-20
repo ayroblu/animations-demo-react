@@ -1,8 +1,8 @@
 import React from "react";
 import styles from "./ViewPager.module.css";
-import { cn } from "../lib/utils";
-import { useArrayRef, useSyncElements } from "../lib/utils/hooks";
-import iosStyles from "./IosPadding.module.css";
+import { cn } from "../../lib/utils";
+import { useArrayRef, useSyncElements } from "../../lib/utils/hooks";
+import iosStyles from "../IosPadding.module.css";
 
 type Props = {
   pages: {
