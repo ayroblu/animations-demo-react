@@ -10,6 +10,7 @@ type Props = {
   fixedRef?: React.ForwardedRef<HTMLDivElement>;
   className?: string;
   style?: React.CSSProperties;
+  placeholderStyle?: React.CSSProperties;
 };
 export function FixedWithPlaceholder({
   isFixed,
@@ -18,6 +19,7 @@ export function FixedWithPlaceholder({
   fixedRef,
   className,
   style,
+  placeholderStyle,
 }: Props) {
   const localFixedRef = React.useRef<HTMLDivElement | null>(null);
   const joinedFixedRef = useJoinRefs([localFixedRef, fixedRef ?? null]);
@@ -32,7 +34,11 @@ export function FixedWithPlaceholder({
     source.style.width = target.clientWidth + "px";
   });
   return (
-    <div className={styles.placeholder} ref={joinedPlaceholderRef}>
+    <div
+      className={styles.placeholder}
+      ref={joinedPlaceholderRef}
+      style={placeholderStyle}
+    >
       <div
         className={cn(isFixed && styles.fixed, className)}
         ref={joinedFixedRef}

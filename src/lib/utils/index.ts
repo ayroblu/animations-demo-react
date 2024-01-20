@@ -20,3 +20,7 @@ export function getTransform(from: Box, to: Box, partial?: number): string {
   }, ${1 + ((to.height - from.height) / from.height) * portion})`;
   return `${translate} ${scale}`;
 }
+
+export function clamp(low: number, value: number, high: number) {
+  return Math.max(low, Math.min(high, value));
+}

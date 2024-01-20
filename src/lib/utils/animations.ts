@@ -50,6 +50,7 @@ export function useDragEvent({
     element.addEventListener("touchmove", touchmove, { passive: false });
     element.addEventListener("touchend", touchend, { passive: false });
     return () => {
+      handler.reset();
       element.removeEventListener("touchstart", touchstart);
       element.removeEventListener("touchmove", touchmove);
       element.removeEventListener("touchend", touchend);
@@ -92,8 +93,8 @@ export function getTransformsManager(transformOrigin?: string) {
     const saved = wmap.get(element);
     if (saved) {
       element.style.transform = saved.style;
+      wmap.delete(element);
     }
-    wmap.delete(element);
   }
   return { transformTo, transformReset };
 }
@@ -126,13 +127,15 @@ export function transitionWrapper(
 ) {
   withSingleTransition(element, (cleanup) => {
     const originalTransition = element.style.transition;
-    element.style.transition = transition ?? "0.3s transform, 0.3s opacity";
+    element.style.transition = transition ?? "0.3s transform";
     const transitionend = () => {
       element.style.transition = originalTransition;
       cleanup();
       onEnd?.();
     };
-    element.addEventListener("transitionend", transitionend, { once: true });
+    element.addEventListener("transitionend", transitionend, {
+      once: true,
+    });
 
     func();
     return () => {

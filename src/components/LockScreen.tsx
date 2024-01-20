@@ -1,9 +1,10 @@
 import React from "react";
 import styles from "./LockScreen.module.css";
-import { cn } from "../lib/utils";
+import { clamp, cn } from "../lib/utils";
 import { routes } from "../routes";
 import {
   DragHandler,
+  GestureOnEndParams,
   GestureOnMoveParams,
   getLinearGestureManager,
   getTransformsManager,
@@ -37,7 +38,7 @@ export function LockScreen(_props: Props) {
     lastTime: Date.now(),
   });
   function scrollHandler() {
-    const { transformTo } = transformManagerRef.current;
+    const { transformTo, transformReset } = transformManagerRef.current;
     const scrollState = scrollStateRef.current;
     const scroll = scrollRef.current;
     const currentScrollTop = scroll?.scrollTop;
@@ -62,12 +63,18 @@ export function LockScreen(_props: Props) {
       // const diff = document.documentElement.clientHeight - pBox.bottom;
       const diff = window.innerHeight - pBox.bottom + nextFrameDiff;
       const normDiff = Math.min(1, Math.max(0, diff / distanceFromBottom));
-      fixed.style.opacity = normDiff + "";
-      const scale = normDiff * 0.2 + 0.8;
-      const translateY = (1 - normDiff) * 0.2 * distanceFromBottom;
-      transformTo(fixed, `scale(${scale}) translateY(${translateY}px)`);
+      const scale = normDiff * 0.3 + 0.7;
+      const translateY = (1 - normDiff) * 0.3 * distanceFromBottom;
+      const isFixed = diff < distanceFromBottom;
+      if (isFixed) {
+        fixed.style.opacity = normDiff + "";
+        transformTo(fixed, `scale(${scale}) translateY(${translateY}px)`);
+      } else {
+        fixed.style.opacity = "1";
+        transformReset(fixed);
+      }
       return {
-        isFixed: diff < distanceFromBottom,
+        isFixed,
       };
     });
     const notifications = notificationsRef.current;
@@ -118,14 +125,13 @@ export function LockScreen(_props: Props) {
           <div className={styles.infoSpacer} />
         </div>
         {notifications.map(({ isFixed }, i) => (
-          <div className={cn(styles.notifItemPadding)} key={i}>
-            <Notification
-              isFixed={isFixed}
-              revIndex={notifications.length - i}
-              onNotifRef={onNotifRef(i)}
-              onFixedNotifRef={onFixedNotifRef(i)}
-            />
-          </div>
+          <Notification
+            key={i}
+            isFixed={isFixed}
+            revIndex={notifications.length - i}
+            onNotifRef={onNotifRef(i)}
+            onFixedNotifRef={onFixedNotifRef(i)}
+          />
         ))}
       </div>
       <button className={cn(styles.leftControl, styles.control)}>T</button>
@@ -173,75 +179,187 @@ function Notification({
   onFixedNotifRef,
   isFixed,
 }: NotificationProps) {
-  const { notifRef } = useNotificationDrag();
-  const handleNotifRef = useJoinRefs([notifRef, onNotifRef]);
+  const { isViewControls, notifRef, cutBoxRef, notifControlsRef } =
+    useNotificationDrag();
+  const handleNotifRef = useJoinRefs([notifRef, onFixedNotifRef]);
   const notificationContent = [
     timeSensitive && <div className={styles.fadedText}>TIME SENSITIVE</div>,
     <div>Title</div>,
     <div>Message</div>,
   ].filter(Boolean);
   const style = React.useMemo(() => {
+    const notifControls = notifControlsRef.current;
+    const notifControlsWidth = notifControls?.clientWidth;
     return {
       zIndex: revIndex,
       bottom: isFixed ? distanceFromBottom + "px" : undefined,
+      transform:
+        isViewControls && notifControlsWidth
+          ? `translateX(${-notifControlsWidth - 8}px)`
+          : undefined,
     };
-  }, [isFixed, revIndex]);
+  }, [isFixed, isViewControls, notifControlsRef, revIndex]);
+  // const notifControls = notifControlsRef.current;
+  // const notifControlsWidth = notifControls?.clientWidth;
   return (
-    <FixedWithPlaceholder
-      isFixed={isFixed}
-      className={cn(styles.notification, isFixed && styles.noPointer)}
-      placeholderRef={handleNotifRef}
-      fixedRef={onFixedNotifRef}
-      style={style}
-    >
-      <div className={styles.iconContainer}>
-        <div className={styles.icon}>Icon</div>
-      </div>
-      <div className={styles.notifContent}>
-        {notificationContent.map((content, i) =>
-          i === 0 ? (
-            <div className={styles.notifTop} key="top">
-              <div className={styles.flexGrow}>{content}</div>
-              <div className={cn(styles.fadedText, styles.smallerFont)}>
-                3m ago
+    <div className={cn(styles.notifItemPadding)}>
+      <FixedWithPlaceholder
+        isFixed={isFixed}
+        className={cn(styles.notification, isFixed && styles.noPointer)}
+        placeholderRef={onNotifRef}
+        fixedRef={handleNotifRef}
+        style={style}
+      >
+        <div className={styles.iconContainer}>
+          <div className={styles.icon}>Icon</div>
+        </div>
+        <div className={styles.notifContent}>
+          {notificationContent.map((content, i) =>
+            i === 0 ? (
+              <div className={styles.notifTop} key="top">
+                <div className={styles.flexGrow}>{content}</div>
+                <div className={cn(styles.fadedText, styles.smallerFont)}>
+                  3m ago
+                </div>
               </div>
-            </div>
-          ) : (
-            <React.Fragment key={i}>{content}</React.Fragment>
-          ),
-        )}
+            ) : (
+              <React.Fragment key={i}>{content}</React.Fragment>
+            ),
+          )}
+        </div>
+      </FixedWithPlaceholder>
+      <div
+        ref={cutBoxRef}
+        className={styles.cutBox}
+        style={{
+          display: isFixed ? "none" : undefined,
+          opacity: isViewControls ? 1 : 0,
+          zIndex: revIndex,
+          transform: isViewControls
+            ? `translateX(calc(-100% - 8px))`
+            : undefined,
+        }}
+      >
+        <div
+          className={styles.notifOptions}
+          ref={notifControlsRef}
+          style={{
+            transform: isViewControls ? `translateX(0)` : undefined,
+          }}
+        >
+          <div className={styles.notifControl}>
+            <span>options</span>
+          </div>
+          <div className={styles.notifControl}>
+            <span>clear</span>
+          </div>
+        </div>
       </div>
-    </FixedWithPlaceholder>
+    </div>
   );
 }
 function useNotificationDrag() {
   const notifRef = React.useRef<HTMLDivElement | null>(null);
+  const cutBoxRef = React.useRef<HTMLDivElement | null>(null);
+  const notifControlsRef = React.useRef<HTMLDivElement | null>(null);
+  const [isViewControls, setIsViewControls] = React.useState(false);
+  React.useEffect(() => {
+    if (!isViewControls) return;
+    const notifCur = notifRef.current;
+    if (!notifCur) return;
+    const notif = notifCur;
+    const scrollElement = getScrollParent(notif);
+    function reset() {
+      transitionWrapper(notif, () => {
+        setIsViewControls(false);
+      });
+      scrollElement.removeEventListener("touchmove", resetTouch, {
+        capture: true,
+      });
+      scrollElement.removeEventListener("scroll", reset);
+    }
+    function resetTouch(e: Event) {
+      if (e.target instanceof HTMLElement) {
+        if (notif?.contains(e.target)) return;
+        reset();
+      }
+    }
+    scrollElement.addEventListener("scroll", reset, { once: true });
+    scrollElement.addEventListener("touchmove", resetTouch, { capture: true });
+    return () => {
+      scrollElement.removeEventListener("scroll", reset);
+      scrollElement.removeEventListener("touchmove", resetTouch, {
+        capture: true,
+      });
+    };
+  }, [isViewControls]);
   const dragHandler: DragHandler = React.useCallback(() => {
     const { transformTo, transformReset } = getTransformsManager();
-    function onReset() {}
+    function onReset() {
+      const notif = notifRef.current;
+      notif && transformReset(notif);
+    }
     function onMove({ touchEvent, moveX }: GestureOnMoveParams) {
       const notif = notifRef.current;
       if (!notif) return;
       touchEvent.preventDefault();
       touchEvent.stopPropagation();
       transformTo(notif, `translateX(${moveX}px)`);
+      const cutBox = cutBoxRef.current;
+      if (!cutBox) return;
+      if (isViewControls) {
+        const notifControls = notifControlsRef.current;
+        const notifControlsWidth = notifControls?.clientWidth;
+        if (notifControlsWidth) {
+          moveX = Math.max(0, moveX);
+          transformTo(cutBox, `translateX(${moveX}px)`);
+          transformTo(notifControls, `translateX(${-moveX}px)`);
+          cutBox.style.opacity =
+            clamp(0, (notifControlsWidth - moveX - 50) / 50, 1) + "";
+        }
+      } else {
+        const notifControls = notifControlsRef.current;
+        const notifControlsWidth = notifControls?.clientWidth;
+        if (notifControlsWidth) {
+          moveX = Math.max(-notifControlsWidth - 8, moveX);
+        }
+        transformTo(cutBox, `translateX(${moveX}px)`);
+        notifControls && transformTo(notifControls, `translateX(${-moveX}px)`);
+        cutBox.style.opacity = clamp(0, (-moveX - 50) / 50, 1) + "";
+      }
     }
-    function onEnd() {
+    function onEnd({ isReturningX, moveX }: GestureOnEndParams) {
+      const cutBox = cutBoxRef.current;
+      const notifControls = notifControlsRef.current;
+
       const notif = notifRef.current;
-      if (!notif) return;
-      transitionWrapper(notif, () => {
-        transformReset(notif);
-      });
+      notif &&
+        transitionWrapper(notif, () => {
+          transformReset(notif);
+        });
+      cutBox &&
+        transitionWrapper(cutBox, () => {
+          transformReset(cutBox);
+        });
+      notifControls &&
+        transitionWrapper(notifControls, () => {
+          transformReset(notifControls);
+        });
+      if (isViewControls) {
+        setIsViewControls(!(moveX > 0 && !isReturningX));
+      } else {
+        setIsViewControls(!isReturningX);
+      }
     }
     return getLinearGestureManager({
       getConstraints: () => {
-        return { left: true };
+        return { left: true, right: isViewControls };
       },
       handlers: { onReset, onMove, onEnd },
     });
-  }, []);
+  }, [isViewControls]);
   useDragEvent({ dragHandler, getElement: () => notifRef.current });
-  return { notifRef };
+  return { isViewControls, notifRef, cutBoxRef, notifControlsRef };
 }
 
 function useScrollListener(
@@ -279,3 +397,26 @@ function useScrollListener(
   }, [scrollRef]);
 }
 // position fixed with placeholder component
+
+function getScrollParent(element: HTMLElement, includeHidden?: boolean) {
+  let style = getComputedStyle(element);
+  const excludeStaticParent = style.position === "absolute";
+  const overflowRegex = includeHidden
+    ? /(auto|scroll|hidden)/
+    : /(auto|scroll)/;
+
+  if (style.position === "fixed") return document.documentElement;
+  let parent = element.parentElement;
+  while (parent) {
+    style = getComputedStyle(parent);
+    if (!(excludeStaticParent && style.position === "static")) {
+      if (
+        overflowRegex.test(style.overflow + style.overflowY + style.overflowX)
+      )
+        return parent;
+    }
+    parent = parent.parentElement;
+  }
+
+  return document.documentElement;
+}
