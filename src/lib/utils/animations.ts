@@ -69,22 +69,28 @@ export function getTransformsManager(transformOrigin?: string) {
     computed: Transform;
     style: Transform;
   };
-  const wmap = new WeakMap<HTMLElement, Saved>();
+  const map = new Map<HTMLElement, Saved>();
 
-  function transformTo(element: HTMLElement, transform: Transform) {
-    const saved = wmap.get(element);
+  type Options = { transformOrigin?: string };
+  function transformTo(
+    element: HTMLElement,
+    transform: Transform,
+    options?: Options,
+  ) {
+    const saved = map.get(element);
     let original = saved?.computed ?? "";
     if (!saved) {
       original = getComputedStyle(element).transform;
-      wmap.set(element, {
+      map.set(element, {
         computed: original,
         style: element.style.transform,
       });
     }
     ensureNoTransition(element);
-    if (transformOrigin) {
+    const localTransformOrigin = options?.transformOrigin ?? transformOrigin;
+    if (localTransformOrigin) {
       // needed if we scale up and down
-      element.style.transformOrigin = transformOrigin;
+      element.style.transformOrigin = localTransformOrigin;
     }
     if (original === "none") {
       element.style.transform = transform;
@@ -94,13 +100,17 @@ export function getTransformsManager(transformOrigin?: string) {
     }
   }
   function transformReset(element: HTMLElement) {
-    const saved = wmap.get(element);
+    const saved = map.get(element);
     if (saved) {
       element.style.transform = saved.style;
-      wmap.delete(element);
+      map.delete(element);
     }
   }
-  return { transformTo, transformReset };
+  return {
+    transformTo,
+    transformReset,
+    getTransformedElements: () => map.keys(),
+  };
 }
 
 const transitionMap = new WeakMap<HTMLElement, () => void>();
@@ -353,4 +363,23 @@ export function composeGestureHandlers(
     onMove,
     onEnd,
   };
+}
+
+export function manualTransitionTransform(
+  func: () => void,
+  durationMs: number,
+  { onEnd }: { onEnd: () => void },
+) {
+  const startTime = Date.now();
+  function handler() {
+    if (Date.now() - startTime > durationMs) {
+      onEnd();
+      return;
+    }
+    requestAnimationFrame(() => {
+      func();
+      handler();
+    });
+  }
+  handler();
 }

@@ -156,6 +156,16 @@
   contain: paint;
   border-radius: 16px;
   pointer-events: none;
+  opacity: 0;
+  transform: scaleX(0.01);
+}
+.cutBox.fixed {
+  display: "none";
+}
+.cutBox.viewControls {
+  opacity: 1;
+  pointer-events: all;
+  transform: scaleX(1);
 }
 .notifOptions {
   position: relative;
@@ -166,7 +176,10 @@
   display: flex;
   gap: 8px;
   height: 100%;
-  /* transform: translateX(calc(-100% - 8px)); */
+  transform: scaleX(100);
+}
+.notifOptions.visible {
+  transform: scaleX(1);
 }
 .notifControl {
   background-color: rgba(255, 255, 255, 0.33);
@@ -177,6 +190,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.scale {
+}
+.scaleRev {
 }
 
 @media (prefers-color-scheme: dark) {

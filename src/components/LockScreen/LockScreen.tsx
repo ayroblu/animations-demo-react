@@ -8,6 +8,7 @@ import {
   composeGestureHandlers,
   getLinearGestureManager,
   getTransformsManager,
+  manualTransitionTransform,
   noopDragHandler,
   transitionWrapper,
   useAnimationScrollListener,
@@ -16,6 +17,7 @@ import {
 import { Link } from "react-router-dom";
 import { useArrayRef, useJoinRefs } from "../../lib/utils/hooks";
 import { FixedWithPlaceholder } from "../FixedWithPlaceholder";
+import { flushSync } from "react-dom";
 
 type Props = {
   notifications: string[];
@@ -240,26 +242,24 @@ function Notification({
       </FixedWithPlaceholder>
       <div
         ref={cutBoxRef}
-        className={styles.cutBox}
+        className={cn(
+          styles.cutBox,
+          isViewControls && styles.viewControls,
+          isFixed && styles.fixed,
+        )}
         style={{
-          display: isFixed ? "none" : undefined,
-          opacity: isViewControls ? 1 : 0,
           zIndex: revIndex,
-          transform: isViewControls ? `scale(1)` : undefined,
         }}
       >
         <div
-          className={styles.notifOptions}
+          className={cn(styles.notifOptions, isViewControls && styles.visible)}
           ref={notifControlsRef}
-          style={{
-            transform: isViewControls ? `translateX(0)` : undefined,
-          }}
         >
-          <div className={styles.notifControl}>
-            <span>options</span>
+          <div className={cn(styles.notifControl)}>
+            <span className={styles.scaleRev}>options</span>
           </div>
-          <div className={styles.notifControl}>
-            <span>clear</span>
+          <div className={cn(styles.notifControl)}>
+            <span className={styles.scaleRev}>clear</span>
           </div>
         </div>
       </div>
@@ -284,7 +284,8 @@ function useNotificationDrag() {
   }, [isViewControls]);
   useResetOnScrollOrTouch({ getElement, onReset });
   const dragHandler: DragHandler = React.useCallback(() => {
-    const { transformTo, transformReset } = getTransformsManager("top right");
+    const { transformTo, transformReset, getTransformedElements } =
+      getTransformsManager("top right");
     const notif = notifRef.current;
     const cutBox = cutBoxRef.current;
     const notifControls = notifControlsRef.current;
@@ -303,58 +304,117 @@ function useNotificationDrag() {
         transformTo(notif, `translateX(${moveX}px)`);
       },
       onEnd: () => {
-        transitionWrapper(notif, () => {
-          transformReset(notif);
-        });
+        transitionWrapper(
+          notif,
+          () => {
+            transformReset(notif);
+          },
+          { transition: "0.3s transform linear" },
+        );
       },
     };
     const notifControlsHandler: GestureHandler = {
       onReset: () => {
-        transformReset(cutBox);
-        transformReset(notifControls);
+        cutBox.style.transform = "";
+        notifControls.style.transform = "";
       },
       onMove: ({ moveX }) => {
+        const notifControlsWidth = notifControls.clientWidth;
+        if (!isViewControls) {
+          moveX += 8;
+        }
+        const scale = isViewControls
+          ? 1 - moveX / notifControlsWidth
+          : -moveX / notifControlsWidth;
+        cutBox.style.transform = `scaleX(${scale})`;
+        cutBox.style.transformOrigin = "top right";
+        const revScale = Math.max(1, scale === 0 ? 1 : 1 / scale);
+        notifControls.style.transform = `scaleX(${revScale})`;
+        notifControls.style.transformOrigin = "top right";
         if (isViewControls) {
-          const notifControlsWidth = notifControls.clientWidth;
-          const scale = 1 - moveX / notifControlsWidth;
-          transformTo(cutBox, `scaleX(${scale})`);
-          const revScale = Math.max(1, scale === 0 ? 1 : 1 / scale);
-          transformTo(notifControls, `scaleX(${revScale})`);
+          // Technically is wrong, should actually grab the bounding client rect initial offset in case the user grabs the item while animating
           cutBox.style.opacity =
             clamp(0, (notifControlsWidth - moveX - 20) / 20, 1) + "";
         } else {
-          const notifControlsWidth = notifControls.clientWidth;
-          moveX += 8;
-          const scale = -moveX / notifControlsWidth;
-          transformTo(cutBox, `scaleX(${scale})`);
-          const revScale = Math.max(1, scale === 0 ? 1 : 1 / scale);
-          notifControls && transformTo(notifControls, `scaleX(${revScale})`);
           cutBox.style.opacity = clamp(0, (-moveX - 20) / 20, 1) + "";
         }
-      },
-      onEnd: () => {
-        transitionWrapper(cutBox, () => {
-          transformReset(cutBox);
-        });
-        transitionWrapper(notifControls, () => {
-          transformReset(notifControls);
-        });
-      },
-    };
-    const setStateHandler: GestureHandler = {
-      onEnd: ({ moveX, isReturningX }) => {
-        if (isViewControls) {
-          setIsViewControls(!(moveX > 0 && !isReturningX));
-        } else {
-          setIsViewControls(!isReturningX);
+        if (scale > 1) {
+          const scaleRevEls = Array.from(
+            cutBox.getElementsByClassName(styles.scaleRev),
+          );
+          for (const scaleRevEl of scaleRevEls) {
+            if (scaleRevEl instanceof HTMLElement) {
+              const revScale = scale === 0 ? 1 : 1 / scale;
+              transformTo(scaleRevEl, `scaleX(${revScale})`, {
+                transformOrigin: "center",
+              });
+            }
+          }
+          // const scaleEls = Array.from(
+          //   cutBox.getElementsByClassName(styles.scale),
+          // );
+          // for (const scaleEl of scaleEls) {
+          //   if (scaleEl instanceof HTMLElement) {
+          //     transformTo(scaleEl, `scaleX(${scale})`);
+          //   }
+          // }
         }
+      },
+      onEnd: ({ moveX, isReturningX }) => {
+        for (const element of getTransformedElements()) {
+          transitionWrapper(element, () => {
+            transformReset(element);
+          });
+        }
+        // y = 1/x - can't use normal transition
+        const initialWidth = cutBox.getBoundingClientRect().width;
+        notifControls.style.transform = "";
+        cutBox.style.transform = "";
+        const startTime = Date.now();
+
+        // perform setState here so that we have the before and after
+        const isVisible = isViewControls
+          ? !(moveX > 0 && !isReturningX)
+          : !isReturningX;
+        flushSync(() => {
+          setIsViewControls(isVisible);
+        });
+
+        const currentWidth = cutBox.getBoundingClientRect().width;
+        const originalWidth = cutBox.clientWidth;
+        console.log("boxes", initialWidth, currentWidth);
+        const durationMs = 300;
+        manualTransitionTransform(
+          () => {
+            const y = easeIn(
+              Math.min(300, Date.now() - startTime) / durationMs,
+            );
+            const r = initialWidth / currentWidth;
+            const scale = r + y * (1 - r);
+            transformTo(cutBox, `scaleX(${scale})`);
+            let revScale = scale === 0 ? 1 : 1 / scale;
+            if (currentWidth > originalWidth) {
+              revScale = Math.max(1, revScale);
+            }
+            transformTo(notifControls, `scaleX(${revScale})`);
+            cutBox.style.opacity =
+              clamp(0, (currentWidth * scale - 20) / 20, 1) + "";
+          },
+          durationMs,
+          {
+            onEnd: () => {
+              transformReset(notifControls);
+              transformReset(cutBox);
+              cutBox.style.opacity = "";
+            },
+          },
+        );
       },
     };
     const { onReset, onMove, onEnd } = composeGestureHandlers([
       preventDefaultHandler,
       notifHandler,
       notifControlsHandler,
-      setStateHandler,
     ]);
     return getLinearGestureManager({
       getConstraints: () => {
@@ -399,4 +459,24 @@ function useResetOnScrollOrTouch({ getElement, onReset }: ResetParams) {
       });
     };
   }, [getElement, onReset]);
+}
+
+function cubicBezier(
+  p1x: number,
+  _p1y: number,
+  p2x: number,
+  _p2y: number,
+  t: number,
+) {
+  // ease-in
+  // cubic-bezier(0.42, 0, 1, 1)
+  // https://morethandev.hashnode.dev/demystifying-the-cubic-bezier-function-ft-javascript
+  return (
+    3 * Math.pow(1 - t, 2) * t * p1x +
+    3 * (1 - t) * Math.pow(t, 2) * p2x +
+    Math.pow(t, 3)
+  );
+}
+function easeIn(t: number) {
+  return cubicBezier(0.42, 0, 1, 1, t);
 }
