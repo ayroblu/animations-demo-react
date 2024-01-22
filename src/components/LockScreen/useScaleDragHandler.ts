@@ -61,8 +61,11 @@ export function useScaleDragHandler(params: Params) {
     };
     const notifControlsHandler: GestureHandler = {
       onReset: () => {
-        cutBox.style.transform = "";
-        notifOptions.style.transform = "";
+        for (const element of getTransformedElements()) {
+          transitionWrapper(element, () => {
+            transformReset(element);
+          });
+        }
       },
       onMove: ({ moveX }) => {
         const notifControlsWidth = notifOptions.clientWidth;
@@ -94,6 +97,15 @@ export function useScaleDragHandler(params: Params) {
               });
             }
           }
+          cutBox.style.borderRadius = "0";
+          const notifControlEls = Array.from(
+            cutBox.getElementsByClassName(styles.notifControl),
+          );
+          for (const notifControlEl of notifControlEls) {
+            if (notifControlEl instanceof HTMLElement) {
+              notifControlEl.style.borderRadius = `${16 / scale}px / 16px`;
+            }
+          }
         }
       },
       onEnd: ({ moveX, isReturningX }) => {
@@ -116,6 +128,22 @@ export function useScaleDragHandler(params: Params) {
         flushSync(() => {
           setIsViewControls(isVisible);
         });
+
+        cutBox.style.borderRadius = "";
+        const notifControlEls = Array.from(
+          cutBox.getElementsByClassName(styles.notifControl),
+        );
+        for (const notifControlEl of notifControlEls) {
+          if (notifControlEl instanceof HTMLElement) {
+            transitionWrapper(
+              notifControlEl,
+              () => {
+                notifControlEl.style.borderRadius = "";
+              },
+              { transition: "border-radius 0.3s" },
+            );
+          }
+        }
 
         const currentWidth = cutBox.getBoundingClientRect().width;
         const originalWidth = cutBox.clientWidth;

@@ -294,7 +294,7 @@ function Notification({
   );
 }
 
-const dragType: "width" | "scale" | "slide" = "slide";
+const dragType: "width" | "scale" | "slide" = "scale";
 function useNotificationDrag() {
   const placeholderRef = React.useRef<HTMLDivElement | null>(null);
   const notifRef = React.useRef<HTMLDivElement | null>(null);
@@ -310,7 +310,7 @@ function useNotificationDrag() {
   }, []);
   const getElement = React.useCallback(() => {
     if (!isViewControls) return null;
-    return placeholderRef.current;
+    return placeholderRef.current?.parentElement ?? null;
   }, [isViewControls]);
   useResetOnScrollOrTouch({ getElement, onReset });
 
