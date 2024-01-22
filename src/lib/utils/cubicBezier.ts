@@ -13,6 +13,7 @@ function cubicBezier(
   );
 }
 export function ease(t: number) {
-  return cubicBezier(0.25, 0.1, 0.25, 1, t);
+  // return cubicBezier(0.25, 0.1, 0.25, 1, t);
+  // ease-in?
+  return cubicBezier(0.42, 0, 1, 1, t);
 }
-// cubic-bezier(0.25, 0.1, 0.25, 1)

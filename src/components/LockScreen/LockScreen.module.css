@@ -160,14 +160,11 @@
   bottom: 4px;
   contain: paint;
   border-radius: 16px;
-  pointer-events: none;
   opacity: 0;
+  pointer-events: none;
   backface-visibility: hidden;
-  width: 0;
   display: flex;
   flex-direction: row-reverse;
-  /* transform-origin: top right; */
-  /* transform: scaleX(0.01); */
 }
 .cutBox.fixed {
   display: "none";
@@ -178,6 +175,22 @@
   /* width: auto; */
   /* transform: scaleX(1); */
 }
+.cutBox.dragWidth {
+  width: 0;
+}
+.cutBox.dragScale {
+  transform-origin: top right;
+  transform: scaleX(0.05);
+}
+.cutBox.dragScale.viewControls {
+  transform: scaleX(1);
+}
+.cutBox.dragSlide {
+  transform: translateX(100%);
+}
+.cutBox.dragSlide.viewControls {
+  transform: translateX(0);
+}
 .notifOptions {
   position: relative;
   right: 0px;
@@ -187,13 +200,21 @@
   display: flex;
   gap: 8px;
   height: 100%;
-  /* transform: translateX(-100%); */
-  /* transform-origin: top right; */
-  /* transform: scaleX(100); */
 }
 .notifOptions.visible {
-  /* transform: translateX(0); */
-  /* transform: scaleX(1); */
+}
+.cutBox.dragScale .notifOptions {
+  transform-origin: top right;
+  transform: scaleX(20);
+}
+.cutBox.dragScale .notifOptions.visible {
+  transform: scaleX(1);
+}
+.cutBox.dragSlide .notifOptions {
+  transform: translateX(-100%);
+}
+.cutBox.dragSlide .notifOptions.visible {
+  transform: translateX(0);
 }
 .notifControl {
   background-color: rgba(255, 255, 255, 0.33);
@@ -206,6 +227,8 @@
   justify-content: center;
 }
 .scaleWidth {
+}
+.scaleRev {
 }
 
 @media (prefers-color-scheme: dark) {

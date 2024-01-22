@@ -1,16 +1,10 @@
 import React from "react";
 import styles from "./LockScreen.module.css";
-import { clamp, cn } from "../../lib/utils";
+import { cn } from "../../lib/utils";
 import { routes } from "../../routes";
 import {
   DragHandler,
-  GestureHandler,
-  GestureOnEndParams,
-  composeGestureHandlers,
-  getLinearGestureManager,
-  getResetable,
   getTransformsManager,
-  noopDragHandler,
   transitionWrapper,
   useAnimationScrollListener,
   useDragEvent,
@@ -22,7 +16,9 @@ import {
   useResetOnScrollOrTouch,
 } from "../../lib/utils/hooks";
 import { FixedWithPlaceholder } from "../FixedWithPlaceholder";
-import { getCachedValueManager } from "../../lib/utils/cache";
+import { useScaleDragHandler } from "./useScaleDragHandler";
+import { useWidthDragHandler } from "./useWidthDragHandler";
+import { useSlideDragHandler } from "./useSlideDragHandler";
 
 type Props = {
   notifications: string[];
@@ -212,10 +208,19 @@ function Notification({
     <div className={styles.message}>Message</div>,
   ].filter(Boolean);
   const style = React.useMemo(() => {
+    const notifOptions = notifOptionsRef.current;
+    const notifOptionsWidth = notifOptions?.clientWidth;
     return {
       zIndex: revIndex,
+      transform:
+        (dragType === "scale" || dragType === "slide") &&
+        isViewControls &&
+        notifOptionsWidth
+          ? `translateX(${-notifOptionsWidth - 8}px)`
+          : undefined,
     };
-  }, [revIndex]);
+  }, [isViewControls, notifOptionsRef, revIndex]);
+
   return (
     <div className={cn(styles.notifItemPadding)}>
       <FixedWithPlaceholder
@@ -249,6 +254,11 @@ function Notification({
           styles.cutBox,
           isViewControls && styles.viewControls,
           isFixed && styles.fixed,
+          dragType === "width"
+            ? styles.dragWidth
+            : dragType === "scale"
+              ? styles.dragScale
+              : styles.dragSlide,
         )}
         style={{
           zIndex: revIndex,
@@ -258,17 +268,33 @@ function Notification({
           className={cn(styles.notifOptions, isViewControls && styles.visible)}
           ref={notifOptionsRef}
         >
-          <div className={cn(styles.notifControl, styles.scaleWidth)}>
-            <span>options</span>
+          <div
+            className={cn(
+              styles.notifControl,
+              dragType === "width" && styles.scaleWidth,
+            )}
+          >
+            <span className={cn(dragType === "scale" && styles.scaleRev)}>
+              options
+            </span>
           </div>
-          <div className={cn(styles.notifControl, styles.scaleWidth)}>
-            <span>clear</span>
+          <div
+            className={cn(
+              styles.notifControl,
+              dragType === "width" && styles.scaleWidth,
+            )}
+          >
+            <span className={cn(dragType === "scale" && styles.scaleRev)}>
+              clear
+            </span>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+const dragType: "width" | "scale" | "slide" = "slide";
 function useNotificationDrag() {
   const placeholderRef = React.useRef<HTMLDivElement | null>(null);
   const notifRef = React.useRef<HTMLDivElement | null>(null);
@@ -287,151 +313,40 @@ function useNotificationDrag() {
     return placeholderRef.current;
   }, [isViewControls]);
   useResetOnScrollOrTouch({ getElement, onReset });
-  const dragHandler: DragHandler = React.useCallback(() => {
-    const notif = notifRef.current;
-    const cutBox = cutBoxRef.current;
-    const notifOptionsCur = notifOptionsRef.current;
-    if (!notif || !cutBox || !notifOptionsCur) return noopDragHandler;
-    const notifOptions = notifOptionsCur;
 
-    function getIsVisible({ moveX, isReturningX }: GestureOnEndParams) {
-      const notifOptionsWidth = cachedValueManager.get(
-        notifOptions,
-        () => notifOptions.clientWidth,
-      );
-      return isViewControls
-        ? !(moveX > 0 && !isReturningX)
-        : !isReturningX || -moveX > notifOptionsWidth;
-    }
+  const widthDragHandler: DragHandler = useWidthDragHandler({
+    notifRef,
+    cutBoxRef,
+    notifOptionsRef,
+    isViewControls,
+    setIsViewControls,
+  });
 
-    const preventDefaultHandler: GestureHandler = {
-      onMove: ({ touchEvent }) => {
-        touchEvent.preventDefault();
-        touchEvent.stopPropagation();
-      },
-    };
-    const notifHandler: GestureHandler = {
-      onMove: ({ moveX }) => {
-        const notifOptionsWidth = cachedValueManager.get(
-          notifOptions,
-          () => notifOptions.clientWidth,
-        );
-        if (isViewControls) {
-          moveX -= notifOptionsWidth + 8;
-        }
-        notif.style.transform = `translateX(${moveX}px)`;
-      },
-      onEnd: (params) => {
-        const notifOptionsWidth = cachedValueManager.get(
-          notifOptions,
-          () => notifOptions.clientWidth,
-        );
-        transitionWrapper(notif, () => {
-          const isVisible = getIsVisible(params);
-          if (isVisible) {
-            notif.style.transform = `translateX(${-notifOptionsWidth - 8}px)`;
-          } else {
-            notif.style.transform = "";
-          }
-        });
-      },
-    };
-    const cachedValueManager = getCachedValueManager<HTMLElement, number>();
-    const notifOptionsResetable = getResetable<HTMLElement>();
-    const notifOptionsHandler: GestureHandler = {
-      onReset: () => {
-        notifOptionsResetable.reset();
-      },
-      onMove: ({ moveX }) => {
-        const notifOptionsWidth = cachedValueManager.get(
-          notifOptions,
-          () => notifOptions.clientWidth,
-        );
-        if (isViewControls) {
-          moveX -= notifOptionsWidth;
-        } else {
-          moveX += 8;
-        }
-        cutBox.style.width = Math.max(0, -moveX) + "px";
-        cutBox.style.opacity = clamp(0, (-moveX - 20) / 20, 1) + "";
+  const scaleDragHandler: DragHandler = useScaleDragHandler({
+    notifRef,
+    cutBoxRef,
+    notifOptionsRef,
+    isViewControls,
+    setIsViewControls,
+  });
 
-        const controlEls = Array.from(
-          cutBox.getElementsByClassName(styles.scaleWidth),
-        );
-        for (const controlEl of controlEls) {
-          if (controlEl instanceof HTMLElement) {
-            if (-moveX > notifOptionsWidth) {
-              const width = cachedValueManager.get(
-                controlEl,
-                () => controlEl.clientWidth,
-              );
-              const moveXPastFull = moveX + notifOptionsWidth;
-              controlEl.style.width =
-                width - moveXPastFull / controlEls.length + "px";
-              notifOptionsResetable.set(controlEl, () => {
-                transitionWrapper(
-                  controlEl,
-                  () => {
-                    controlEl.style.width = `${width}px`;
-                  },
-                  {
-                    transition: "width 0.3s",
-                    onEnd: () => {
-                      controlEl.style.width = "";
-                    },
-                  },
-                );
-              });
-            } else {
-              if (controlEl.style.width) {
-                controlEl.style.width = "";
-              }
-            }
-          }
-        }
-      },
-      onEnd: (params) => {
-        notifOptionsResetable.reset();
+  const slideDragHandler: DragHandler = useSlideDragHandler({
+    notifRef,
+    cutBoxRef,
+    notifOptionsRef,
+    isViewControls,
+    setIsViewControls,
+  });
 
-        const notifOptionsWidth = cachedValueManager.get(
-          notifOptions,
-          () => notifOptions.clientWidth,
-        );
-        const isVisible = getIsVisible(params);
-        transitionWrapper(
-          cutBox,
-          () => {
-            cutBox.style.opacity = "";
-            if (isVisible) {
-              cutBox.style.width = `${notifOptionsWidth}px`;
-            } else {
-              cutBox.style.width = "";
-            }
-          },
-          { transition: "width 0.3s, opacity 0.3s" },
-        );
-      },
-    };
-    const stateHandler: GestureHandler = {
-      onEnd: (params) => {
-        const isVisible = getIsVisible(params);
-        setIsViewControls(isVisible);
-      },
-    };
-    const { onReset, onMove, onEnd } = composeGestureHandlers([
-      preventDefaultHandler,
-      notifOptionsHandler,
-      notifHandler,
-      stateHandler,
-    ]);
-    return getLinearGestureManager({
-      getConstraints: () => {
-        return { left: true, right: isViewControls };
-      },
-      handlers: { onReset, onMove, onEnd },
-    });
-  }, [isViewControls]);
-  useDragEvent({ dragHandler, getElement: () => notifRef.current });
+  useDragEvent({
+    dragHandler:
+      dragType === "width"
+        ? widthDragHandler
+        : dragType === "scale"
+          ? scaleDragHandler
+          : slideDragHandler,
+    getElement: () => notifRef.current,
+  });
   return {
     isViewControls,
     notifRef,
