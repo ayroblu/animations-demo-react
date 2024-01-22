@@ -1,5 +1,6 @@
 import React from "react";
 import { globalResizeObserver } from "../global-resize-observer";
+import { getScrollParent } from ".";
 
 export function useForceUpdate() {
   const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
@@ -86,4 +87,38 @@ export function useJoinRefs<T extends HTMLElement>(
       }
     }
   }, []);
+}
+
+type ResetParams = {
+  getElement: () => HTMLElement | null;
+  onReset: () => void;
+};
+export function useResetOnScrollOrTouch({ getElement, onReset }: ResetParams) {
+  React.useEffect(() => {
+    const el = getElement();
+    if (!el) return;
+    const element = el;
+    const scrollElement = getScrollParent(element);
+    function reset() {
+      onReset();
+      scrollElement.removeEventListener("touchmove", resetTouch, {
+        capture: true,
+      });
+      scrollElement.removeEventListener("scroll", reset);
+    }
+    function resetTouch(e: Event) {
+      if (e.target instanceof HTMLElement) {
+        if (element?.contains(e.target)) return;
+        reset();
+      }
+    }
+    scrollElement.addEventListener("scroll", reset, { once: true });
+    scrollElement.addEventListener("touchmove", resetTouch, { capture: true });
+    return () => {
+      scrollElement.removeEventListener("scroll", reset);
+      scrollElement.removeEventListener("touchmove", resetTouch, {
+        capture: true,
+      });
+    };
+  }, [getElement, onReset]);
 }

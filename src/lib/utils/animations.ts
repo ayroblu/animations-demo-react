@@ -383,3 +383,20 @@ export function manualTransitionTransform(
   }
   handler();
 }
+
+export function getResetable<T>() {
+  const map = new Map<T, () => void>();
+  function reset() {
+    for (const [key, resetter] of map) {
+      resetter();
+      map.delete(key);
+    }
+  }
+  function set(key: T, resetter: () => void) {
+    map.set(key, resetter);
+  }
+  return {
+    reset,
+    set,
+  };
+}
