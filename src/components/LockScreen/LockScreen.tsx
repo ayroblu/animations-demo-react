@@ -338,6 +338,10 @@ function useNotificationDrag() {
     setIsViewControls,
   });
 
+  const getDragElement = React.useCallback(
+    () => placeholderRef.current?.parentElement ?? null,
+    [],
+  );
   useDragEvent({
     dragHandler:
       dragType === "width"
@@ -345,7 +349,7 @@ function useNotificationDrag() {
         : dragType === "scale"
           ? scaleDragHandler
           : slideDragHandler,
-    getElement: () => notifRef.current,
+    getElement: getDragElement,
   });
   return {
     isViewControls,

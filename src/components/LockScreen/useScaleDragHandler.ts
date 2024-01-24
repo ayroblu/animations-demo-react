@@ -92,9 +92,10 @@ export function useScaleDragHandler(params: Params) {
           for (const scaleRevEl of scaleRevEls) {
             if (scaleRevEl instanceof HTMLElement) {
               const revScale = scale === 0 ? 1 : 1 / scale;
-              transformTo(scaleRevEl, `scaleX(${revScale})`, {
-                transformOrigin: "center",
-              });
+              scaleRevEl.style.transform = `scaleX(${revScale})`;
+              // transformTo(scaleRevEl, `scaleX(${revScale})`, {
+              //   transformOrigin: "center",
+              // });
             }
           }
           cutBox.style.borderRadius = "0";
@@ -106,6 +107,8 @@ export function useScaleDragHandler(params: Params) {
               notifControlEl.style.borderRadius = `${16 / scale}px / 16px`;
             }
           }
+        } else {
+          cutBox.style.borderRadius = `${16 / scale}px / 16px`;
         }
       },
       onEnd: ({ moveX, isReturningX }) => {
@@ -129,28 +132,22 @@ export function useScaleDragHandler(params: Params) {
           setIsViewControls(isVisible);
         });
 
-        cutBox.style.borderRadius = "";
-        const notifControlEls = Array.from(
-          cutBox.getElementsByClassName(styles.notifControl),
-        );
-        for (const notifControlEl of notifControlEls) {
-          if (notifControlEl instanceof HTMLElement) {
-            transitionWrapper(
-              notifControlEl,
-              () => {
-                notifControlEl.style.borderRadius = "";
-              },
-              { transition: "border-radius 0.3s" },
-            );
-          }
-        }
+        // transitionWrapper(
+        //   cutBox,
+        //   () => {
+        //     cutBox.style.borderRadius = "16px / 16px";
+        //   },
+        //   { transition: "border-radius 3s" },
+        // );
 
         const currentWidth = cutBox.getBoundingClientRect().width;
         const originalWidth = cutBox.clientWidth;
         const durationMs = 300;
         manualTransitionTransform(
           () => {
-            const y = ease(Math.min(300, Date.now() - startTime) / durationMs);
+            const y = ease(
+              Math.min(durationMs, Date.now() - startTime) / durationMs,
+            );
             const r = initialWidth / currentWidth;
             const scale = r + y * (1 - r);
             transformTo(cutBox, `scaleX(${scale})`);
@@ -161,6 +158,25 @@ export function useScaleDragHandler(params: Params) {
             transformTo(notifOptions, `scaleX(${revScale})`);
             cutBox.style.opacity =
               clamp(0, (currentWidth * scale - 20) / 20, 1) + "";
+
+            const notifControlEls = Array.from(
+              cutBox.getElementsByClassName(styles.notifControl),
+            );
+            for (const notifControlEl of notifControlEls) {
+              if (notifControlEl instanceof HTMLElement) {
+                notifControlEl.style.borderRadius = `${16 / scale}px / 16px`;
+              }
+            }
+
+            const scaleRevEls = Array.from(
+              cutBox.getElementsByClassName(styles.scaleRev),
+            );
+            for (const scaleRevEl of scaleRevEls) {
+              if (scaleRevEl instanceof HTMLElement) {
+                const revScale = scale === 0 ? 1 : 1 / scale;
+                scaleRevEl.style.transform = `scaleX(${revScale})`;
+              }
+            }
           },
           durationMs,
           {
@@ -168,6 +184,7 @@ export function useScaleDragHandler(params: Params) {
               transformReset(notifOptions);
               transformReset(cutBox);
               cutBox.style.opacity = "";
+              cutBox.style.borderRadius = "";
             },
           },
         );
