@@ -148,7 +148,7 @@ export function useScaleDragHandler(params: Params) {
           ? !(moveX > 0 && !isReturningX)
           : !isReturningX || -moveX > notifOptionsWidth;
 
-        const animation = `0.3s ${
+        const animation = `0.3s -0.05s ${
           isVisible ? styles.scaleNormal : styles.scaleHidden
         } forwards`;
         setAnimation(cutBox, animation);

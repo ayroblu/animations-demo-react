@@ -156,7 +156,7 @@ export function LockScreen(_props: Props) {
   );
 }
 
-const distanceFromBottom = 150;
+const distanceFromBottom = 120;
 
 function useTime() {
   const [time, setTime] = React.useState(() =>

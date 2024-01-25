@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  --distance-from-bottom: calc(120px + env(safe-area-inset-bottom));
 }
 @media (display-mode: standalone) {
   .lockScreen {
@@ -21,7 +22,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior-y: none;
-  padding-bottom: 150px;
+  padding-bottom: var(--distance-from-bottom);
 }
 .infoContent {
   text-align: center;
@@ -116,7 +117,7 @@
 }
 .notification.fixed {
   pointer-events: none;
-  bottom: 150px;
+  bottom: var(--distance-from-bottom);
 }
 .iconContainer {
   margin-right: 16px;
