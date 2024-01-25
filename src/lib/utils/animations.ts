@@ -384,7 +384,11 @@ export function manualTransitionTransform(
   handler();
 }
 
-export function getResetable<T>() {
+type Resettable<T> = {
+  reset: () => void;
+  set: (key: T, resetter: () => void) => void;
+};
+export function getResetable<T>(): Resettable<T> {
   const map = new Map<T, () => void>();
   function reset() {
     for (const [key, resetter] of map) {

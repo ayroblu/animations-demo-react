@@ -19,6 +19,7 @@ import { FixedWithPlaceholder } from "../FixedWithPlaceholder";
 import { useScaleDragHandler } from "./useScaleDragHandler";
 import { useWidthDragHandler } from "./useWidthDragHandler";
 import { useSlideDragHandler } from "./useSlideDragHandler";
+import { globalResizeObserver } from "../../lib/global-resize-observer";
 
 type Props = {
   notifications: string[];
@@ -207,9 +208,8 @@ function Notification({
     <div>Title</div>,
     <div className={styles.message}>Message</div>,
   ].filter(Boolean);
+  const notifOptionsWidth = useElementWidth(notifOptionsRef);
   const style = React.useMemo(() => {
-    const notifOptions = notifOptionsRef.current;
-    const notifOptionsWidth = notifOptions?.clientWidth;
     return {
       zIndex: revIndex,
       transform:
@@ -219,7 +219,7 @@ function Notification({
           ? `translateX(${-notifOptionsWidth - 8}px)`
           : undefined,
     };
-  }, [isViewControls, notifOptionsRef, revIndex]);
+  }, [isViewControls, notifOptionsWidth, revIndex]);
 
   return (
     <div className={cn(styles.notifItemPadding)}>
@@ -292,6 +292,24 @@ function Notification({
       </div>
     </div>
   );
+}
+
+function useElementWidth(
+  ref: React.RefObject<HTMLElement | null>,
+): number | null {
+  const [width, setWidth] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    setWidth(el.clientWidth);
+    const dispose = globalResizeObserver.observe(el, () => {
+      setWidth(el.clientWidth);
+    });
+    return () => {
+      dispose();
+    };
+  }, [ref]);
+  return width;
 }
 
 const dragType: "width" | "scale" | "slide" = "scale";
