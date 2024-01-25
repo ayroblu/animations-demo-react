@@ -1,17 +1,14 @@
 import React from "react";
 import styles from "./LockScreen.module.css";
-import { clamp } from "../../lib/utils";
 import {
   DragHandler,
   GestureHandler,
   composeGestureHandlers,
   getLinearGestureManager,
-  getResetable,
   getTransformsManager,
   noopDragHandler,
   transitionWrapper,
 } from "../../lib/utils/animations";
-import { flushSync } from "react-dom";
 
 type Params = {
   notifRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -54,7 +51,6 @@ export function useScaleDragHandler(params: Params) {
         });
       },
     };
-    const notifControlsResettable = getResetable();
     const notifControlsHandler: GestureHandler = {
       onReset: () => {
         for (const element of getTransformedElements()) {
@@ -151,9 +147,6 @@ export function useScaleDragHandler(params: Params) {
         const isVisible = isViewControls
           ? !(moveX > 0 && !isReturningX)
           : !isReturningX || -moveX > notifOptionsWidth;
-        flushSync(() => {
-          setIsViewControls(isVisible);
-        });
 
         const animation = `0.3s ${
           isVisible ? styles.scaleNormal : styles.scaleHidden
@@ -243,10 +236,20 @@ export function useScaleDragHandler(params: Params) {
         // );
       },
     };
+    const setStateHandler: GestureHandler = {
+      onEnd: ({ moveX, isReturningX }) => {
+        const notifOptionsWidth = notifOptions.clientWidth;
+        const isVisible = isViewControls
+          ? !(moveX > 0 && !isReturningX)
+          : !isReturningX || -moveX > notifOptionsWidth;
+        setIsViewControls(isVisible);
+      },
+    };
     const { onReset, onMove, onEnd } = composeGestureHandlers([
       preventDefaultHandler,
-      notifHandler,
       notifControlsHandler,
+      notifHandler,
+      setStateHandler,
     ]);
     return getLinearGestureManager({
       getConstraints: () => {
