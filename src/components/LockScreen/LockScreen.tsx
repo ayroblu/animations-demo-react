@@ -318,12 +318,16 @@ function useNotificationDrag() {
   const notifRef = React.useRef<HTMLDivElement | null>(null);
   const cutBoxRef = React.useRef<HTMLDivElement | null>(null);
   const notifOptionsRef = React.useRef<HTMLDivElement | null>(null);
+  const resetRef = React.useRef<(() => void)[]>([]);
   const [isViewControls, setIsViewControls] = React.useState(false);
   const onReset = React.useCallback(() => {
     const notif = notifRef.current;
     if (!notif) return;
     transitionWrapper(notif, () => {
       setIsViewControls(false);
+      resetRef.current.forEach((reset) => {
+        reset();
+      });
     });
   }, []);
   const getElement = React.useCallback(() => {

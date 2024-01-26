@@ -32,10 +32,9 @@ export function FixedWithPlaceholder({
   useSyncElements(localFixedRef, localPlaceholderRef, (source, target) => {
     target.style.height = source.clientHeight + "px";
   });
-  // To consider if I really need this
-  // useSyncElements(localPlaceholderRef, localFixedRef, (source, target) => {
-  //   source.style.width = target.clientWidth + "px";
-  // });
+  useSyncElements(localPlaceholderRef, localFixedRef, (source, target) => {
+    target.style.width = source.clientWidth + "px";
+  });
   return (
     <div
       className={styles.placeholder}

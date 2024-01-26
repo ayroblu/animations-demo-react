@@ -25,9 +25,10 @@ export function useScaleDragHandler(params: Params) {
     isViewControls,
     setIsViewControls,
   } = params;
+  const isViewControlsRef = React.useRef(isViewControls);
+  isViewControlsRef.current = isViewControls;
   const scaleDragHandler: DragHandler = React.useCallback(() => {
-    const { transformTo, transformReset, getTransformedElements } =
-      getTransformsManager();
+    const { transformTo, transformReset } = getTransformsManager();
     const notif = notifRef.current;
     const cutBox = cutBoxRef.current;
     const notifOptions = notifOptionsRef.current;
@@ -53,12 +54,9 @@ export function useScaleDragHandler(params: Params) {
     };
     const notifControlsHandler: GestureHandler = {
       onReset: () => {
-        notifOptions.style.transform = "";
-        cutBox.style.transform = "";
-
         const resetProperties = (el: HTMLElement) => {
-          el.style.setProperty("--scaleX", "0.05");
-          el.style.setProperty("--translateX", "0");
+          el.style.removeProperty("--scaleX");
+          el.style.removeProperty("--translateX");
         };
         resetProperties(cutBox);
         resetProperties(notifOptions);
@@ -67,8 +65,6 @@ export function useScaleDragHandler(params: Params) {
         );
         for (const notifControlEl of notifControlEls) {
           if (notifControlEl instanceof HTMLElement) {
-            notifControlEl.style.borderRadius = "";
-            notifControlEl.style.transform = "";
             resetProperties(notifControlEl);
           }
         }
@@ -78,13 +74,13 @@ export function useScaleDragHandler(params: Params) {
         );
         for (const scaleRevEl of scaleRevEls) {
           if (scaleRevEl instanceof HTMLElement) {
-            scaleRevEl.style.transform = "";
             resetProperties(scaleRevEl);
           }
         }
       },
       onMove: ({ moveX }) => {
         const notifControlsWidth = notifOptions.clientWidth;
+        const isViewControls = isViewControlsRef.current;
         if (!isViewControls) {
           moveX += 8;
         }
@@ -126,24 +122,13 @@ export function useScaleDragHandler(params: Params) {
                 -cumulativeX + "px",
               );
               cumulativeX = notifControlEl.clientWidth * (itemScale - 1);
-            } else {
-              notifControlEl.style.borderRadius = "";
-              notifControlEl.style.transform = "";
             }
           }
         }
       },
       onEnd: ({ moveX, isReturningX }) => {
-        for (const element of getTransformedElements()) {
-          transitionWrapper(element, () => {
-            transformReset(element);
-          });
-        }
-        // y = 1/x - can't use normal transition
-        notifOptions.style.transform = "";
-        cutBox.style.transform = "";
-
         const notifOptionsWidth = notifOptions.clientWidth;
+        const isViewControls = isViewControlsRef.current;
         const isVisible = isViewControls
           ? !(moveX > 0 && !isReturningX)
           : !isReturningX || -moveX > notifOptionsWidth;
@@ -158,8 +143,6 @@ export function useScaleDragHandler(params: Params) {
         );
         for (const notifControlEl of notifControlEls) {
           if (notifControlEl instanceof HTMLElement) {
-            notifControlEl.style.borderRadius = "";
-            notifControlEl.style.transform = "";
             setAnimation(notifControlEl, animation);
           }
         }
@@ -169,7 +152,6 @@ export function useScaleDragHandler(params: Params) {
         );
         for (const scaleRevEl of scaleRevEls) {
           if (scaleRevEl instanceof HTMLElement) {
-            scaleRevEl.style.transform = "";
             setAnimation(scaleRevEl, animation);
           }
         }
@@ -178,6 +160,7 @@ export function useScaleDragHandler(params: Params) {
     const setStateHandler: GestureHandler = {
       onEnd: ({ moveX, isReturningX }) => {
         const notifOptionsWidth = notifOptions.clientWidth;
+        const isViewControls = isViewControlsRef.current;
         const isVisible = isViewControls
           ? !(moveX > 0 && !isReturningX)
           : !isReturningX || -moveX > notifOptionsWidth;
@@ -192,11 +175,12 @@ export function useScaleDragHandler(params: Params) {
     ]);
     return getLinearGestureManager({
       getConstraints: () => {
+        const isViewControls = isViewControlsRef.current;
         return { left: true, right: isViewControls };
       },
       handlers: { onReset, onMove, onEnd },
     });
-  }, [cutBoxRef, isViewControls, notifOptionsRef, notifRef, setIsViewControls]);
+  }, [cutBoxRef, notifOptionsRef, notifRef, setIsViewControls]);
   return scaleDragHandler;
 }
 function setAnimation(el: HTMLElement, animation: string) {
@@ -208,11 +192,11 @@ function setAnimation(el: HTMLElement, animation: string) {
     "animationend",
     () => {
       if (animation.includes(styles.scaleHidden)) {
-        el.style.setProperty("--scaleX", "0.05");
+        el.style.removeProperty("--scaleX");
       } else {
-        el.style.setProperty("--scaleX", "1");
+        el.style.removeProperty("--scaleX");
       }
-      el.style.setProperty("--translateX", "0");
+      el.style.removeProperty("--translateX");
       el.style.animation = "";
     },
     { once: true },

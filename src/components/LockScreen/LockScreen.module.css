@@ -189,6 +189,7 @@
 }
 .cutBox.dragScale.viewControls {
   /* transform: scaleX(1); */
+  --scaleX: 1;
 }
 .cutBox.dragSlide {
   transform: translateX(100%);
