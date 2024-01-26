@@ -53,10 +53,34 @@ export function useScaleDragHandler(params: Params) {
     };
     const notifControlsHandler: GestureHandler = {
       onReset: () => {
-        for (const element of getTransformedElements()) {
-          transitionWrapper(element, () => {
-            transformReset(element);
-          });
+        notifOptions.style.transform = "";
+        cutBox.style.transform = "";
+
+        const resetProperties = (el: HTMLElement) => {
+          el.style.setProperty("--scaleX", "0.05");
+          el.style.setProperty("--translateX", "0");
+        };
+        resetProperties(cutBox);
+        resetProperties(notifOptions);
+        const notifControlEls = Array.from(
+          cutBox.getElementsByClassName(styles.notifControl),
+        );
+        for (const notifControlEl of notifControlEls) {
+          if (notifControlEl instanceof HTMLElement) {
+            notifControlEl.style.borderRadius = "";
+            notifControlEl.style.transform = "";
+            resetProperties(notifControlEl);
+          }
+        }
+
+        const scaleRevEls = Array.from(
+          cutBox.getElementsByClassName(styles.scaleRev),
+        );
+        for (const scaleRevEl of scaleRevEls) {
+          if (scaleRevEl instanceof HTMLElement) {
+            scaleRevEl.style.transform = "";
+            resetProperties(scaleRevEl);
+          }
         }
       },
       onMove: ({ moveX }) => {
@@ -67,18 +91,8 @@ export function useScaleDragHandler(params: Params) {
         const scale = isViewControls
           ? 1 - moveX / notifControlsWidth
           : -moveX / notifControlsWidth;
-        // cutBox.style.transform = `scaleX(${scale})`;
         cutBox.style.setProperty("--scaleX", scale + "");
-        // const revScale = scale === 0 ? 1 : 1 / scale;
-        // notifOptions.style.transform = `scaleX(${revScale})`;
         notifOptions.style.setProperty("--scaleX", scale + "");
-        // if (isViewControls) {
-        //   // Technically is wrong, should actually grab the bounding client rect initial offset in case the user grabs the item while animating
-        //   cutBox.style.opacity =
-        //     clamp(0, (notifControlsWidth - moveX - 20) / 20, 1) + "";
-        // } else {
-        //   cutBox.style.opacity = clamp(0, (-moveX - 20) / 20, 1) + "";
-        // }
 
         const scaleRevEls = Array.from(
           cutBox.getElementsByClassName(styles.scaleRev),
@@ -86,20 +100,12 @@ export function useScaleDragHandler(params: Params) {
         for (const scaleRevEl of scaleRevEls) {
           if (scaleRevEl instanceof HTMLElement) {
             if (scale > 1) {
-              // const revScale = scale === 0 ? 1 : 1 / scale;
-              // scaleRevEl.style.transform = `scaleX(${revScale})`;
               scaleRevEl.style.setProperty("--scaleX", scale + "");
             } else {
-              // scaleRevEl.style.transform = `scaleX(1)`;
               scaleRevEl.style.setProperty("--scaleX", "1");
             }
           }
         }
-        // if (scale > 1) {
-        //   cutBox.style.borderRadius = "0";
-        // } else {
-        //   cutBox.style.borderRadius = `${16 / scale}px / 16px`;
-        // }
         const notifControlEls = Array.from(
           cutBox.getElementsByClassName(styles.notifControl),
         );
@@ -114,8 +120,6 @@ export function useScaleDragHandler(params: Params) {
         for (const notifControlEl of notifControlEls) {
           if (notifControlEl instanceof HTMLElement) {
             if (scale > 1) {
-              notifControlEl.style.borderRadius = `${16 / itemScale}px / 16px`;
-              // notifControlEl.style.transform = `translateX(-${cumulativeX}px) scaleX(${itemScale})`;
               notifControlEl.style.setProperty("--scaleX", itemScale + "");
               notifControlEl.style.setProperty(
                 "--translateX",
@@ -136,13 +140,9 @@ export function useScaleDragHandler(params: Params) {
           });
         }
         // y = 1/x - can't use normal transition
-        // const initialWidth = cutBox.getBoundingClientRect().width;
         notifOptions.style.transform = "";
         cutBox.style.transform = "";
-        // cutBox.style.setProperty("--scaleX", "1");
-        // const startTime = Date.now();
 
-        // perform setState here so that we have the before and after
         const notifOptionsWidth = notifOptions.clientWidth;
         const isVisible = isViewControls
           ? !(moveX > 0 && !isReturningX)
@@ -158,22 +158,11 @@ export function useScaleDragHandler(params: Params) {
         );
         for (const notifControlEl of notifControlEls) {
           if (notifControlEl instanceof HTMLElement) {
-            // notifControlEl.animate(
-            //   [{ "--scaleX": initialWidth / currentWidth }, { "--scaleX": 1 }],
-            //   { duration: 300 },
-            // );
             notifControlEl.style.borderRadius = "";
             notifControlEl.style.transform = "";
             setAnimation(notifControlEl, animation);
           }
         }
-        // transitionWrapper(
-        //   cutBox,
-        //   () => {
-        //     cutBox.style.opacity = "";
-        //   },
-        //   { transition: "opacity 0.3s" },
-        // );
 
         const scaleRevEls = Array.from(
           cutBox.getElementsByClassName(styles.scaleRev),
@@ -184,56 +173,6 @@ export function useScaleDragHandler(params: Params) {
             setAnimation(scaleRevEl, animation);
           }
         }
-
-        // const currentWidth = cutBox.getBoundingClientRect().width;
-        // const originalWidth = cutBox.clientWidth;
-        // const durationMs = 300;
-        // manualTransitionTransform(
-        //   () => {
-        //     const y = ease(
-        //       Math.min(durationMs, Date.now() - startTime) / durationMs,
-        //     );
-        //     const r = initialWidth / currentWidth;
-        //     const scale = r + y * (1 - r);
-        //     transformTo(cutBox, `scaleX(${scale})`);
-        //     let revScale = scale === 0 ? 1 : 1 / scale;
-        //     if (currentWidth > originalWidth) {
-        //       revScale = Math.max(1, revScale);
-        //     }
-        //     transformTo(notifOptions, `scaleX(${revScale})`);
-        //     cutBox.style.opacity =
-        //       clamp(0, (currentWidth * scale - 20) / 20, 1) + "";
-
-        //     const notifControlEls = Array.from(
-        //       cutBox.getElementsByClassName(styles.notifControl),
-        //     );
-        //     for (const notifControlEl of notifControlEls) {
-        //       if (notifControlEl instanceof HTMLElement) {
-        //         notifControlEl.style.borderRadius = `${16 / scale}px / 16px`;
-        //         notifControlEl.style.transform = "";
-        //       }
-        //     }
-
-        //     const scaleRevEls = Array.from(
-        //       cutBox.getElementsByClassName(styles.scaleRev),
-        //     );
-        //     for (const scaleRevEl of scaleRevEls) {
-        //       if (scaleRevEl instanceof HTMLElement) {
-        //         const revScale = scale === 0 ? 1 : 1 / scale;
-        //         scaleRevEl.style.transform = `scaleX(${revScale})`;
-        //       }
-        //     }
-        //   },
-        //   durationMs,
-        //   {
-        //     onEnd: () => {
-        //       transformReset(notifOptions);
-        //       transformReset(cutBox);
-        //       cutBox.style.opacity = "";
-        //       cutBox.style.borderRadius = "";
-        //     },
-        //   },
-        // );
       },
     };
     const setStateHandler: GestureHandler = {
