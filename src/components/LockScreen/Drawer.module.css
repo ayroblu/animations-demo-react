@@ -1,0 +1,58 @@
+.sidenavDrawer {
+  display: flex;
+}
+.drawerContent {
+  /* width: 280px; */
+  width: 100%;
+  min-height: 100dvh;
+}
+.drawerContentWrapper {
+  top: 0;
+}
+.mobileDrawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  transform: translateX(-100%);
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+.sidenav {
+  flex-shrink: 0;
+}
+.content {
+  position: relative;
+  z-index: 0;
+}
+.content.visible {
+  /* transform: translateX(280px); */
+  filter: blur(8px);
+  transform: perspective(500px) translateZ(-40px);
+}
+.sidenavContent {
+  flex-grow: 1;
+}
+.contentCover {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.contentCover.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+.groupContainer {
+  contain: paint;
+}
+.drawer.visible {
+  transform: translateX(0);
+}
+.fill {
+  flex-grow: 1;
+}

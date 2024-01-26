@@ -3,23 +3,13 @@ import styles from "./LockScreen.module.css";
 import { cn } from "../../lib/utils";
 import { routes } from "../../routes";
 import {
-  DragHandler,
   getTransformsManager,
-  transitionWrapper,
   useAnimationScrollListener,
-  useDragEvent,
 } from "../../lib/utils/animations";
 import { Link } from "react-router-dom";
-import {
-  useArrayRef,
-  useJoinRefs,
-  useResetOnScrollOrTouch,
-} from "../../lib/utils/hooks";
-import { FixedWithPlaceholder } from "../FixedWithPlaceholder";
-import { useScaleDragHandler } from "./useScaleDragHandler";
-import { useWidthDragHandler } from "./useWidthDragHandler";
-import { useSlideDragHandler } from "./useSlideDragHandler";
-import { globalResizeObserver } from "../../lib/global-resize-observer";
+import { useArrayRef } from "../../lib/utils/hooks";
+import { DragDrawerImperative } from "./DragDrawerImperative";
+import { Notification } from "./Notification";
 
 type Props = {
   notifications: string[];
@@ -36,6 +26,87 @@ export function LockScreen(_props: Props) {
         isFixed: false,
       })),
   );
+  useScrollRotation({
+    scrollRef,
+    notifRefs,
+    fixedNotifRefs,
+    notifications,
+    setNotifications,
+  });
+
+  return (
+    <DragDrawerImperative drawerContent={drawerContent}>
+      <div className={styles.lockScreen}>
+        <div className={styles.backgroundImage} />
+        <div className={styles.statusBar} />
+        <div className={styles.scrollableContent} ref={scrollRef}>
+          <div>
+            <div className={styles.infoContent}>
+              <div className={styles.itemPadding}>
+                <div className={styles.lock} />
+              </div>
+              <div className={styles.itemPadding}>
+                <div className={styles.widgetTop}>widget</div>
+              </div>
+              <div className={styles.itemPadding}>
+                <div className={styles.time}>{time}</div>
+              </div>
+              <div className={cn(styles.itemPadding, styles.widgetsContainer)}>
+                <div className={styles.widgets}>
+                  <div className={styles.widgetSpan2}>
+                    <Link to={routes.root} className={styles.widgetPlaceholder}>
+                      &lt; Home
+                    </Link>
+                  </div>
+                  <div className={styles.widget}>
+                    <div className={styles.widgetPlaceholder}>Widget</div>
+                  </div>
+                  <div className={styles.widget}>
+                    <div className={styles.widgetPlaceholder}>Widget</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={styles.infoSpacer} />
+          </div>
+          {notifications.map(({ isFixed }, i) => (
+            <Notification
+              key={i}
+              isFixed={isFixed}
+              revIndex={notifications.length - i}
+              onNotifRef={onNotifRef(i)}
+              onFixedNotifRef={onFixedNotifRef(i)}
+            />
+          ))}
+        </div>
+        <button className={cn(styles.leftControl, styles.control)}>T</button>
+        <button className={cn(styles.rightControl, styles.control)}>C</button>
+        <div className={styles.homeArea} />
+      </div>
+    </DragDrawerImperative>
+  );
+}
+
+type ScrollRotationParams = {
+  scrollRef: React.RefObject<HTMLElement | null>;
+  notifications: { isFixed: boolean }[];
+  notifRefs: (HTMLElement | null)[];
+  fixedNotifRefs: (HTMLElement | null)[];
+  setNotifications: React.Dispatch<
+    React.SetStateAction<
+      {
+        isFixed: boolean;
+      }[]
+    >
+  >;
+};
+function useScrollRotation({
+  scrollRef,
+  notifRefs,
+  fixedNotifRefs,
+  notifications,
+  setNotifications,
+}: ScrollRotationParams) {
   const notificationsRef = React.useRef(notifications);
   notificationsRef.current = notifications;
   const scrollStateRef = React.useRef({
@@ -105,55 +176,6 @@ export function LockScreen(_props: Props) {
     const { onScroll } = scrollHandler();
     onScroll();
   }, [fixedNotifRefs, notifRefs]);
-
-  return (
-    <div className={styles.lockScreen}>
-      <div className={styles.statusBar} />
-      <div className={styles.scrollableContent} ref={scrollRef}>
-        <div>
-          <div className={styles.infoContent}>
-            <div className={styles.itemPadding}>
-              <div className={styles.lock} />
-            </div>
-            <div className={styles.itemPadding}>
-              <div className={styles.widgetTop}>widget</div>
-            </div>
-            <div className={styles.itemPadding}>
-              <div className={styles.time}>{time}</div>
-            </div>
-            <div className={cn(styles.itemPadding, styles.widgetsContainer)}>
-              <div className={styles.widgets}>
-                <div className={styles.widgetSpan2}>
-                  <Link to={routes.root} className={styles.widgetPlaceholder}>
-                    &lt; Home
-                  </Link>
-                </div>
-                <div className={styles.widget}>
-                  <div className={styles.widgetPlaceholder}>Widget</div>
-                </div>
-                <div className={styles.widget}>
-                  <div className={styles.widgetPlaceholder}>Widget</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.infoSpacer} />
-        </div>
-        {notifications.map(({ isFixed }, i) => (
-          <Notification
-            key={i}
-            isFixed={isFixed}
-            revIndex={notifications.length - i}
-            onNotifRef={onNotifRef(i)}
-            onFixedNotifRef={onFixedNotifRef(i)}
-          />
-        ))}
-      </div>
-      <button className={cn(styles.leftControl, styles.control)}>T</button>
-      <button className={cn(styles.rightControl, styles.control)}>C</button>
-      <div className={styles.homeArea} />
-    </div>
-  );
 }
 
 const safeAreaInsetBottom = getComputedStyle(
@@ -183,204 +205,17 @@ function useTime() {
   return time;
 }
 
-type NotificationProps = {
-  timeSensitive?: boolean;
-  revIndex: number;
-  onNotifRef: (element: HTMLElement | null) => void;
-  onFixedNotifRef: (element: HTMLElement | null) => void;
-  isFixed: boolean;
-};
-function Notification({
-  timeSensitive,
-  revIndex,
-  onNotifRef,
-  onFixedNotifRef,
-  isFixed,
-}: NotificationProps) {
-  const {
-    isViewControls,
-    notifRef,
-    cutBoxRef,
-    notifOptionsRef,
-    placeholderRef,
-  } = useNotificationDrag();
-  const handlePlaceholderRef = useJoinRefs([placeholderRef, onNotifRef]);
-  const handleNotifRef = useJoinRefs([notifRef, onFixedNotifRef]);
-  const notificationContent = [
-    timeSensitive && <div className={styles.fadedText}>TIME SENSITIVE</div>,
-    <div>Title</div>,
-    <div className={styles.message}>Message</div>,
-  ].filter(Boolean);
-  const notifOptionsWidth = useElementWidth(notifOptionsRef);
-  const style = React.useMemo(() => {
-    return {
-      zIndex: revIndex,
-      transform:
-        (dragType === "scale" || dragType === "slide") &&
-        isViewControls &&
-        notifOptionsWidth
-          ? `translateX(${-notifOptionsWidth - 8}px)`
-          : undefined,
-    };
-  }, [isViewControls, notifOptionsWidth, revIndex]);
-
+const drawerContent = <WidgetDrawerContent />;
+function WidgetDrawerContent() {
   return (
-    <div className={cn(styles.notifItemPadding)}>
-      <FixedWithPlaceholder
-        isFixed={isFixed}
-        className={cn(styles.notification, isFixed && styles.fixed)}
-        placeholderRef={handlePlaceholderRef}
-        fixedRef={handleNotifRef}
-        style={style}
-      >
-        <div className={styles.iconContainer}>
-          <div className={styles.icon}>Icon</div>
-        </div>
-        <div className={styles.notifContent}>
-          {notificationContent.map((content, i) =>
-            i === 0 ? (
-              <div className={styles.notifTop} key="top">
-                <div className={styles.flexGrow}>{content}</div>
-                <div className={cn(styles.fadedText, styles.smallerFont)}>
-                  3m ago
-                </div>
-              </div>
-            ) : (
-              <React.Fragment key={i}>{content}</React.Fragment>
-            ),
-          )}
-        </div>
-      </FixedWithPlaceholder>
-      <div
-        ref={cutBoxRef}
-        className={cn(
-          styles.cutBox,
-          isViewControls && styles.viewControls,
-          isFixed && styles.fixed,
-          dragType === "width"
-            ? styles.dragWidth
-            : dragType === "scale"
-              ? styles.dragScale
-              : styles.dragSlide,
-        )}
-        style={{
-          zIndex: revIndex,
-        }}
-      >
-        <div
-          className={cn(styles.notifOptions, isViewControls && styles.visible)}
-          ref={notifOptionsRef}
-        >
-          <div
-            className={cn(
-              styles.notifControl,
-              dragType === "width" && styles.scaleWidth,
-            )}
-          >
-            <span className={cn(dragType === "scale" && styles.scaleRev)}>
-              options
-            </span>
-          </div>
-          <div
-            className={cn(
-              styles.notifControl,
-              dragType === "width" && styles.scaleWidth,
-            )}
-          >
-            <span className={cn(dragType === "scale" && styles.scaleRev)}>
-              clear
-            </span>
-          </div>
-        </div>
+    <div className={styles.drawerContainer}>
+      <div className={styles.drawerContent}>
+        {Array(10)
+          .fill(null)
+          .map((_, i) => (
+            <div key={i} className={styles.drawerWidget} />
+          ))}
       </div>
     </div>
   );
-}
-
-function useElementWidth(
-  ref: React.RefObject<HTMLElement | null>,
-): number | null {
-  const [width, setWidth] = React.useState<number | null>(null);
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    setWidth(el.clientWidth);
-    const dispose = globalResizeObserver.observe(el, () => {
-      setWidth(el.clientWidth);
-    });
-    return () => {
-      dispose();
-    };
-  }, [ref]);
-  return width;
-}
-
-const dragType: "width" | "scale" | "slide" = "scale";
-function useNotificationDrag() {
-  const placeholderRef = React.useRef<HTMLDivElement | null>(null);
-  const notifRef = React.useRef<HTMLDivElement | null>(null);
-  const cutBoxRef = React.useRef<HTMLDivElement | null>(null);
-  const notifOptionsRef = React.useRef<HTMLDivElement | null>(null);
-  const resetRef = React.useRef<(() => void)[]>([]);
-  const [isViewControls, setIsViewControls] = React.useState(false);
-  const onReset = React.useCallback(() => {
-    const notif = notifRef.current;
-    if (!notif) return;
-    transitionWrapper(notif, () => {
-      setIsViewControls(false);
-      resetRef.current.forEach((reset) => {
-        reset();
-      });
-    });
-  }, []);
-  const getElement = React.useCallback(() => {
-    if (!isViewControls) return null;
-    return placeholderRef.current?.parentElement ?? null;
-  }, [isViewControls]);
-  useResetOnScrollOrTouch({ getElement, onReset });
-
-  const widthDragHandler: DragHandler = useWidthDragHandler({
-    notifRef,
-    cutBoxRef,
-    notifOptionsRef,
-    isViewControls,
-    setIsViewControls,
-  });
-
-  const scaleDragHandler: DragHandler = useScaleDragHandler({
-    notifRef,
-    cutBoxRef,
-    notifOptionsRef,
-    isViewControls,
-    setIsViewControls,
-  });
-
-  const slideDragHandler: DragHandler = useSlideDragHandler({
-    notifRef,
-    cutBoxRef,
-    notifOptionsRef,
-    isViewControls,
-    setIsViewControls,
-  });
-
-  const getDragElement = React.useCallback(
-    () => placeholderRef.current?.parentElement ?? null,
-    [],
-  );
-  useDragEvent({
-    dragHandler:
-      dragType === "width"
-        ? widthDragHandler
-        : dragType === "scale"
-          ? scaleDragHandler
-          : slideDragHandler,
-    getElement: getDragElement,
-  });
-  return {
-    isViewControls,
-    notifRef,
-    cutBoxRef,
-    notifOptionsRef,
-    placeholderRef,
-  };
 }

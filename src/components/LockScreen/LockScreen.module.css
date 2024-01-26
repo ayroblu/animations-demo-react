@@ -1,12 +1,17 @@
 .lockScreen {
-  background-image: url("../../assets/iphone-background.jpg");
-  background-size: cover;
-  background-position: center;
   height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
   --distance-from-bottom: calc(120px + env(safe-area-inset-bottom));
+}
+.backgroundImage {
+  background-image: url("../../assets/iphone-background.jpg");
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+  inset: -50px;
+  z-index: -1;
 }
 @media (display-mode: standalone) {
   .lockScreen {
@@ -19,8 +24,7 @@
 
 .scrollableContent {
   flex-grow: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
   overscroll-behavior-y: none;
   padding-bottom: var(--distance-from-bottom);
 }
@@ -273,4 +277,28 @@
   .fadedText {
     color: rgba(255, 255, 255, 0.5);
   }
+}
+
+.drawerContainer {
+  overflow: hidden auto;
+  scrollbar-width: none;
+}
+.drawerContainer::-webkit-scrollbar {
+  display: none;
+}
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.drawerContent:before,
+.drawerContent:after {
+  content: "";
+}
+.drawerWidget {
+  aspect-ratio: 2 / 1;
+  background-color: #5bf;
+  border-radius: 16px;
+  margin-inline-start: 16px;
+  margin-inline-end: 16px;
 }

@@ -1,0 +1,3 @@
+.contentCover {
+  transition: var(--animate-duration) opacity;
+}
