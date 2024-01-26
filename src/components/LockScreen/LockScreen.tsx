@@ -156,7 +156,10 @@ export function LockScreen(_props: Props) {
   );
 }
 
-const distanceFromBottom = 120;
+const safeAreaInsetBottom = getComputedStyle(
+  document.documentElement,
+).getPropertyValue("--safe-area-inset-bottom");
+const distanceFromBottom = 120 + parseFloat(safeAreaInsetBottom);
 
 function useTime() {
   const [time, setTime] = React.useState(() =>

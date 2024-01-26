@@ -2,6 +2,7 @@
   font-family: system-ui, sans-serif;
   color-scheme: light dark;
   --animate-duration: 0.3s;
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
 }
 body {
   margin: 0;
