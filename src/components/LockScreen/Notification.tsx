@@ -35,6 +35,8 @@ export function Notification({
     cutBoxRef,
     notifOptionsRef,
     placeholderRef,
+    isExiting,
+    containerRef,
   } = useNotificationDrag(removeNotification);
   const handlePlaceholderRef = useJoinRefs([placeholderRef, onNotifRef]);
   const handleNotifRef = useJoinRefs([notifRef, onFixedNotifRef]);
@@ -57,7 +59,10 @@ export function Notification({
   }, [isViewControls, notifOptionsWidth, revIndex]);
 
   return (
-    <div className={cn(styles.notifItemPadding)}>
+    <div
+      className={cn(styles.notifItemPadding, isExiting && styles.exiting)}
+      ref={containerRef}
+    >
       <FixedWithPlaceholder
         isFixed={isFixed}
         className={cn(
@@ -153,12 +158,14 @@ function useElementWidth(
 
 const dragType: "width" | "scale" | "slide" = "scale";
 function useNotificationDrag(removeNotification: (id: string) => void) {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const placeholderRef = React.useRef<HTMLDivElement | null>(null);
   const notifRef = React.useRef<HTMLDivElement | null>(null);
   const cutBoxRef = React.useRef<HTMLDivElement | null>(null);
   const notifOptionsRef = React.useRef<HTMLDivElement | null>(null);
   const resetRef = React.useRef<(() => void)[]>([]);
   const [isViewControls, setIsViewControls] = React.useState(false);
+  const [isExiting, setIsExiting] = React.useState(false);
   const onReset = React.useCallback(() => {
     const notif = notifRef.current;
     if (!notif) return;
@@ -190,6 +197,8 @@ function useNotificationDrag(removeNotification: (id: string) => void) {
     isViewControls,
     setIsViewControls,
     removeNotification,
+    setIsExiting,
+    containerRef,
   });
 
   const slideDragHandler: DragHandler = useSlideDragHandler({
@@ -219,5 +228,7 @@ function useNotificationDrag(removeNotification: (id: string) => void) {
     cutBoxRef,
     notifOptionsRef,
     placeholderRef,
+    isExiting,
+    containerRef,
   };
 }

@@ -10,25 +10,33 @@ import {
   transitionWrapper,
 } from "../../lib/utils/animations";
 import { useNotification } from "./useNotification";
+import { flushSync } from "react-dom";
+import { useLockScreenData } from "./useLockScreenData";
+import { getTransform } from "../../lib/utils";
 
 type Params = {
   notifRef: React.MutableRefObject<HTMLDivElement | null>;
   cutBoxRef: React.MutableRefObject<HTMLDivElement | null>;
   notifOptionsRef: React.MutableRefObject<HTMLDivElement | null>;
+  containerRef: React.MutableRefObject<HTMLDivElement | null>;
   isViewControls: boolean;
   setIsViewControls: React.Dispatch<React.SetStateAction<boolean>>;
   removeNotification: (id: string) => void;
+  setIsExiting: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export function useScaleDragHandler(params: Params) {
   const {
     notifRef,
     cutBoxRef,
     notifOptionsRef,
+    containerRef,
     isViewControls,
     setIsViewControls,
     removeNotification,
+    setIsExiting,
   } = params;
   const { id } = useNotification();
+  const { notifRefs } = useLockScreenData();
   const isViewControlsRef = React.useRef(isViewControls);
   isViewControlsRef.current = isViewControls;
   const scaleDragHandler: DragHandler = React.useCallback(() => {
@@ -44,7 +52,43 @@ export function useScaleDragHandler(params: Params) {
       },
     };
     function removeThisNotification() {
-      removeNotification(id);
+      const container = containerRef.current;
+      if (!container) return;
+      const originalRect = container.getBoundingClientRect();
+      const beforeNotifRects = notifRefs.map(
+        (ref) => ref?.getBoundingClientRect(),
+      );
+      flushSync(() => {
+        setIsExiting(true);
+      });
+      const afterNotifRects = notifRefs.map(
+        (ref) => ref?.getBoundingClientRect(),
+      );
+      // const newRect = container.getBoundingClientRect();
+      container.style.top = originalRect.top + "px";
+      afterNotifRects.forEach((afterRect, i) => {
+        const beforeRect = beforeNotifRects[i];
+        const ref = notifRefs[i];
+        if (!ref || !beforeRect || !afterRect) return;
+        if (container.contains(ref)) return;
+        if (getComputedStyle(ref.children[0]).position === "fixed") return;
+        const transform = getTransform(afterRect, beforeRect);
+        transformTo(ref, transform);
+        ref.getBoundingClientRect();
+        transitionWrapper(ref, () => {
+          transformReset(ref);
+        });
+      });
+
+      if (container) {
+        container.addEventListener(
+          "transitionend",
+          () => {
+            removeNotification(id);
+          },
+          { once: true },
+        );
+      }
     }
     const notifHandler: GestureHandler = {
       onReset: () => {

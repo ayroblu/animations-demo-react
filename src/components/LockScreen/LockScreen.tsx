@@ -11,6 +11,7 @@ import { useArrayRef } from "../../lib/utils/hooks";
 import { DragDrawerImperative } from "./DragDrawerImperative";
 import { Notification } from "./Notification";
 import { NotificationContext } from "./useNotification";
+import { LockScreenContext } from "./useLockScreenData";
 
 type Props = {
   notifications: string[];
@@ -53,62 +54,69 @@ export function LockScreen(_props: Props) {
   );
 
   return (
-    <DragDrawerImperative drawerContent={drawerContent}>
-      <div className={styles.lockScreen}>
-        <div className={styles.backgroundImage} />
-        <div className={styles.statusBar} />
-        <div
-          className={styles.scrollableContent}
-          ref={scrollRef}
-          key="scrollable"
-        >
-          <div>
-            <div className={styles.infoContent}>
-              <div className={styles.itemPadding}>
-                <div className={styles.lock} />
-              </div>
-              <div className={styles.itemPadding}>
-                <div className={styles.widgetTop}>widget</div>
-              </div>
-              <div className={styles.itemPadding}>
-                <div className={styles.time}>{time}</div>
-              </div>
-              <div className={cn(styles.itemPadding, styles.widgetsContainer)}>
-                <div className={styles.widgets}>
-                  <div className={styles.widgetSpan2}>
-                    <Link to={routes.root} className={styles.widgetPlaceholder}>
-                      &lt; Home
-                    </Link>
-                  </div>
-                  <div className={styles.widget}>
-                    <div className={styles.widgetPlaceholder}>Widget</div>
-                  </div>
-                  <div className={styles.widget}>
-                    <div className={styles.widgetPlaceholder}>Widget</div>
+    <LockScreenContext.Provider value={{ notifRefs }}>
+      <DragDrawerImperative drawerContent={drawerContent}>
+        <div className={styles.lockScreen}>
+          <div className={styles.backgroundImage} />
+          <div className={styles.statusBar} />
+          <div
+            className={styles.scrollableContent}
+            ref={scrollRef}
+            key="scrollable"
+          >
+            <div>
+              <div className={styles.infoContent}>
+                <div className={styles.itemPadding}>
+                  <div className={styles.lock} />
+                </div>
+                <div className={styles.itemPadding}>
+                  <div className={styles.widgetTop}>widget</div>
+                </div>
+                <div className={styles.itemPadding}>
+                  <div className={styles.time}>{time}</div>
+                </div>
+                <div
+                  className={cn(styles.itemPadding, styles.widgetsContainer)}
+                >
+                  <div className={styles.widgets}>
+                    <div className={styles.widgetSpan2}>
+                      <Link
+                        to={routes.root}
+                        className={styles.widgetPlaceholder}
+                      >
+                        &lt; Home
+                      </Link>
+                    </div>
+                    <div className={styles.widget}>
+                      <div className={styles.widgetPlaceholder}>Widget</div>
+                    </div>
+                    <div className={styles.widget}>
+                      <div className={styles.widgetPlaceholder}>Widget</div>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div className={styles.infoSpacer} />
             </div>
-            <div className={styles.infoSpacer} />
+            {notifications.map(({ id, isFixed }, i) => (
+              <NotificationContext.Provider value={{ id, isFixed }} key={id}>
+                <Notification
+                  key={id}
+                  isFixed={isFixed}
+                  revIndex={notifications.length - i}
+                  onNotifRef={onNotifRef(i)}
+                  onFixedNotifRef={onFixedNotifRef(i)}
+                  removeNotification={removeNotification}
+                />
+              </NotificationContext.Provider>
+            ))}
           </div>
-          {notifications.map(({ id, isFixed }, i) => (
-            <NotificationContext.Provider value={{ id, isFixed }} key={id}>
-              <Notification
-                key={id}
-                isFixed={isFixed}
-                revIndex={notifications.length - i}
-                onNotifRef={onNotifRef(i)}
-                onFixedNotifRef={onFixedNotifRef(i)}
-                removeNotification={removeNotification}
-              />
-            </NotificationContext.Provider>
-          ))}
+          <button className={cn(styles.leftControl, styles.control)}>T</button>
+          <button className={cn(styles.rightControl, styles.control)}>C</button>
+          <div className={styles.homeArea} />
         </div>
-        <button className={cn(styles.leftControl, styles.control)}>T</button>
-        <button className={cn(styles.rightControl, styles.control)}>C</button>
-        <div className={styles.homeArea} />
-      </div>
-    </DragDrawerImperative>
+      </DragDrawerImperative>
+    </LockScreenContext.Provider>
   );
 }
 

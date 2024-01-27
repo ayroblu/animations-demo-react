@@ -29,6 +29,11 @@
   /* mask: linear-gradient(to right, #000 0, 100%, #0000 0); */
   position: relative;
 }
+.notifItemPadding.exiting {
+  transform: translateX(-100%);
+  transition: 0.2s transform;
+  position: absolute;
+}
 .flexGrow {
   flex-grow: 1;
 }

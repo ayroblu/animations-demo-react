@@ -14,7 +14,7 @@ export function getTransform(from: Box, to: Box, partial?: number): string {
   const portion = partial ?? 1;
   const translate = `translate(${(to.left - from.left) * portion}px, ${
     (to.top - from.top) * portion
-  })`;
+  }px)`;
   const scale = `scale(${
     1 + ((to.width - from.width) / from.width) * portion
   }, ${1 + ((to.height - from.height) / from.height) * portion})`;
