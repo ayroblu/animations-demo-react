@@ -81,7 +81,7 @@ export function useWidthDragHandler(params: Params) {
     const notifOptionsResetable = getResetable<HTMLElement>();
     const notifOptionsHandler: GestureHandler = {
       onReset: () => {
-        notifOptionsResetable.reset();
+        notifOptionsResetable.resetAll();
       },
       onMove: ({ moveX }) => {
         const notifOptionsWidth = cachedValueManager.get(
@@ -132,7 +132,7 @@ export function useWidthDragHandler(params: Params) {
         }
       },
       onEnd: (params) => {
-        notifOptionsResetable.reset();
+        notifOptionsResetable.resetAll();
 
         const notifOptionsWidth = cachedValueManager.get(
           notifOptions,

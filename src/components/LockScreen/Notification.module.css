@@ -1,0 +1,170 @@
+.notification {
+  border-radius: 16px;
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.33);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 12px 16px;
+  position: relative;
+}
+.notification.fixed {
+  pointer-events: none;
+  bottom: var(--distance-from-bottom);
+}
+.notification.dragScale {
+  transform: translateX(var(--translateX));
+}
+.iconContainer {
+  margin-right: 16px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  place-items: center;
+}
+.icon {
+}
+.notifItemPadding {
+  padding: 4px 8px;
+  max-width: 450px;
+  margin: auto;
+  /* mask: linear-gradient(to right, #000 0, 100%, #0000 0); */
+  position: relative;
+}
+.flexGrow {
+  flex-grow: 1;
+}
+.notifTop {
+  display: flex;
+}
+.notifContent {
+  flex-grow: 1;
+}
+.fadedText {
+  color: rgba(0, 0, 0, 0.5);
+}
+.smallerFont {
+  font-size: 0.88rem;
+}
+.message {
+  font-size: 0.9rem;
+  font-weight: 300;
+}
+
+.cutBox {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  bottom: 4px;
+  contain: paint;
+  border-radius: calc(16px / var(--scaleX)) / 16px;
+  /* 0.1 is 0, 0.3 is 1 */
+  opacity: clamp(0, (var(--scaleX) - 0.1) / 0.2, 1);
+  pointer-events: none;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: row-reverse;
+}
+.cutBox.fixed {
+  display: "none";
+}
+.cutBox.viewControls {
+  /* opacity: 1; */
+  pointer-events: all;
+  /* width: auto; */
+  /* transform: scaleX(1); */
+}
+.cutBox.dragWidth {
+  width: 0;
+}
+.cutBox.dragScale {
+  --scaleX: 0.05;
+  transform-origin: top right;
+  /* transform: scaleX(0.05); */
+  /* opacity: 1; */
+  transform: scaleX(var(--scaleX));
+}
+.cutBox.dragScale.viewControls {
+  /* transform: scaleX(1); */
+  --scaleX: 1;
+}
+.cutBox.dragSlide {
+  transform: translateX(100%);
+}
+.cutBox.dragSlide.viewControls {
+  transform: translateX(0);
+}
+.notifOptions {
+  position: relative;
+  right: 0px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  gap: 8px;
+  height: 100%;
+}
+.notifOptions.visible {
+}
+.cutBox.dragScale .notifOptions {
+  --scaleX: 0.05;
+  transform-origin: top right;
+  transform: scaleX(calc(1 / var(--scaleX)));
+}
+.cutBox.dragScale .notifOptions.visible {
+  /* transform: scaleX(1); */
+  --scaleX: 1;
+}
+.cutBox.dragSlide .notifOptions {
+  transform: translateX(-100%);
+}
+.cutBox.dragSlide .notifOptions.visible {
+  transform: translateX(0);
+}
+.notifControl {
+  background-color: rgba(255, 255, 255, 0.33);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 12px 16px;
+  border-radius: calc(16px / var(--scaleX)) / 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: top right;
+  transform: translateX(var(--translateX)) scaleX(var(--scaleX));
+}
+.scaleWidth {
+}
+.scaleRev {
+  transform: scaleX(calc(1 / max(1, var(--scaleX))));
+}
+
+@property --scaleX {
+  syntax: "<number>";
+  initial-value: 1;
+  inherits: false;
+}
+@property --translateX {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@keyframes scaleNormal {
+  100% {
+    --scaleX: 1;
+    --translateX: 0;
+  }
+}
+@keyframes scaleHidden {
+  100% {
+    --scaleX: 0.05;
+    --translateX: 0;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .notification {
+    background-color: rgba(0, 0, 0, 0.33);
+  }
+  .fadedText {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}

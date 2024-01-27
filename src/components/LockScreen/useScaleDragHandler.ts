@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./LockScreen.module.css";
+import styles from "./Notification.module.css";
 import {
   DragHandler,
   GestureHandler,
@@ -46,12 +46,22 @@ export function useScaleDragHandler(params: Params) {
       onMove: ({ moveX }) => {
         transformTo(notif, `translateX(${moveX}px)`);
       },
-      onEnd: () => {
-        transitionWrapper(notif, () => {
+      onEnd: ({ moveX }) => {
+        resetAllAnimations({ commitStyles: true });
+        if (isClearing) {
           transformReset(notif);
-        });
+          notif.style.setProperty("--translateX", moveX + "px");
+          animateElement(notif, { translateX: -notif.clientWidth - 8 + "px" });
+        } else {
+          transitionWrapper(notif, () => {
+            transformReset(notif);
+          });
+        }
       },
     };
+    let isClearing = false;
+    const { animateElement, resetAnimation, resetAllAnimations, isAnimating } =
+      getAnimationManager();
     const notifControlsHandler: GestureHandler = {
       onReset: () => {
         const resetProperties = (el: HTMLElement) => {
@@ -89,39 +99,90 @@ export function useScaleDragHandler(params: Params) {
           : -moveX / notifControlsWidth;
         cutBox.style.setProperty("--scaleX", scale + "");
         notifOptions.style.setProperty("--scaleX", scale + "");
-
-        const scaleRevEls = Array.from(
-          cutBox.getElementsByClassName(styles.scaleRev),
-        );
-        for (const scaleRevEl of scaleRevEls) {
-          if (scaleRevEl instanceof HTMLElement) {
-            if (scale > 1) {
-              scaleRevEl.style.setProperty("--scaleX", scale + "");
-            } else {
-              scaleRevEl.style.setProperty("--scaleX", "1");
-            }
-          }
-        }
         const notifControlEls = Array.from(
           cutBox.getElementsByClassName(styles.notifControl),
         );
-        const totalWidth = notifControlEls.reduce(
-          (sum, next) => sum + next.clientWidth,
-          0,
-        );
         const leftMove = isViewControls ? -moveX : -moveX - notifControlsWidth;
-        const itemScale = 1 + leftMove / totalWidth;
-        notifControlEls.reverse();
-        let cumulativeX = 0;
-        for (const notifControlEl of notifControlEls) {
-          if (notifControlEl instanceof HTMLElement) {
-            if (scale > 1) {
-              notifControlEl.style.setProperty("--scaleX", itemScale + "");
-              notifControlEl.style.setProperty(
-                "--translateX",
-                -cumulativeX + "px",
-              );
+        if (scale > 1.2) {
+          const width = notifControlEls.at(-1)!.clientWidth;
+          // why +4???
+          const itemScale =
+            1 + (notifControlsWidth + 4 - width + leftMove) / width;
+          for (let i = 0; i < notifControlEls.length; ++i) {
+            const notifControlEl = notifControlEls[i];
+            if (notifControlEl instanceof HTMLElement) {
+              if (isClearing === false) {
+                resetAnimation(notifControlEl, { commitStyles: true });
+              }
+              forEachElementByClass(notifControlEl, styles.scaleRev, (el) => {
+                if (isClearing === false) {
+                  resetAnimation(el, { commitStyles: true });
+                }
+              });
+              if (i === notifControlEls.length - 1) {
+                animateElement(notifControlEl, { scaleX: itemScale + "" });
+
+                forEachElementByClass(notifControlEl, styles.scaleRev, (el) => {
+                  animateElement(el, { scaleX: itemScale + "" });
+                });
+              } else {
+                const currentScaleX =
+                  notifControlEl.style.getPropertyValue("--scaleX");
+                animateElement(notifControlEl, {
+                  scaleX: currentScaleX,
+                  translateX:
+                    -notifControlEl.clientWidth - 8 - 8 - leftMove + "px",
+                });
+                forEachElementByClass(notifControlEl, styles.scaleRev, (el) => {
+                  animateElement(el, { scaleX: "1" });
+                });
+              }
+            }
+          }
+          isClearing = true;
+        } else if (scale > 1) {
+          const totalWidth = notifControlEls.reduce(
+            (sum, next) => sum + next.clientWidth,
+            0,
+          );
+          const itemScale = 1 + leftMove / totalWidth;
+          notifControlEls.reverse();
+          let cumulativeX = 0;
+          for (const notifControlEl of notifControlEls) {
+            if (notifControlEl instanceof HTMLElement) {
+              if (isClearing === true) {
+                resetAnimation(notifControlEl, { commitStyles: true });
+                forEachElementByClass(notifControlEl, styles.scaleRev, (el) => {
+                  resetAnimation(el, { commitStyles: true });
+                });
+              }
+              if (isClearing === true || isAnimating(notifControlEl)) {
+                animateElement(notifControlEl, {
+                  scaleX: itemScale + "",
+                  translateX: -cumulativeX + "px",
+                });
+                forEachElementByClass(notifControlEl, styles.scaleRev, (el) => {
+                  animateElement(el, { scaleX: itemScale + "" });
+                });
+              } else {
+                notifControlEl.style.setProperty("--scaleX", itemScale + "");
+                notifControlEl.style.setProperty(
+                  "--translateX",
+                  -cumulativeX + "px",
+                );
+                forEachElementByClass(notifControlEl, styles.scaleRev, (el) => {
+                  el.style.setProperty("--scaleX", itemScale + "");
+                });
+              }
               cumulativeX = notifControlEl.clientWidth * (itemScale - 1);
+            }
+          }
+          isClearing = false;
+        } else {
+          for (const notifControlEl of notifControlEls) {
+            if (notifControlEl instanceof HTMLElement) {
+              notifControlEl.style.removeProperty("--scaleX");
+              notifControlEl.style.removeProperty("--translateX");
             }
           }
         }
@@ -129,31 +190,71 @@ export function useScaleDragHandler(params: Params) {
       onEnd: ({ moveX, isReturningX }) => {
         const notifOptionsWidth = notifOptions.clientWidth;
         const isViewControls = isViewControlsRef.current;
-        const isVisible = isViewControls
-          ? !(moveX > 0 && !isReturningX)
-          : !isReturningX || -moveX > notifOptionsWidth;
-
-        const animation = `0.3s -0.05s ${
-          isVisible ? styles.scaleNormal : styles.scaleHidden
-        } forwards`;
-        setAnimation(cutBox, animation);
-        setAnimation(notifOptions, animation);
-        const notifControlEls = Array.from(
-          cutBox.getElementsByClassName(styles.notifControl),
-        );
-        for (const notifControlEl of notifControlEls) {
-          if (notifControlEl instanceof HTMLElement) {
-            setAnimation(notifControlEl, animation);
+        if (isClearing) {
+          const currentScaleX = parseFloat(
+            cutBox.style.getPropertyValue("--scaleX"),
+          );
+          const cutBoxScale = notif.clientWidth / notifOptionsWidth;
+          if (currentScaleX > cutBoxScale) {
+            // go straight to removing and dismissing
           }
-        }
+          // cutBox.style.setProperty("--scaleX", cutBoxScale + "");
+          animateElement(cutBox, {
+            scaleX: cutBoxScale + "",
+          });
+          // notifOptions.style.setProperty("--scaleX", cutBoxScale + "");
+          animateElement(notifOptions, {
+            scaleX: cutBoxScale + "",
+          });
 
-        const scaleRevEls = Array.from(
-          cutBox.getElementsByClassName(styles.scaleRev),
-        );
-        for (const scaleRevEl of scaleRevEls) {
-          if (scaleRevEl instanceof HTMLElement) {
-            setAnimation(scaleRevEl, animation);
-          }
+          forEachElementByClass(
+            cutBox,
+            styles.notifControl,
+            (notifControlEl, i, els) => {
+              if (i === els.length - 1) {
+                const width = notifControlEl.clientWidth;
+                // 8*2 for the two gaps
+                const itemScale = 1 + notif.clientWidth / (width + 16);
+                animateElement(notifControlEl, {
+                  scaleX: itemScale + "",
+                });
+                forEachElementByClass(notifControlEl, styles.scaleRev, (el) => {
+                  animateElement(el, {
+                    scaleX: itemScale + "",
+                  });
+                });
+              } else {
+                const currentScaleX =
+                  notifControlEl.style.getPropertyValue("--scaleX");
+                const leftMove =
+                  cutBoxScale * notifOptionsWidth - notifOptionsWidth;
+                animateElement(notifControlEl, {
+                  scaleX: currentScaleX,
+                  translateX: -notifControlEl.clientWidth - 8 - leftMove + "px",
+                });
+              }
+            },
+          );
+        } else {
+          const isVisible = isViewControls
+            ? !(moveX > 0 && !isReturningX)
+            : !isReturningX || -moveX > notifOptionsWidth;
+
+          const animation = `0.3s -0.05s ${
+            isVisible ? styles.scaleNormal : styles.scaleHidden
+          }`;
+          setAnimation(cutBox, animation);
+          setAnimation(notifOptions, animation);
+          const animationInner = isVisible
+            ? animation
+            : `0.3s -0.05s ${styles.scaleNormal}`;
+
+          forEachElementByClass(cutBox, styles.notifControl, (el) => {
+            setAnimation(el, animationInner);
+          });
+          forEachElementByClass(cutBox, styles.scaleRev, (el) => {
+            setAnimation(el, animationInner);
+          });
         }
       },
     };
@@ -164,13 +265,16 @@ export function useScaleDragHandler(params: Params) {
         const isVisible = isViewControls
           ? !(moveX > 0 && !isReturningX)
           : !isReturningX || -moveX > notifOptionsWidth;
-        setIsViewControls(isVisible);
+        if (!isClearing) {
+          setIsViewControls(isVisible);
+        }
+        isClearing = false;
       },
     };
     const { onReset, onMove, onEnd } = composeGestureHandlers([
       preventDefaultHandler,
-      notifControlsHandler,
       notifHandler,
+      notifControlsHandler,
       setStateHandler,
     ]);
     return getLinearGestureManager({
@@ -202,4 +306,160 @@ function setAnimation(el: HTMLElement, animation: string) {
     { once: true },
   );
   el.style.animation = animation;
+}
+
+function forEachElementByClass(
+  parent: HTMLElement,
+  className: string,
+  func: (element: HTMLElement, i: number, list: Element[]) => void,
+) {
+  let i = 0;
+  const elements = Array.from(parent.getElementsByClassName(className));
+  for (const el of elements) {
+    if (el instanceof HTMLElement) {
+      func(el, i, elements);
+    }
+    ++i;
+  }
+}
+
+function getAnimationManager() {
+  const map = new Map<HTMLElement, Animation>();
+  const eventListenerManager = getEventListenerManager();
+
+  function animateOnce(
+    element: HTMLElement,
+    getAnimation: () => Animation,
+    updateAnimation: (animation: Animation) => void,
+    onEnd: () => void,
+  ) {
+    const animation = map.get(element);
+    if (animation) {
+      eventListenerManager.remove(animation);
+      if (animation.playState === "running") {
+        eventListenerManager.set(animation, () => {
+          onEnd();
+        });
+        updateAnimation(animation);
+      } else {
+        onEnd();
+      }
+    } else {
+      const animation = getAnimation();
+      map.set(element, animation);
+      eventListenerManager.set(animation, () => {
+        onEnd();
+      });
+    }
+  }
+  function animateElement(
+    element: HTMLElement,
+    { scaleX, translateX }: { scaleX?: string; translateX?: string },
+  ) {
+    const currentScaleX =
+      scaleX !== undefined ? element.style.getPropertyValue("--scaleX") : null;
+    const currentTranslateX =
+      translateX !== undefined
+        ? element.style.getPropertyValue("--translateX")
+        : null;
+    animateOnce(
+      element,
+      () =>
+        element.animate(
+          [
+            {
+              ...(scaleX !== undefined ? { "--scaleX": currentScaleX } : {}),
+              ...(translateX !== undefined
+                ? { "--translateX": currentTranslateX }
+                : {}),
+            },
+            {
+              ...(scaleX !== undefined ? { "--scaleX": scaleX } : {}),
+              ...(translateX !== undefined
+                ? { "--translateX": translateX }
+                : {}),
+            },
+          ],
+          3150,
+        ),
+      (animation) => {
+        const effect = animation.effect;
+        if (effect instanceof KeyframeEffect) {
+          effect.setKeyframes([
+            {
+              ...(scaleX !== undefined ? { "--scaleX": currentScaleX } : {}),
+              ...(translateX !== undefined
+                ? { "--translateX": currentTranslateX }
+                : {}),
+            },
+            {
+              ...(scaleX !== undefined ? { "--scaleX": scaleX } : {}),
+              ...(translateX !== undefined
+                ? { "--translateX": translateX }
+                : {}),
+            },
+          ]);
+        }
+      },
+      () => {
+        scaleX !== undefined && element.style.setProperty("--scaleX", scaleX);
+        translateX !== undefined &&
+          element.style.setProperty("--translateX", translateX);
+      },
+    );
+  }
+  function resetAnimation(
+    element: HTMLElement,
+    { commitStyles }: { commitStyles?: boolean } = {},
+  ) {
+    const animation = map.get(element);
+    if (animation) {
+      if (commitStyles) {
+        animation.commitStyles();
+      }
+      animation.cancel();
+      map.delete(element);
+      eventListenerManager.remove(animation);
+    }
+  }
+  function resetAllAnimations({
+    commitStyles,
+  }: { commitStyles?: boolean } = {}) {
+    for (const [, animation] of map) {
+      if (commitStyles) {
+        animation.commitStyles();
+      }
+      animation.cancel();
+      eventListenerManager.remove(animation);
+    }
+    map.clear();
+  }
+  function isAnimating(key: HTMLElement): boolean {
+    return !!map.get(key);
+  }
+
+  return {
+    animateElement,
+    animateOnce,
+    resetAnimation,
+    resetAllAnimations,
+    isAnimating,
+  };
+}
+function getEventListenerManager() {
+  const eventListeners = new WeakMap<Animation, () => void>();
+  function remove(animation: Animation) {
+    const eventListener = eventListeners.get(animation);
+    if (eventListener) {
+      animation.removeEventListener("finish", eventListener);
+    }
+  }
+  function set(animation: Animation, func: () => void) {
+    eventListeners.set(animation, func);
+    animation.addEventListener("finish", func, { once: true });
+  }
+  return {
+    set,
+    remove,
+  };
 }

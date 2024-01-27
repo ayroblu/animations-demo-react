@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./LockScreen.module.css";
+import styles from "./Notification.module.css";
 import { cn } from "../../lib/utils";
 import {
   DragHandler,
@@ -58,7 +58,11 @@ export function Notification({
     <div className={cn(styles.notifItemPadding)}>
       <FixedWithPlaceholder
         isFixed={isFixed}
-        className={cn(styles.notification, isFixed && styles.fixed)}
+        className={cn(
+          styles.notification,
+          isFixed && styles.fixed,
+          dragType === "scale" && styles.dragScale,
+        )}
         placeholderRef={handlePlaceholderRef}
         fixedRef={handleNotifRef}
         style={style}

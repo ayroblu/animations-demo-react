@@ -385,13 +385,21 @@ export function manualTransitionTransform(
 }
 
 type Resettable<T> = {
-  reset: () => void;
+  resetAll: () => void;
+  reset: (key: T) => void;
   set: (key: T, resetter: () => void) => void;
 };
 export function getResetable<T>(): Resettable<T> {
   const map = new Map<T, () => void>();
-  function reset() {
+  function resetAll() {
     for (const [key, resetter] of map) {
+      resetter();
+      map.delete(key);
+    }
+  }
+  function reset(key: T) {
+    const resetter = map.get(key);
+    if (resetter) {
       resetter();
       map.delete(key);
     }
@@ -400,6 +408,7 @@ export function getResetable<T>(): Resettable<T> {
     map.set(key, resetter);
   }
   return {
+    resetAll,
     reset,
     set,
   };
