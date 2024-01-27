@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { useArrayRef } from "../../lib/utils/hooks";
 import { DragDrawerImperative } from "./DragDrawerImperative";
 import { Notification } from "./Notification";
+import { NotificationContext } from "./useNotification";
 
 type Props = {
   notifications: string[];
@@ -22,7 +23,8 @@ export function LockScreen(_props: Props) {
   const [notifications, setNotifications] = React.useState(() =>
     Array(20)
       .fill(null)
-      .map(() => ({
+      .map((_, i) => ({
+        id: `notificaiton-${i}`,
         isFixed: false,
       })),
   );
@@ -33,13 +35,33 @@ export function LockScreen(_props: Props) {
     notifications,
     setNotifications,
   });
+  const notificationsRef = React.useRef(notifications);
+  notificationsRef.current = notifications;
+  const removeNotification = React.useCallback(
+    (notifId: string) => {
+      const notifications = notificationsRef.current;
+      const index = notifications.findIndex(({ id }) => id === notifId);
+      if (index !== -1) {
+        notifRefs.splice(index, 1);
+        fixedNotifRefs.splice(index, 1);
+      }
+      setNotifications((notifications) =>
+        notifications.filter(({ id }) => id !== notifId),
+      );
+    },
+    [fixedNotifRefs, notifRefs],
+  );
 
   return (
     <DragDrawerImperative drawerContent={drawerContent}>
       <div className={styles.lockScreen}>
         <div className={styles.backgroundImage} />
         <div className={styles.statusBar} />
-        <div className={styles.scrollableContent} ref={scrollRef}>
+        <div
+          className={styles.scrollableContent}
+          ref={scrollRef}
+          key="scrollable"
+        >
           <div>
             <div className={styles.infoContent}>
               <div className={styles.itemPadding}>
@@ -69,14 +91,17 @@ export function LockScreen(_props: Props) {
             </div>
             <div className={styles.infoSpacer} />
           </div>
-          {notifications.map(({ isFixed }, i) => (
-            <Notification
-              key={i}
-              isFixed={isFixed}
-              revIndex={notifications.length - i}
-              onNotifRef={onNotifRef(i)}
-              onFixedNotifRef={onFixedNotifRef(i)}
-            />
+          {notifications.map(({ id, isFixed }, i) => (
+            <NotificationContext.Provider value={{ id, isFixed }} key={id}>
+              <Notification
+                key={id}
+                isFixed={isFixed}
+                revIndex={notifications.length - i}
+                onNotifRef={onNotifRef(i)}
+                onFixedNotifRef={onFixedNotifRef(i)}
+                removeNotification={removeNotification}
+              />
+            </NotificationContext.Provider>
           ))}
         </div>
         <button className={cn(styles.leftControl, styles.control)}>T</button>
@@ -87,18 +112,13 @@ export function LockScreen(_props: Props) {
   );
 }
 
+export type NotificationData = { id: string; isFixed: boolean };
 type ScrollRotationParams = {
   scrollRef: React.RefObject<HTMLElement | null>;
-  notifications: { isFixed: boolean }[];
+  notifications: NotificationData[];
   notifRefs: (HTMLElement | null)[];
   fixedNotifRefs: (HTMLElement | null)[];
-  setNotifications: React.Dispatch<
-    React.SetStateAction<
-      {
-        isFixed: boolean;
-      }[]
-    >
-  >;
+  setNotifications: React.Dispatch<React.SetStateAction<NotificationData[]>>;
 };
 function useScrollRotation({
   scrollRef,
@@ -131,10 +151,13 @@ function useScrollRotation({
       // scroll is out of sync with render, so try offset by a frame
       const nextFrameDiff = getNextFrameDiff();
 
+      const notifications = notificationsRef.current;
       const result = notifRefs.map((placeholder, i) => {
         const fixed = fixedNotifRefs[i];
         if (!placeholder || !fixed) {
+          console.log("failure", i);
           return {
+            ...notifications[i],
             isFixed: false,
           };
         }
@@ -152,10 +175,10 @@ function useScrollRotation({
           transformReset(fixed);
         }
         return {
+          ...notifications[i],
           isFixed,
         };
       });
-      const notifications = notificationsRef.current;
       const isDifferent = notifications.some(
         ({ isFixed }, i) => isFixed !== result[i].isFixed,
       );

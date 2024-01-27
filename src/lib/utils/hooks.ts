@@ -29,7 +29,9 @@ export function useArrayRef(): ArrayRef {
 
   function onRef(key: number) {
     return (ref: HTMLElement | null) => {
-      refs.current[key] = ref;
+      if (ref) {
+        refs.current[key] = ref;
+      }
     };
   }
   return {

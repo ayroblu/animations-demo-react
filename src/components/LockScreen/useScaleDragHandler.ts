@@ -9,6 +9,7 @@ import {
   noopDragHandler,
   transitionWrapper,
 } from "../../lib/utils/animations";
+import { useNotification } from "./useNotification";
 
 type Params = {
   notifRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -16,6 +17,7 @@ type Params = {
   notifOptionsRef: React.MutableRefObject<HTMLDivElement | null>;
   isViewControls: boolean;
   setIsViewControls: React.Dispatch<React.SetStateAction<boolean>>;
+  removeNotification: (id: string) => void;
 };
 export function useScaleDragHandler(params: Params) {
   const {
@@ -24,7 +26,9 @@ export function useScaleDragHandler(params: Params) {
     notifOptionsRef,
     isViewControls,
     setIsViewControls,
+    removeNotification,
   } = params;
+  const { id } = useNotification();
   const isViewControlsRef = React.useRef(isViewControls);
   isViewControlsRef.current = isViewControls;
   const scaleDragHandler: DragHandler = React.useCallback(() => {
@@ -39,6 +43,9 @@ export function useScaleDragHandler(params: Params) {
         touchEvent.stopPropagation();
       },
     };
+    function removeThisNotification() {
+      removeNotification(id);
+    }
     const notifHandler: GestureHandler = {
       onReset: () => {
         transformReset(notif);
@@ -50,8 +57,25 @@ export function useScaleDragHandler(params: Params) {
         resetAllAnimations({ commitStyles: true });
         if (isClearing) {
           transformReset(notif);
-          notif.style.setProperty("--translateX", moveX + "px");
-          animateElement(notif, { translateX: -notif.clientWidth - 8 + "px" });
+          notif.style.transform = "";
+
+          const notifControlsWidth = notifOptions.clientWidth;
+          const isViewControls = isViewControlsRef.current;
+          const leftMove = isViewControls
+            ? -moveX + notifControlsWidth
+            : -moveX;
+          notif.style.setProperty("--translateX", -leftMove + "px");
+          if (leftMove < notif.clientWidth) {
+            animateElement(
+              notif,
+              {
+                translateX: -notif.clientWidth - 8 + "px",
+              },
+              removeThisNotification,
+            );
+          } else {
+            removeThisNotification();
+          }
         } else {
           transitionWrapper(notif, () => {
             transformReset(notif);
@@ -284,7 +308,14 @@ export function useScaleDragHandler(params: Params) {
       },
       handlers: { onReset, onMove, onEnd },
     });
-  }, [cutBoxRef, notifOptionsRef, notifRef, setIsViewControls]);
+  }, [
+    cutBoxRef,
+    id,
+    notifOptionsRef,
+    notifRef,
+    removeNotification,
+    setIsViewControls,
+  ]);
   return scaleDragHandler;
 }
 function setAnimation(el: HTMLElement, animation: string) {
@@ -355,6 +386,7 @@ function getAnimationManager() {
   function animateElement(
     element: HTMLElement,
     { scaleX, translateX }: { scaleX?: string; translateX?: string },
+    onEnd?: () => void,
   ) {
     const currentScaleX =
       scaleX !== undefined ? element.style.getPropertyValue("--scaleX") : null;
@@ -380,7 +412,7 @@ function getAnimationManager() {
                 : {}),
             },
           ],
-          3150,
+          150,
         ),
       (animation) => {
         const effect = animation.effect;
@@ -405,6 +437,7 @@ function getAnimationManager() {
         scaleX !== undefined && element.style.setProperty("--scaleX", scaleX);
         translateX !== undefined &&
           element.style.setProperty("--translateX", translateX);
+        onEnd?.();
       },
     );
   }

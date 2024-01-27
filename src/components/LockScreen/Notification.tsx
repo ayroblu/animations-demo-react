@@ -19,6 +19,7 @@ type NotificationProps = {
   onNotifRef: (element: HTMLElement | null) => void;
   onFixedNotifRef: (element: HTMLElement | null) => void;
   isFixed: boolean;
+  removeNotification: (id: string) => void;
 };
 export function Notification({
   timeSensitive,
@@ -26,6 +27,7 @@ export function Notification({
   onNotifRef,
   onFixedNotifRef,
   isFixed,
+  removeNotification,
 }: NotificationProps) {
   const {
     isViewControls,
@@ -33,7 +35,7 @@ export function Notification({
     cutBoxRef,
     notifOptionsRef,
     placeholderRef,
-  } = useNotificationDrag();
+  } = useNotificationDrag(removeNotification);
   const handlePlaceholderRef = useJoinRefs([placeholderRef, onNotifRef]);
   const handleNotifRef = useJoinRefs([notifRef, onFixedNotifRef]);
   const notificationContent = [
@@ -150,7 +152,7 @@ function useElementWidth(
 }
 
 const dragType: "width" | "scale" | "slide" = "scale";
-function useNotificationDrag() {
+function useNotificationDrag(removeNotification: (id: string) => void) {
   const placeholderRef = React.useRef<HTMLDivElement | null>(null);
   const notifRef = React.useRef<HTMLDivElement | null>(null);
   const cutBoxRef = React.useRef<HTMLDivElement | null>(null);
@@ -187,6 +189,7 @@ function useNotificationDrag() {
     notifOptionsRef,
     isViewControls,
     setIsViewControls,
+    removeNotification,
   });
 
   const slideDragHandler: DragHandler = useSlideDragHandler({
