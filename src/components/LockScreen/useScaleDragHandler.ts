@@ -49,7 +49,6 @@ export function useScaleDragHandler(params: Params) {
       onMove: ({ touchEvent }) => {
         touchEvent.preventDefault();
         touchEvent.stopPropagation();
-        console.log("stop prop");
       },
     };
     function removeThisNotification() {

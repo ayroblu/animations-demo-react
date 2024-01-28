@@ -88,6 +88,7 @@ function getEmulateTouch(
     touchType: "touchstart" | "touchend" | "touchmove" | "touchcancel",
     { withoutTouch }: { withoutTouch?: boolean } = {},
   ): TouchEvent {
+    polyfillTouch();
     const touchEvent = new TouchEvent(touchType, {
       touches: withoutTouch
         ? []
@@ -117,7 +118,6 @@ function getEmulateTouch(
     if ((e.buttons & 1) !== 1) {
       return;
     }
-    console.log("mousemove", e);
     const touchEvent = getTouchEvent(e, "touchmove");
     touchmove(touchEvent);
   }
@@ -126,6 +126,7 @@ function getEmulateTouch(
     touchend(touchEvent);
   }
   element.style.userSelect = "none";
+  element.style.webkitUserSelect = "none";
   element.addEventListener("mousedown", mousedown);
   element.addEventListener("mousemove", mousemove);
   element.addEventListener("mouseup", mouseup);
@@ -486,4 +487,52 @@ export function getResetable<T>(): Resettable<T> {
     reset,
     set,
   };
+}
+
+/** Safari polyfill */
+declare global {
+  interface Array<T> {
+    item(index: number): T;
+  }
+}
+function polyfillTouch() {
+  if (!("TouchEvent" in window)) {
+    globalThis.TouchEvent = class TouchEvent extends UIEvent {
+      constructor(type: string, { touches }: TouchEventInit = {}) {
+        super(type);
+        if (touches) {
+          this.touches = touches;
+        }
+      }
+      readonly altKey: boolean = false;
+      readonly changedTouches: TouchList = [];
+      readonly ctrlKey: boolean = false;
+      readonly metaKey: boolean = false;
+      readonly shiftKey: boolean = false;
+      readonly targetTouches: TouchList = [];
+      readonly touches: TouchList = [];
+    };
+    globalThis.Touch = class Touch {
+      constructor(options: TouchInit) {
+        for (const option in options) {
+          if (option in this && options[option as keyof TouchInit]) {
+            // @ts-expect-error - `keyof Touch` not quite there
+            this[option as keyof Touch] = options[option as keyof TouchInit];
+          }
+        }
+      }
+      readonly clientX: number = 0;
+      readonly clientY: number = 0;
+      readonly force: number = 0;
+      readonly identifier: number = 0;
+      readonly pageX: number = 0;
+      readonly pageY: number = 0;
+      readonly radiusX: number = 0;
+      readonly radiusY: number = 0;
+      readonly rotationAngle: number = 0;
+      readonly screenX: number = 0;
+      readonly screenY: number = 0;
+      readonly target: EventTarget = new EventTarget();
+    };
+  }
 }
