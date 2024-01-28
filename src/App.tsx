@@ -36,6 +36,9 @@ function App() {
         <li>
           <Link to={routes.lockScreen}>iOS Lock Screen</Link>
         </li>
+        <li>
+          <Link to={routes.gallery}>Gallery</Link>
+        </li>
       </ul>
 
       <button onClick={() => window.location.reload()}>Reload</button>

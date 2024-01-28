@@ -1,0 +1,27 @@
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+}
+.imageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  contain: paint;
+}
+.image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.image.horizontal {
+  height: 100%;
+  width: auto;
+  max-width: initial;
+}
+.image.vertical {
+  height: auto;
+  width: 100%;
+}
