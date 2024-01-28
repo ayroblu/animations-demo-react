@@ -1,4 +1,4 @@
-import { cacheName, cacheablePaths } from "./helper";
+import { cacheName, cacheablePaths, updateUrlWithRevision } from "./helper";
 import { log } from "./utils";
 
 declare const self: ServiceWorkerGlobalScope;
@@ -18,11 +18,20 @@ async function handlePrecacheManifest() {
   const newPaths = cacheablePaths.filter(
     ({ url, revision }) => revision || !cachedUrls.has(url),
   );
-  log("sw: new precache:", newPaths.length, "/", cacheablePaths.length);
+  let counter = 0;
 
-  for (const { url } of newPaths) {
+  for (const { url, revision } of newPaths) {
     const reqUrl = new URL(url, self.location.origin);
+    if (revision) {
+      updateUrlWithRevision(reqUrl, revision);
+    }
     // TODO: update tests to support URL param to fetch
-    await cache.add(reqUrl);
+    const match = await cache.match(reqUrl);
+    if (!match) {
+      counter += 1;
+      // log("new", reqUrl.href);
+      await cache.add(reqUrl);
+    }
   }
+  log("sw: new precache:", counter, "/", cacheablePaths.length);
 }

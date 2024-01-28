@@ -1,13 +1,9 @@
-import { precacheRoutes } from "./helper";
+import { cacheName, precacheRoutes } from "./helper";
 import { raceSafe, raceSafeAny, log, wait } from "./utils";
 
 declare const self: ServiceWorkerGlobalScope;
 
 const base = import.meta.env.BASE_URL;
-
-// if you ever change this, you need to delete existing cache storage
-const version = "1";
-const cacheName = `sw-precache-v${version}`;
 
 // MARK: fetch
 export function proxyFetch(event: FetchEvent) {

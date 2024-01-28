@@ -1,4 +1,4 @@
-import { cacheName, cacheablePaths } from "./helper";
+import { cacheName, cacheablePaths, getUrlWithRevision } from "./helper";
 import { log } from "./utils";
 
 declare const self: ServiceWorkerGlobalScope;
@@ -8,7 +8,11 @@ export function cleanupStaleAssets(event: ExtendableEvent) {
   event.waitUntil(handleRemoveStaleAssets());
 }
 async function handleRemoveStaleAssets() {
-  const cacheablePathsSet = new Set(cacheablePaths.map(({ url }) => url));
+  const cacheablePathsSet = new Set(
+    cacheablePaths.map(({ url, revision }) =>
+      revision ? getUrlWithRevision(url, revision) : url,
+    ),
+  );
   const cache = await caches.open(cacheName);
   const cachedRequests = await cache.keys();
   const staleRequests = cachedRequests.filter(
@@ -20,6 +24,13 @@ async function handleRemoveStaleAssets() {
     "/",
     cachedRequests.length,
   );
+  // if (staleRequests.length) {
+  //   log(
+  //     "staleRequests",
+  //     staleRequests.map(({ url }) => url),
+  //     cacheablePathsSet,
+  //   );
+  // }
   await Promise.all(staleRequests.map((req) => cache.delete(req)));
 }
 

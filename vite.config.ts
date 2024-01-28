@@ -11,7 +11,7 @@ export default defineConfig({
     VitePWA({
       manifest: {
         name: "Animations Demo React",
-        short_name: "Animations Demo React",
+        short_name: "Animations Demo",
         theme_color: "#323232",
         background_color: "#323232",
         icons: [
@@ -23,6 +23,9 @@ export default defineConfig({
         ],
       },
       strategies: "injectManifest",
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,html,jpg,svg}"],
+      },
       srcDir: "src/service-worker",
       filename: "sw.ts",
       injectRegister: "inline",

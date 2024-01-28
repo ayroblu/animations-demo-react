@@ -24,3 +24,21 @@ function saveRoutes(routes: string[]) {
   }
 }
 saveRoutes(cacheablePaths.map(({ url }) => url));
+
+export const revisionParam = "__wb_revision";
+export function getUrlWithRevision(url: string, revision: string): string {
+  if (url.includes("/index.html")) {
+    return url;
+  }
+  const param = `${revisionParam}=${revision}`;
+  const prefix = url.includes("?") ? "&" : "?";
+  return `${url}${prefix}${param}`;
+}
+export function updateUrlWithRevision(url: URL, revision: string): void {
+  if (url.pathname.includes("/index.html")) {
+    return;
+  }
+  if (revision) {
+    url.searchParams.append(revisionParam, revision);
+  }
+}
