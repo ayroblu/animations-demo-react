@@ -1,3 +1,18 @@
+.notifItemPadding {
+  padding: 4px 8px;
+  max-width: 450px;
+  margin: auto;
+  /* mask: linear-gradient(to right, #000 0, 100%, #0000 0); */
+  position: relative;
+}
+.notifItemPadding.exiting {
+  transform: translateX(-100%);
+  transition: 0.2s transform;
+  position: absolute;
+}
+.notifItemPadding.fixed {
+  pointer-events: none;
+}
 .notification {
   border-radius: 16px;
   display: flex;
@@ -8,7 +23,6 @@
   position: relative;
 }
 .notification.fixed {
-  pointer-events: none;
   bottom: var(--distance-from-bottom);
 }
 .notification.dragScale {
@@ -21,18 +35,6 @@
   place-items: center;
 }
 .icon {
-}
-.notifItemPadding {
-  padding: 4px 8px;
-  max-width: 450px;
-  margin: auto;
-  /* mask: linear-gradient(to right, #000 0, 100%, #0000 0); */
-  position: relative;
-}
-.notifItemPadding.exiting {
-  transform: translateX(-100%);
-  transition: 0.2s transform;
-  position: absolute;
 }
 .flexGrow {
   flex-grow: 1;

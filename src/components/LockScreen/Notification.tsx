@@ -60,7 +60,11 @@ export function Notification({
 
   return (
     <div
-      className={cn(styles.notifItemPadding, isExiting && styles.exiting)}
+      className={cn(
+        styles.notifItemPadding,
+        isFixed && styles.fixed,
+        isExiting && styles.exiting,
+      )}
       ref={containerRef}
     >
       <FixedWithPlaceholder
