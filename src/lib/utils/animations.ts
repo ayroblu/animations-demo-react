@@ -390,26 +390,27 @@ export function useAnimationScrollListener(
     const { element: el, onScroll } = callback();
     if (!el) return;
     const element = el;
-    let timeoutId = 0;
-    let isScrolling = false;
+    // let timeoutId = 0;
+    // let isScrolling = false;
     function handleScroll() {
-      isScrolling = true;
-      cancelAnimationFrame(timeoutId);
-      timeoutId = requestAnimationFrame(() => {
-        onScroll();
-        if (isScrolling) {
-          handleScroll();
-        }
-      });
+      onScroll();
+      // isScrolling = true;
+      // cancelAnimationFrame(timeoutId);
+      // timeoutId = requestAnimationFrame(() => {
+      //   onScroll();
+      //   if (isScrolling) {
+      //     handleScroll();
+      //   }
+      // });
     }
-    function onScrollEnd() {
-      isScrolling = false;
-    }
+    // function onScrollEnd() {
+    //   isScrolling = false;
+    // }
     element.addEventListener("scroll", handleScroll, { passive: true });
-    element.addEventListener("scrollend", onScrollEnd, { passive: true });
+    // element.addEventListener("scrollend", onScrollEnd, { passive: true });
     return () => {
       element.removeEventListener("scroll", handleScroll);
-      element.removeEventListener("scrollend", onScrollEnd);
+      // element.removeEventListener("scrollend", onScrollEnd);
     };
   }, []);
 }
