@@ -47,3 +47,8 @@ export function getScrollParent(element: HTMLElement, includeHidden?: boolean) {
 
   return document.documentElement;
 }
+
+/* https://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript */
+export function isTouchDevice() {
+  return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}

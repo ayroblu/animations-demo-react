@@ -138,5 +138,5 @@
   border-radius: 16px;
   margin-inline-start: 16px;
   margin-inline-end: 16px;
-  width: calc(100dvw - 32px);
+  /* width: calc(100dvw - 32px); */
 }

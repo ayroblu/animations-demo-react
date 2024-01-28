@@ -1,6 +1,5 @@
 import React from "react";
 import styles from "./Drawer.module.css";
-import { useDimensions } from "../../lib/utils/hooks";
 import { cn } from "../../lib/utils";
 import iosStyles from "../IosPadding.module.css";
 
@@ -18,26 +17,6 @@ type Props = {
   contentCoverRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 export function Drawer({ children, drawerContent, ...rest }: Props) {
-  const { width } = useDimensions();
-  if (width > 700) {
-    return (
-      <div className={styles.sidenavDrawer}>
-        <div
-          className={cn(
-            iosStyles.topPadding,
-            iosStyles.leftPadding,
-            styles.drawerContent,
-            styles.sidenav,
-          )}
-        >
-          <div className={styles.drawerContentWrapper}>{drawerContent}</div>
-        </div>
-        <div className={cn(styles.sidenavContent, styles.content)}>
-          {children}
-        </div>
-      </div>
-    );
-  }
   return (
     <SideDrawer children={children} drawerContent={drawerContent} {...rest} />
   );

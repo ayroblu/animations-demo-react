@@ -2,12 +2,16 @@
   display: flex;
 }
 .drawerContent {
-  /* width: 280px; */
-  width: 100%;
+  width: 280px;
   min-height: 100dvh;
 }
+@media (max-width: 1000px) {
+  .drawerContent {
+    width: 100%;
+  }
+}
 .drawerContentWrapper {
-  top: 0;
+  /* top: 0; */
 }
 .mobileDrawer {
   position: absolute;
@@ -18,6 +22,7 @@
   display: flex;
   flex-direction: column;
   z-index: 1;
+  will-change: transform;
 }
 .sidenav {
   flex-shrink: 0;
@@ -27,9 +32,9 @@
   z-index: 0;
 }
 .content.visible {
-  /* transform: translateX(280px); */
-  filter: blur(8px);
-  transform: perspective(500px) translateZ(-40px);
+  filter: blur(16px);
+  transform: perspective(500px) translateZ(-10px);
+  pointer-events: none;
 }
 .sidenavContent {
   flex-grow: 1;

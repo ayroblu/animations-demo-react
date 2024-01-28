@@ -38,11 +38,15 @@ function useDragDrawer() {
       if (!drawer || !content) return;
 
       touchEvent.preventDefault();
+
+      const drawerWidth = drawer.clientWidth;
+      if (moveX > drawerWidth) {
+        moveX = drawerWidth;
+      }
       transformTo(drawer, `translateX(${moveX}px)`);
-      const contentWidth = content.clientWidth;
-      const z = (moveX / contentWidth) * 40;
+      const z = (moveX / drawerWidth) * 10;
       transformTo(content, `perspective(500px) translateZ(-${z}px)`);
-      const blur = (moveX / contentWidth) * 8;
+      const blur = (moveX / drawerWidth) * 16;
       content.style.filter = `blur(${blur}px)`;
       const contentCover = contentCoverRef.current;
       if (contentCover) {

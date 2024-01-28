@@ -1,4 +1,5 @@
 import React from "react";
+import { isTouchDevice } from ".";
 
 export type DragHandler = () => {
   reset: () => void;
@@ -44,11 +45,19 @@ export function useDragEvent({ dragHandler, getElement }: UseDragEventParams) {
     }
     const element = getElement();
     if (!element) return;
+    const disposeMouse = !isTouchDevice()
+      ? getEmulateTouch(element, {
+          touchstart,
+          touchmove,
+          touchend,
+        })
+      : null;
     element.addEventListener("touchstart", touchstart, { passive: false });
     element.addEventListener("touchmove", touchmove, { passive: false });
     element.addEventListener("touchend", touchend, { passive: false });
     return () => {
       handler.reset();
+      disposeMouse?.();
       element.removeEventListener("touchstart", touchstart);
       element.removeEventListener("touchmove", touchmove);
       element.removeEventListener("touchend", touchend);
@@ -61,6 +70,71 @@ export const noopDragHandler: ReturnType<DragHandler> = {
   move: () => {},
   end: () => {},
 };
+
+function getEmulateTouch(
+  element: HTMLElement,
+  {
+    touchstart,
+    touchmove,
+    touchend,
+  }: {
+    touchstart: (e: TouchEvent) => void;
+    touchmove: (e: TouchEvent) => void;
+    touchend: (e: TouchEvent) => void;
+  },
+) {
+  function getTouchEvent(
+    e: MouseEvent,
+    touchType: "touchstart" | "touchend" | "touchmove" | "touchcancel",
+    { withoutTouch }: { withoutTouch?: boolean } = {},
+  ): TouchEvent {
+    const touchEvent = new TouchEvent(touchType, {
+      touches: withoutTouch
+        ? []
+        : [
+            new Touch({
+              target: e.target!,
+              identifier: 0,
+              pageX: e.pageX,
+              pageY: e.pageY,
+              screenX: e.screenX,
+              screenY: e.screenY,
+              clientX: e.clientX,
+              clientY: e.clientY,
+            }),
+          ],
+    });
+    touchEvent.stopPropagation = () => e.stopPropagation();
+    touchEvent.preventDefault = () => e.preventDefault();
+    return touchEvent;
+  }
+
+  function mousedown(e: MouseEvent) {
+    const touchEvent = getTouchEvent(e, "touchstart");
+    touchstart(touchEvent);
+  }
+  function mousemove(e: MouseEvent) {
+    if ((e.buttons & 1) !== 1) {
+      return;
+    }
+    console.log("mousemove", e);
+    const touchEvent = getTouchEvent(e, "touchmove");
+    touchmove(touchEvent);
+  }
+  function mouseup(e: MouseEvent) {
+    const touchEvent = getTouchEvent(e, "touchend", { withoutTouch: true });
+    touchend(touchEvent);
+  }
+  element.style.userSelect = "none";
+  element.addEventListener("mousedown", mousedown);
+  element.addEventListener("mousemove", mousemove);
+  element.addEventListener("mouseup", mouseup);
+  return () => {
+    element.removeEventListener("mousedown", mousedown);
+    element.removeEventListener("mousemove", mousemove);
+    element.removeEventListener("mouseup", mouseup);
+  };
+}
 
 export function getTransformsManager(transformOrigin?: string) {
   // it's typed as a string, but may also be a "matrix"

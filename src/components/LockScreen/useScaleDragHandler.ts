@@ -49,6 +49,7 @@ export function useScaleDragHandler(params: Params) {
       onMove: ({ touchEvent }) => {
         touchEvent.preventDefault();
         touchEvent.stopPropagation();
+        console.log("stop prop");
       },
     };
     function removeThisNotification() {
@@ -353,11 +354,14 @@ export function useScaleDragHandler(params: Params) {
       handlers: { onReset, onMove, onEnd },
     });
   }, [
+    containerRef,
     cutBoxRef,
     id,
     notifOptionsRef,
     notifRef,
+    notifRefs,
     removeNotification,
+    setIsExiting,
     setIsViewControls,
   ]);
   return scaleDragHandler;
