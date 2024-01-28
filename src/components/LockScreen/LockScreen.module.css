@@ -132,11 +132,12 @@
 .drawerContent:after {
   content: "";
 }
+.drawerPadding {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+}
 .drawerWidget {
   aspect-ratio: 2 / 1;
   background-color: #5bf;
   border-radius: 16px;
-  margin-inline-start: 16px;
-  margin-inline-end: 16px;
-  /* width: calc(100dvw - 32px); */
 }

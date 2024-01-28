@@ -5,7 +5,7 @@
   width: 280px;
   min-height: 100dvh;
 }
-@media (max-width: 1000px) {
+@media (max-width: 500px) {
   .drawerContent {
     width: 100%;
   }

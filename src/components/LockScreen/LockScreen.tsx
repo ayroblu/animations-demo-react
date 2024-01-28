@@ -29,7 +29,7 @@ export function LockScreen(_props: Props) {
         isFixed: false,
       })),
   );
-  useScrollRotation({
+  const scrollHandlerRef = useScrollRotation({
     scrollRef,
     notifRefs,
     fixedNotifRefs,
@@ -49,8 +49,13 @@ export function LockScreen(_props: Props) {
       setNotifications((notifications) =>
         notifications.filter(({ id }) => id !== notifId),
       );
+      const scrollHandler = scrollHandlerRef.current;
+      const { onScroll } = scrollHandler();
+      setTimeout(() => {
+        onScroll();
+      }, 10);
     },
-    [fixedNotifRefs, notifRefs],
+    [fixedNotifRefs, notifRefs, scrollHandlerRef],
   );
 
   return (
@@ -202,11 +207,13 @@ function useScrollRotation({
   }
   useAnimationScrollListener(scrollHandler);
   const scrollHandlerRef = React.useRef(scrollHandler);
+  scrollHandlerRef.current = scrollHandler;
   React.useLayoutEffect(() => {
     const scrollHandler = scrollHandlerRef.current;
     const { onScroll } = scrollHandler();
     onScroll();
   }, [fixedNotifRefs, notifRefs]);
+  return scrollHandlerRef;
 }
 
 const safeAreaInsetBottom = getComputedStyle(
@@ -244,7 +251,9 @@ function WidgetDrawerContent() {
         {Array(10)
           .fill(null)
           .map((_, i) => (
-            <div key={i} className={styles.drawerWidget} />
+            <div key={i} className={styles.drawerPadding}>
+              <div key={i} className={styles.drawerWidget} />
+            </div>
           ))}
       </div>
     </div>
