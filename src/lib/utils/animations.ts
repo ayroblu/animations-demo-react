@@ -263,6 +263,9 @@ export type GestureManagerParams = {
   };
   withMargin?: boolean;
 };
+const safeAreaInsetBottom = getComputedStyle(
+  document.documentElement,
+).getPropertyValue("--safe-area-inset-bottom");
 export function getLinearGestureManager({
   getConstraints,
   handlers: { onReset, onMove, onEnd },
@@ -301,6 +304,11 @@ export function getLinearGestureManager({
         // don't mix back swipe and movement
         return;
       }
+    }
+    const viewportHeight = document.documentElement.clientHeight;
+    if (touch.screenY > viewportHeight - parseFloat(safeAreaInsetBottom)) {
+      // user is swiping home, nothing you should do
+      return;
     }
     startPoint = { x: touch.pageX, y: touch.pageY };
     constraints = getConstraints();
