@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Gallery.module.css";
 import { cn, getTransform } from "../../lib/utils";
-import { useForceUpdate } from "../../lib/utils/hooks";
+import { useDimensionsQuery } from "../../lib/utils/hooks";
 import {
   getTransformsManager,
   transitionWrapper,
@@ -74,13 +74,29 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
       const transform = getTransform(after, before);
       const { transformTo, transformReset } = getTransformsManager();
       transformTo(modalMedia, transform);
+      const child = modalMedia.children[0] as HTMLElement;
+      const revTransform = getReverseScaleTransform(
+        after,
+        before,
+        width < height ? "y" : "x",
+      );
+      transformTo(child, revTransform);
+      console.log("revTransform", revTransform);
       modalMedia.getBoundingClientRect();
+      child.getBoundingClientRect();
       transitionWrapper(
         modalMedia,
         () => {
           transformReset(modalMedia);
         },
-        { transition: "0.3s transform" },
+        { transition: "0.25s transform" },
+      );
+      transitionWrapper(
+        child,
+        () => {
+          transformReset(child);
+        },
+        { transition: "0.25s transform" },
       );
     } else {
       const modalMedia = modalMediaRef.current;
@@ -96,13 +112,36 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
       const transform = getTransform(imageRect, modalRect);
       const { transformTo, transformReset } = getTransformsManager();
       transformTo(imageContainer, transform);
+      const revTransform = getReverseScaleTransform(
+        imageRect,
+        modalRect,
+        width < height ? "y" : "x",
+      );
+      const child = imageContainer.children[0] as HTMLElement;
+      transformTo(child, revTransform);
       imageContainer.getBoundingClientRect();
+      child.getBoundingClientRect();
+      imageContainer.style.zIndex = "1";
       transitionWrapper(
         imageContainer,
         () => {
           transformReset(imageContainer);
         },
-        { transition: "0.3s transform" },
+        {
+          transition: "0.25s transform",
+          onEnd: () => {
+            imageContainer.style.zIndex = "";
+          },
+        },
+      );
+      transitionWrapper(
+        child,
+        () => {
+          transformReset(child);
+        },
+        {
+          transition: "0.25s transform",
+        },
       );
     }
   };
@@ -154,7 +193,6 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
               />
             ) : (
               <video
-                ref={videoRef}
                 className={cn(isVertical ? styles.horizontal : styles.vertical)}
                 src={url}
                 width={width}
@@ -173,37 +211,22 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
   );
 }
 
-function useDimensionsQuery<T>(
-  callback: (params: { windowWidth: number; windowHeight: number }) => T,
-): T {
-  const forceUpdate = useForceUpdate();
-  const valueRef = React.useRef<T>();
-  valueRef.current = callback(getDimensions());
-  const callbackRef = React.useRef(callback);
-  callbackRef.current = callback;
-  React.useEffect(() => {
-    function resize() {
-      const callback = callbackRef.current;
-      const value = valueRef.current;
-      const result = callback(getDimensions());
-      if (value !== result) {
-        forceUpdate();
-      }
-    }
-    window.addEventListener("resize", resize);
-    return () => {
-      window.removeEventListener("resize", resize);
-    };
-  }, [forceUpdate]);
-
-  return valueRef.current;
-}
-
-function getDimensions() {
-  const windowHeight = document.documentElement.clientHeight;
-  const windowWidth = document.documentElement.clientWidth;
-  return {
-    windowHeight,
-    windowWidth,
-  };
+type Box = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
+function getReverseScaleTransform(
+  from: Box,
+  to: Box,
+  direction: "x" | "y",
+): string {
+  const fromAspectRatio = from.width / from.height;
+  const toAspectRatio = to.width / to.height;
+  if (direction === "y") {
+    return `scaleY(${toAspectRatio / fromAspectRatio})`;
+  } else {
+    return `scaleX(${fromAspectRatio / toAspectRatio})`;
+  }
 }

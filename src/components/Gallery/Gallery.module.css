@@ -49,6 +49,7 @@
 .modalMedia {
   align-self: center;
   transform-origin: top left;
+  contain: paint;
 }
 .modalFooter {
   position: absolute;

@@ -7,16 +7,38 @@ export function useForceUpdate() {
   return forceUpdate;
 }
 
-export function useDimensions() {
-  const height = document.body.clientHeight;
-  const width = document.body.clientWidth;
+export function useDimensionsQuery<T>(
+  callback: (params: { windowWidth: number; windowHeight: number }) => T,
+): T {
   const forceUpdate = useForceUpdate();
+  const valueRef = React.useRef<T>();
+  valueRef.current = callback(getDimensions());
+  const callbackRef = React.useRef(callback);
+  callbackRef.current = callback;
   React.useEffect(() => {
-    window.addEventListener("resize", forceUpdate);
+    function resize() {
+      const callback = callbackRef.current;
+      const value = valueRef.current;
+      const result = callback(getDimensions());
+      if (value !== result) {
+        forceUpdate();
+      }
+    }
+    window.addEventListener("resize", resize);
+    return () => {
+      window.removeEventListener("resize", resize);
+    };
   }, [forceUpdate]);
+
+  return valueRef.current;
+}
+
+function getDimensions() {
+  const windowHeight = document.documentElement.clientHeight;
+  const windowWidth = document.documentElement.clientWidth;
   return {
-    width,
-    height,
+    windowHeight,
+    windowWidth,
   };
 }
 
