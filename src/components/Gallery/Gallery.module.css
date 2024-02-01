@@ -20,6 +20,8 @@
   aspect-ratio: 1 / 1;
   overflow: hidden;
   contain: paint;
+  cursor: pointer;
+  transform-origin: top left;
 }
 .horizontal {
   height: 100%;
@@ -29,4 +31,28 @@
 .vertical {
   height: auto;
   width: 100%;
+}
+.hide {
+  visibility: hidden;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: Canvas;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  justify-content: center;
+  contain: paint;
+}
+.modalMedia {
+  align-self: center;
+  transform-origin: top left;
+}
+.modalFooter {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
 }

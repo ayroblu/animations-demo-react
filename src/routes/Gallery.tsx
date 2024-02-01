@@ -7,11 +7,21 @@ import React from "react";
 export function GalleryRoute() {
   const pageRef = React.useRef<HTMLDivElement | null>(null);
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const modalRef = React.useRef<HTMLDivElement | null>(null);
+  const [modal] = React.useState(() => document.createElement("div"));
+
   React.useEffect(() => {
     const page = pageRef.current;
     if (!page) return;
     page.scrollTo(0, page.scrollHeight);
   }, []);
+
+  React.useEffect(() => {
+    if (modalRef.current) {
+      modalRef.current.appendChild(modal);
+    }
+  }, [modal]);
+
   const [isVisible, setIsVisible] = React.useState(false);
   const handleMediaClick = React.useCallback(
     (media: Media & { videoTime?: number }) => {
@@ -23,6 +33,7 @@ export function GalleryRoute() {
     },
     [],
   );
+
   return (
     <div className={styles.page} ref={pageRef}>
       <div className={cn(styles.content, iosStyles.fullPadding)}>
@@ -32,22 +43,11 @@ export function GalleryRoute() {
           maintain a consistent reference for a video to continue playing
           exactly as it is I think?
         </div>
-        <Gallery media={media} onClick={handleMediaClick} />
-        <div className={cn(styles.modal, !isVisible && styles.hidden)}>
-          <video
-            ref={videoRef}
-            className={styles.video}
-            src={
-              "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            }
-            width={1280}
-            height={720}
-            autoPlay
-            loop
-            playsInline
-            onClick={() => setIsVisible(false)}
-          />
-        </div>
+        <Gallery media={media} onClick={handleMediaClick} modal={modal} />
+        <div
+          className={cn(styles.modal, !isVisible && styles.hidden)}
+          ref={modalRef}
+        />
       </div>
     </div>
   );
