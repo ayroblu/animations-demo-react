@@ -81,13 +81,13 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
         width < height ? "y" : "x",
       );
       transformTo(child, revTransform);
-      console.log("revTransform", revTransform);
       modalMedia.getBoundingClientRect();
       child.getBoundingClientRect();
       transitionWrapper(
         modalMedia,
         () => {
           transformReset(modalMedia);
+          modalMedia.getBoundingClientRect();
         },
         { transition: "0.25s transform" },
       );
@@ -95,6 +95,7 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
         child,
         () => {
           transformReset(child);
+          child.getBoundingClientRect();
         },
         { transition: "0.25s transform" },
       );
@@ -126,6 +127,7 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
         imageContainer,
         () => {
           transformReset(imageContainer);
+          imageContainer.getBoundingClientRect();
         },
         {
           transition: "0.25s transform",
@@ -138,6 +140,7 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
         child,
         () => {
           transformReset(child);
+          child.getBoundingClientRect();
         },
         {
           transition: "0.25s transform",
@@ -160,6 +163,8 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
             width={width}
             height={height}
             loading="lazy"
+            crossOrigin=""
+            onLoad={(e) => cacheImg(e.currentTarget)}
           />
         ) : (
           <video
@@ -186,7 +191,7 @@ function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
             {kind === "image" ? (
               <img
                 className={cn(isVertical ? styles.horizontal : styles.vertical)}
-                src={url}
+                src={getCachedImage(url) ?? url}
                 width={width}
                 height={height}
                 loading="lazy"
@@ -230,3 +235,31 @@ function getReverseScaleTransform(
     return `scaleX(${fromAspectRatio / toAspectRatio})`;
   }
 }
+// https://gist.github.com/Jonarod/77d8e3a15c5c1bb55fa9d057d12f95bd
+function imgToBlob(img: HTMLImageElement): Promise<Blob | null> {
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0);
+
+  return new Promise((resolve) => {
+    canvas.toBlob(resolve);
+  });
+}
+
+function getImageCache() {
+  const imageMap = new Map<string, string>();
+  async function cacheImg(img: HTMLImageElement): Promise<void> {
+    const blob = await imgToBlob(img);
+    if (blob) {
+      const url = window.URL.createObjectURL(blob);
+      imageMap.set(img.src, url);
+    }
+  }
+  function getCachedImage(src: string): string | void {
+    return imageMap.get(src);
+  }
+  return { cacheImg, getCachedImage };
+}
+const { cacheImg, getCachedImage } = getImageCache();

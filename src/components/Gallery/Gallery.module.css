@@ -33,13 +33,13 @@
   width: 100%;
 }
 .hide {
-  visibility: hidden;
+  /* visibility: hidden; */
 }
 
 .modal {
   position: fixed;
   inset: 0;
-  background: Canvas;
+  /* background-color: Canvas; */
   display: flex;
   flex-direction: column;
   z-index: 1;
@@ -50,6 +50,7 @@
   align-self: center;
   transform-origin: top left;
   contain: paint;
+  /* border: 1px solid red; */
 }
 .modalFooter {
   position: absolute;

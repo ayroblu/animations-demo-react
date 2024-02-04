@@ -16,14 +16,17 @@ export function proxyFetch(event: FetchEvent) {
   ) {
     event.respondWith(handleNavigation(event));
   } else if (precacheRoutes.has(route)) {
-    event.respondWith(cacheFirst(event));
+    event.respondWith(cacheFirst(event, { ignoreSearch: true }));
   } else if (route.includes("favicon")) {
     event.respondWith(networkFirst(event));
   } else if (route.includes("/assets/")) {
     // Mimicing browser cache since github pages doesn't set cache headers
     event.respondWith(cacheFirst(event));
+  } else if (!route.includes("localhost")) {
+    // log("cacheFirst", event.request.url, route);
+    // event.respondWith(cacheFirst(event));
   } else {
-    // log("missing", event.request.url, route, cacheablePaths);
+    // log("missing", event.request.url, route);
   }
 }
 
@@ -67,13 +70,18 @@ async function handleNavigation(event: FetchEvent) {
   });
 }
 
-async function cacheFirst(event: FetchEvent, url: string = event.request.url) {
+async function cacheFirst(
+  event: FetchEvent,
+  { ignoreSearch }: { ignoreSearch?: boolean } = {},
+) {
+  const url = event.request.url;
   const cache = await caches.open(cacheName);
-  const match = await cache.match(url, { ignoreSearch: true });
+  const match = await cache.match(url, { ignoreSearch });
   if (match) {
     return match;
   }
   const res = await fetch(event.request);
+  console.log("fetching", event.request.url);
   if (res.ok) {
     const cache = await caches.open(cacheName);
     await cache.put(url, res.clone());
