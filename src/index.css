@@ -30,3 +30,14 @@ button {
   /* disables the fade out on iOS */
   -webkit-tap-highlight-color: transparent;
 }
+
+@property --scaleX {
+  syntax: "<number>";
+  initial-value: 1;
+  inherits: false;
+}
+@property --translateX {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}

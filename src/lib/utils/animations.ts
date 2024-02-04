@@ -12,6 +12,8 @@ type UseDragEventParams = {
   getElement: () => HTMLElement | null;
 };
 export function useDragEvent({ dragHandler, getElement }: UseDragEventParams) {
+  const getElementRef = React.useRef(getElement);
+  getElementRef.current = getElement;
   React.useEffect(() => {
     const handler = dragHandler();
     function touchstart(e: TouchEvent) {
@@ -43,6 +45,7 @@ export function useDragEvent({ dragHandler, getElement }: UseDragEventParams) {
       }
       handler.end(e);
     }
+    const getElement = getElementRef.current;
     const element = getElement();
     if (!element) return;
     const disposeMouse = !isTouchDevice()
@@ -62,7 +65,7 @@ export function useDragEvent({ dragHandler, getElement }: UseDragEventParams) {
       element.removeEventListener("touchmove", touchmove);
       element.removeEventListener("touchend", touchend);
     };
-  }, [dragHandler, getElement]);
+  }, [dragHandler]);
 }
 export const noopDragHandler: ReturnType<DragHandler> = {
   reset: () => {},
@@ -369,7 +372,7 @@ export function getLinearGestureManager({
     const movingHorizRight = x >= startPoint.x;
     const movingVertDown = y >= startPoint.y;
     const isReturningX = movingHorizRight !== lastDirection.horizRight;
-    const isReturningY = movingVertDown !== !lastDirection.vertDown;
+    const isReturningY = movingVertDown !== lastDirection.vertDown;
     reset(true);
     onEnd({
       touchEvent: e,
