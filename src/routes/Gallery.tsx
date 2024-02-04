@@ -67,7 +67,7 @@ const media: Media[] = [
       };
     }),
   {
-    url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     width: 1280,
     height: 720,
     kind: "video" as const,
