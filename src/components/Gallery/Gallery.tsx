@@ -3,7 +3,7 @@ import styles from "./Gallery.module.css";
 import { cn } from "../../lib/utils";
 import { cacheImg, getCachedImage } from "../../lib/utils/image-cache";
 import { GalleryContext } from "./GalleryContext";
-import { useSelectedItem, useSetSelectedItem } from "./state";
+import { useAllMedia, useSelectedItem, useSetSelectedItem } from "./state";
 import { getWrappedSetState } from "./animate";
 
 export type Media = {
@@ -12,13 +12,11 @@ export type Media = {
   url: string;
   kind: "video" | "image";
 };
-type Props = {
-  media: Media[];
-};
-export function Gallery({ media }: Props) {
+export function Gallery() {
+  const allMedia = useAllMedia();
   return (
     <div className={styles.gallery}>
-      {media.map((media) => {
+      {allMedia.map((media) => {
         return <GalleryItem key={media.url} media={media} />;
       })}
     </div>

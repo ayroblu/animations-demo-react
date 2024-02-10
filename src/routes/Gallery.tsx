@@ -5,15 +5,25 @@ import { Gallery, Media } from "../components/Gallery/Gallery";
 import React from "react";
 import { SwipeableModal } from "../components/Gallery/SwipeableModal";
 import { GalleryContextProvider } from "../components/Gallery/GalleryContext";
+import { useInitMedia } from "../components/Gallery/state";
 
 export function GalleryRoute() {
   const pageRef = React.useRef<HTMLDivElement | null>(null);
+  const [isInit, setIsInit] = React.useState(false);
+  useInitMedia(() => media);
 
   React.useEffect(() => {
     const page = pageRef.current;
     if (!page) return;
     page.scrollTo(0, page.scrollHeight);
   }, []);
+  React.useLayoutEffect(() => {
+    setIsInit(true);
+  }, []);
+
+  if (!isInit) {
+    return null;
+  }
 
   return (
     <GalleryContextProvider>
@@ -25,8 +35,8 @@ export function GalleryRoute() {
             maintain a consistent reference for a video to continue playing
             exactly as it is I think?
           </div>
-          <Gallery media={media} />
-          <SwipeableModal allMedia={media} />
+          <Gallery />
+          <SwipeableModal />
         </div>
       </div>
     </GalleryContextProvider>

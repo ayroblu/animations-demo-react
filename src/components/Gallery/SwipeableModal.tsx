@@ -4,7 +4,20 @@ import { useDimensionsQuery, useJoinRefs } from "../../lib/utils/hooks";
 import { getWrappedSetState } from "./animate";
 import { useModalGalleryDragHandlers } from "./drag";
 import { getCachedImage } from "../../lib/utils/image-cache";
-import { useSelectedItem, useSetSelectedItem, useUnselectItem } from "./state";
+import {
+  getCanDec,
+  getCanInc,
+  useAllMedia,
+  useCanDec,
+  useCanInc,
+  useIncDecSelectedIndex,
+  useKnownSelectedIndex,
+  useKnownSelectedItem,
+  useKnownSelectedMedia,
+  useSelectedItem,
+  useSetSelectedItem,
+  useUnselectItem,
+} from "./state";
 import { useGalleryContext } from "./useGalleryContext";
 import React from "react";
 import { flushSync } from "react-dom";
@@ -19,21 +32,18 @@ export type Media = {
   url: string;
   kind: "video" | "image";
 };
-type Props = {
-  allMedia: Media[];
-};
-export function SwipeableModal(props: Props) {
+export function SwipeableModal() {
   const selectedItem = useSelectedItem();
   if (!selectedItem) {
     return null;
   }
-  return <SwipeableModalInner {...props} />;
+  return <SwipeableModalInner />;
 }
-function SwipeableModalInner({ allMedia }: Props) {
-  const selectedItem = useSelectedItem();
+function SwipeableModalInner() {
   const onDismiss = useUnselectItem();
-  const index = allMedia.findIndex(({ url }) => url === selectedItem);
-  const { url, width, height, kind } = allMedia[index];
+  const index = useKnownSelectedIndex();
+  const { url, width, height, kind } = useKnownSelectedMedia();
+  const selectedItem = useKnownSelectedItem();
   const isVertical = useDimensionsQuery(({ windowWidth, windowHeight }) => {
     const windowAspectRatio = windowWidth / windowHeight;
     const aspectRatio = width / height;
@@ -43,8 +53,7 @@ function SwipeableModalInner({ allMedia }: Props) {
   const wrappedDismiss = getWrappedSetState({
     getModalMedia: () => context.modalMediaEl ?? null,
     setState: onDismiss,
-    getImageContainer: () =>
-      selectedItem ? context.itemEls.get(selectedItem) ?? null : null,
+    getImageContainer: () => context.itemEls.get(selectedItem) ?? null,
     width,
     height,
     isDetail: false,
@@ -68,18 +77,17 @@ function SwipeableModalInner({ allMedia }: Props) {
         }
       : undefined,
   ]);
-  useLeftRightArrows(allMedia);
+  useLeftRightArrows();
   // Probably this should be a cross in the corner rather than on the whole modal
   const onClick = isTouchDevice() ? undefined : wrappedDismiss;
   const beforeIndex = index - 1;
   const afterIndex = index + 1;
+  const canInc = useCanInc();
+  const canDec = useCanDec();
   return (
     <div className={styles.modal} ref={modalRef} onClick={onClick}>
-      {beforeIndex >= 0 && beforeIndex < allMedia.length && (
-        <MediaImage index={beforeIndex} allMedia={allMedia} direction="left" />
-      )}
+      {canDec && <MediaImage index={beforeIndex} direction="left" />}
       <div
-        key={url}
         className={cn(
           styles.modalMedia,
           isVertical ? styles.horizontal : styles.vertical,
@@ -107,9 +115,7 @@ function SwipeableModalInner({ allMedia }: Props) {
           />
         )}
       </div>
-      {afterIndex >= 0 && afterIndex < allMedia.length && (
-        <MediaImage index={afterIndex} allMedia={allMedia} direction="right" />
-      )}
+      {canInc && <MediaImage index={afterIndex} direction="right" />}
       <div className={styles.modalFooter}>Footer</div>
     </div>
   );
@@ -117,10 +123,10 @@ function SwipeableModalInner({ allMedia }: Props) {
 
 type MediaImageProps = {
   index: number;
-  allMedia: Media[];
   direction: "left" | "right";
 };
-function MediaImage({ index, allMedia, direction }: MediaImageProps) {
+function MediaImage({ index, direction }: MediaImageProps) {
+  const allMedia = useAllMedia();
   const { url, width, height, kind } = allMedia[index];
   const isVertical = useDimensionsQuery(({ windowWidth, windowHeight }) => {
     const windowAspectRatio = windowWidth / windowHeight;
@@ -166,10 +172,9 @@ function MediaImage({ index, allMedia, direction }: MediaImageProps) {
   );
 }
 
-function useLeftRightArrows(allMedia: Media[]) {
+function useLeftRightArrows() {
   const setSelected = useSetSelectedItem();
-  const selectedItem = useSelectedItem();
-  const index = allMedia.findIndex(({ url }) => url === selectedItem);
+  const { inc, dec } = useIncDecSelectedIndex();
   const context = useGalleryContext();
   React.useEffect(() => {
     const { transformTo, transformReset } = getTransformsManager();
@@ -200,18 +205,16 @@ function useLeftRightArrows(allMedia: Media[]) {
     }
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "ArrowLeft") {
-        const url = allMedia[index - 1]?.url;
-        if (url !== undefined) {
+        if (getCanDec()) {
           flushSync(() => {
-            setSelected(url);
+            dec();
           });
           handleTransition("translateX(-100vw)");
         }
       } else if (e.key === "ArrowRight") {
-        const url = allMedia[index + 1]?.url;
-        if (url !== undefined) {
+        if (getCanInc()) {
           flushSync(() => {
-            setSelected(url);
+            inc();
           });
           handleTransition("translateX(100vw)");
         }
@@ -221,5 +224,5 @@ function useLeftRightArrows(allMedia: Media[]) {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [allMedia, context, index, setSelected]);
+  }, [context, dec, inc, setSelected]);
 }

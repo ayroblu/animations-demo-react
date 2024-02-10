@@ -10,6 +10,9 @@ import {
   useDragEvent,
 } from "../../lib/utils/animations";
 import { clamp } from "../../lib/utils";
+import { getCanDec, getCanInc, useIncDecSelectedIndex } from "./state";
+import { useGalleryContext } from "./useGalleryContext";
+import { flushSync } from "react-dom";
 
 export function useModalGalleryDragHandlers({
   dismiss,
@@ -23,10 +26,15 @@ export function useModalGalleryDragHandlers({
     imageRef,
     dismiss,
   });
+  const swipeDragHandler: DragHandler = useSwipeDragHandler();
 
   const getDragElement = () => modalRef.current;
   useDragEvent({
     dragHandler: dismissDragHandler,
+    getElement: getDragElement,
+  });
+  useDragEvent({
+    dragHandler: swipeDragHandler,
     getElement: getDragElement,
   });
   return {
@@ -103,5 +111,82 @@ function useDismissDragHandler({
       handlers: { onReset, onMove, onEnd },
     });
   }, [dismiss, imageRef, modalRef]);
+  return dragHandler;
+}
+
+function useSwipeDragHandler(): DragHandler {
+  const { dec, inc } = useIncDecSelectedIndex();
+  const context = useGalleryContext();
+  const dragHandler: DragHandler = React.useCallback(() => {
+    const { transformTo, transformReset } = getTransformsManager();
+    const preventDefaultHandler: GestureHandler = {
+      onMove: ({ touchEvent }) => {
+        touchEvent.preventDefault();
+        touchEvent.stopPropagation();
+      },
+    };
+    const dragDefaultHandler: GestureHandler = {
+      onMove: ({ moveX }) => {
+        const leftEl = context.leftModalMediaEl;
+        const middleEl = context.modalMediaEl;
+        const rightEl = context.rightModalMediaEl;
+        if (leftEl && middleEl && rightEl) {
+          const transform = `translateX(${moveX}px)`;
+          [leftEl, middleEl, rightEl].forEach((el) => {
+            el.style.transition = "";
+            transformTo(el, transform);
+          });
+        }
+      },
+      onEnd: ({ moveX, isReturningX }) => {
+        const leftEl = context.leftModalMediaEl;
+        const middleEl = context.modalMediaEl;
+        const rightEl = context.rightModalMediaEl;
+        if (!leftEl || !middleEl || !rightEl) {
+          return;
+        }
+        if (isReturningX) {
+          [leftEl, middleEl, rightEl].forEach((el) => {
+            transitionWrapper(el, () => {
+              transformReset(el);
+            });
+          });
+        } else {
+          const width = document.documentElement.clientWidth;
+          [leftEl, middleEl, rightEl].forEach((el) => {
+            transformReset(el);
+          });
+          flushSync(() => {
+            if (moveX > 0) {
+              dec();
+            } else {
+              inc();
+            }
+          });
+          const movement = moveX > 0 ? moveX - width : width + moveX;
+          const transform = `translateX(${movement}px)`;
+          [leftEl, middleEl, rightEl].forEach((el) => {
+            transformTo(el, transform);
+          });
+          [leftEl, middleEl, rightEl].forEach((el) => {
+            el.getBoundingClientRect();
+            transitionWrapper(el, () => {
+              transformReset(el);
+            });
+          });
+        }
+      },
+    };
+    const { onReset, onMove, onEnd } = composeGestureHandlers([
+      preventDefaultHandler,
+      dragDefaultHandler,
+    ]);
+    return getLinearGestureManager({
+      getConstraints: () => {
+        return { left: getCanDec(), right: getCanInc() };
+      },
+      handlers: { onReset, onMove, onEnd },
+    });
+  }, [context, dec, inc]);
   return dragHandler;
 }
