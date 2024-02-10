@@ -28,6 +28,17 @@
     }
   }
 }
+.offscreen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+.offscreenLeft {
+  transform: translate(-50%, -50%) translateX(-100vw);
+}
+.offscreenRight {
+  transform: translate(-50%, -50%) translateX(100vw);
+}
 .modalMedia {
   align-self: center;
   transform-origin: top left;

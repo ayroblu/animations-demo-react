@@ -3,6 +3,8 @@ import React from "react";
 type GalleryContextType = {
   modalEl: HTMLElement | null;
   modalMediaEl: HTMLElement | null;
+  leftModalMediaEl: HTMLElement | null;
+  rightModalMediaEl: HTMLElement | null;
   itemEls: Map<string, HTMLElement | null>;
 };
 export const GalleryContext = React.createContext<GalleryContextType | null>(
@@ -16,6 +18,8 @@ export function GalleryContextProvider({
   const [value] = React.useState<GalleryContextType>(() => ({
     modalEl: null,
     modalMediaEl: null,
+    leftModalMediaEl: null,
+    rightModalMediaEl: null,
     itemEls: new Map(),
   }));
   return (

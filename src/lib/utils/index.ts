@@ -52,3 +52,13 @@ export function getScrollParent(element: HTMLElement, includeHidden?: boolean) {
 export function isTouchDevice() {
   return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
+
+/**
+ * Type guard against nulls.
+ *
+ * Can be used in array filter expressions
+ * Can also be used when you suspect undefined might actually
+ * be a value
+ */
+export const nonNullable = <T>(item: T | null | undefined): item is T =>
+  item !== null && item !== undefined;
