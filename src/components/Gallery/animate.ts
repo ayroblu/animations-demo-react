@@ -24,32 +24,32 @@ function getReverseScaleTransform(
     return `scaleX(${fromAspectRatio / toAspectRatio})`;
   }
 }
-export function getWrappedSetIsDetail({
-  setIsDetail,
-  imageContainerRef,
-  modalMediaRef,
+export function getWrappedSetState({
+  setState,
+  getImageContainer,
+  getModalMedia,
   width,
   height,
+  isDetail,
 }: {
-  setIsDetail: React.Dispatch<React.SetStateAction<boolean>>;
-  imageContainerRef: React.RefObject<HTMLDivElement>;
-  modalMediaRef: React.RefObject<HTMLDivElement>;
+  setState: () => void;
+  getImageContainer: () => HTMLElement | null;
+  getModalMedia: () => HTMLElement | null;
   width: number;
   height: number;
-}): React.Dispatch<boolean> {
-  return (isDetail: boolean) => {
-    const reactSetter = () => {
-      setIsDetail(isDetail);
-    };
+  isDetail: boolean;
+}): () => void {
+  const reactSetter = setState;
+  return () => {
     if (isDetail) {
-      const imageContainer = imageContainerRef.current;
+      const imageContainer = getImageContainer();
       if (!imageContainer) {
         reactSetter();
         return;
       }
       invertTransformAnimate({
         beforeEl: imageContainer,
-        getAfterEl: () => modalMediaRef.current,
+        getAfterEl: getModalMedia,
         reactSetter,
         reverse: {
           reverseScaleDir: width < height ? "y" : "x",
@@ -57,14 +57,14 @@ export function getWrappedSetIsDetail({
         },
       });
     } else {
-      const modalMedia = modalMediaRef.current;
+      const modalMedia = getModalMedia();
       if (!modalMedia) {
         reactSetter();
         return;
       }
       invertTransformAnimate({
         beforeEl: modalMedia,
-        getAfterEl: () => imageContainerRef.current,
+        getAfterEl: getImageContainer,
         reactSetter,
         reverse: {
           reverseScaleDir: width < height ? "y" : "x",
@@ -74,7 +74,7 @@ export function getWrappedSetIsDetail({
           el.style.zIndex = "";
         },
       });
-      const imageContainer = imageContainerRef.current;
+      const imageContainer = getImageContainer();
       if (imageContainer) {
         imageContainer.style.zIndex = "1";
       }

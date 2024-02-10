@@ -3,12 +3,11 @@ import styles from "./Gallery.module.css";
 import iosStyles from "../components/IosPadding.module.css";
 import { Gallery, Media } from "../components/Gallery/Gallery";
 import React from "react";
+import { SwipeableModal } from "../components/Gallery/SwipeableModal";
+import { GalleryContextProvider } from "../components/Gallery/GalleryContext";
 
 export function GalleryRoute() {
   const pageRef = React.useRef<HTMLDivElement | null>(null);
-  const videoRef = React.useRef<HTMLVideoElement | null>(null);
-  const modalRef = React.useRef<HTMLDivElement | null>(null);
-  const [modal] = React.useState(() => document.createElement("div"));
 
   React.useEffect(() => {
     const page = pageRef.current;
@@ -16,40 +15,21 @@ export function GalleryRoute() {
     page.scrollTo(0, page.scrollHeight);
   }, []);
 
-  React.useEffect(() => {
-    if (modalRef.current) {
-      modalRef.current.appendChild(modal);
-    }
-  }, [modal]);
-
-  const [isVisible, setIsVisible] = React.useState(false);
-  const handleMediaClick = React.useCallback(
-    (media: Media & { videoTime?: number }) => {
-      setIsVisible(true);
-      const video = videoRef.current;
-      if (media.videoTime && video) {
-        video.currentTime = media.videoTime;
-      }
-    },
-    [],
-  );
-
   return (
-    <div className={styles.page} ref={pageRef}>
-      <div className={cn(styles.content, iosStyles.fullPadding)}>
-        <div className={styles.description}>
-          Photo Album, tap each image to make it full screen, swipe up to show a
-          sheet, swipe down to dismiss. Note that for videos, we need to
-          maintain a consistent reference for a video to continue playing
-          exactly as it is I think?
+    <GalleryContextProvider>
+      <div className={styles.page} ref={pageRef}>
+        <div className={cn(styles.content, iosStyles.fullPadding)}>
+          <div className={styles.description}>
+            Photo Album, tap each image to make it full screen, swipe up to show
+            a sheet, swipe down to dismiss. Note that for videos, we need to
+            maintain a consistent reference for a video to continue playing
+            exactly as it is I think?
+          </div>
+          <Gallery media={media} />
+          <SwipeableModal allMedia={media} />
         </div>
-        <Gallery media={media} onClick={handleMediaClick} modal={modal} />
-        <div
-          className={cn(styles.modal, !isVisible && styles.hidden)}
-          ref={modalRef}
-        />
       </div>
-    </div>
+    </GalleryContextProvider>
   );
 }
 const media: Media[] = [

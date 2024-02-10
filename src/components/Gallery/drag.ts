@@ -11,17 +11,17 @@ import {
 } from "../../lib/utils/animations";
 import { clamp } from "../../lib/utils";
 
-export function useGalleryDragHandlers({
-  isDetailState,
+export function useModalGalleryDragHandlers({
+  dismiss,
 }: {
-  isDetailState: [boolean, (isDetail: boolean) => void];
+  dismiss: () => void;
 }) {
   const modalRef = React.useRef<HTMLDivElement | null>(null);
   const imageRef = React.useRef<HTMLImageElement | null>(null);
   const dismissDragHandler: DragHandler = useDismissDragHandler({
     modalRef,
     imageRef,
-    isDetailState,
+    dismiss,
   });
 
   const getDragElement = () => modalRef.current;
@@ -38,13 +38,12 @@ export function useGalleryDragHandlers({
 function useDismissDragHandler({
   modalRef,
   imageRef,
-  isDetailState,
+  dismiss,
 }: {
   modalRef: React.RefObject<HTMLElement | null>;
   imageRef: React.RefObject<HTMLElement | null>;
-  isDetailState: [boolean, (isDetail: boolean) => void];
+  dismiss: () => void;
 }): DragHandler {
-  const [isDetail, setIsDetail] = isDetailState;
   const dragHandler: DragHandler = React.useCallback(() => {
     const image = imageRef.current;
     const modal = modalRef.current;
@@ -67,7 +66,7 @@ function useDismissDragHandler({
             transformReset(image);
           });
         } else {
-          setIsDetail(false);
+          dismiss();
         }
       },
     };
@@ -99,10 +98,10 @@ function useDismissDragHandler({
     ]);
     return getLinearGestureManager({
       getConstraints: () => {
-        return { down: isDetail };
+        return { down: true };
       },
       handlers: { onReset, onMove, onEnd },
     });
-  }, [imageRef, isDetail, modalRef, setIsDetail]);
+  }, [dismiss, imageRef, modalRef]);
   return dragHandler;
 }

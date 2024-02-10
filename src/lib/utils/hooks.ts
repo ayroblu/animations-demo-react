@@ -101,7 +101,7 @@ export function useSyncElements(
 }
 
 export function useJoinRefs<T extends HTMLElement>(
-  refs: React.ForwardedRef<T | null>[],
+  refs: (React.ForwardedRef<T | null> | undefined)[],
 ) {
   const stableRefs = React.useRef(refs);
   return React.useCallback((ref: T | null) => {

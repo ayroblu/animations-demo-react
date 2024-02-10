@@ -1,0 +1,59 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  background-color: Canvas;
+  animation: 0.3s fadeInBackground;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  justify-content: center;
+  contain: paint;
+}
+@keyframes fadeInBackground {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: Canvas;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  @keyframes fadeInBackground {
+    from {
+      background-color: transparent;
+    }
+    to {
+      /* bug in chrome where canvas is white */
+      background-color: black;
+    }
+  }
+}
+.modalMedia {
+  align-self: center;
+  transform-origin: top left;
+  contain: paint;
+}
+.modalFooter {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.horizontal {
+  height: 100%;
+  width: auto;
+  max-width: initial;
+}
+.vertical {
+  height: auto;
+  width: 100%;
+}
+.hide {
+  animation: 0.3s hideVisibility forwards;
+}
+@keyframes hideVisibility {
+  to {
+    visibility: hidden;
+  }
+}
