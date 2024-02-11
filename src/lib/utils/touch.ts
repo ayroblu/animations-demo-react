@@ -83,6 +83,7 @@ type Constraints = {
 };
 export type GestureOnMoveParams = {
   touchEvent: TouchEvent;
+  touch: Touch;
   moveX: number;
   moveY: number;
 };
@@ -199,7 +200,7 @@ export function getLinearGestureManager({
     if (!isSwiping) {
       return;
     }
-    onMove({ touchEvent: e, moveX, moveY });
+    onMove({ touchEvent: e, moveX, moveY, touch });
   }
   function end(e: TouchEvent) {
     if (!isSwiping || !startPoint || !lastPoint) return;

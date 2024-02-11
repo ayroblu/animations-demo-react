@@ -67,12 +67,26 @@ function useDismissDragHandler({
         touchEvent.stopPropagation();
       },
     };
+    let transformOrigin: string | null = null;
     const dragDefaultHandler: GestureHandler = {
-      onMove: ({ moveX, moveY }) => {
+      onReset: () => {
+        transformOrigin = null;
+      },
+      onMove: ({ moveX, moveY, touch }) => {
         const scale = `scale(${Math.min(1, Math.pow(2.7, -moveY / 1000))})`;
-        transformTo(image, `translate(${moveX}px, ${moveY}px) ${scale}`);
+        transformOrigin =
+          transformOrigin ??
+          (() => {
+            const { clientX, clientY } = touch;
+            const { left, top } = image.getBoundingClientRect();
+            return `${clientX - left}px ${clientY - top}px`;
+          })();
+        transformTo(image, `translate(${moveX}px, ${moveY}px) ${scale}`, {
+          transformOrigin,
+        });
       },
       onEnd: ({ isReturningY }) => {
+        transformOrigin = null;
         if (isReturningY) {
           transitionWrapper(image, () => {
             transformReset(image);
