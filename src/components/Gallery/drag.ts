@@ -186,6 +186,7 @@ function useSwipeDragHandler(): DragHandler {
         return { left: getCanDec(), right: getCanInc() };
       },
       handlers: { onReset, onMove, onEnd },
+      withMargin: true,
     });
   }, [context, dec, inc]);
   return dragHandler;
