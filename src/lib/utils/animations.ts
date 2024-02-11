@@ -289,7 +289,7 @@ export function getLinearGestureManager({
     }
   }
   function start(e: TouchEvent, touch: Touch) {
-    if (touch.screenX < 25) {
+    if (touch.screenX < 35) {
       // 25 from manual testing back swipe
       if (withMargin) {
         if (
