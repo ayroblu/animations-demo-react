@@ -82,8 +82,9 @@ export type GestureOnMoveParams = {
 export type GestureOnPinchMoveParams = {
   touchEvent: TouchEvent;
   touches: [Touch, Touch];
-  distApart: number;
+  distApartRatio: number;
   translation: { x: number; y: number };
+  centroid: { x: number; y: number };
   rotation: number;
 };
 export type GestureOnEndParams = {
@@ -168,7 +169,7 @@ export function getGestureManager({
       if (e.touches.length === 2) {
         isPinching = true;
         const touch = e.touches[1];
-        startPoint2 = { x: touch.pageX, y: touch.pageY };
+        startPoint2 = { x: touch.clientX, y: touch.clientY };
       }
     }
     const viewportHeight = document.documentElement.clientHeight;
@@ -176,7 +177,7 @@ export function getGestureManager({
       // user is swiping home, nothing you should do
       return;
     }
-    startPoint = { x: touch.pageX, y: touch.pageY };
+    startPoint = { x: touch.clientX, y: touch.clientY };
     constraints = getConstraints();
   }
   function move(e: TouchEvent, touch: Touch) {
@@ -186,35 +187,45 @@ export function getGestureManager({
     if (isPinching) {
       if (onPinchMove && startPoint2) {
         const [touch1, touch2] = e.touches;
-        const distApart = dist([
-          touch1.pageX - touch2.pageX,
-          touch1.pageY - touch2.pageY,
-        ]);
+        const distApartRatio =
+          dist([
+            touch1.clientX - touch2.clientX,
+            touch1.clientY - touch2.clientY,
+          ]) /
+          dist([startPoint.x - startPoint2.x, startPoint.y - startPoint2.y]);
+        const centroidX = (startPoint.x + startPoint2.x) / 2;
+        const centroidY = (startPoint.y + startPoint2.y) / 2;
+        // const centroidX = (touch1.clientX + touch2.clientX) / 2;
+        // const centroidY = (touch1.clientY + touch2.clientY) / 2;
         const translationX =
-          (touch1.pageX + touch2.pageX) / 2 -
+          (touch1.clientX + touch2.clientX) / 2 -
           (startPoint.x + startPoint2.x) / 2;
         const translationY =
-          (touch1.pageY + touch2.pageY) / 2 -
+          (touch1.clientY + touch2.clientY) / 2 -
           (startPoint.y + startPoint2.y) / 2;
         const vec1 = [
           startPoint2.x - startPoint.x,
           startPoint2.y - startPoint.y,
         ];
-        const vec2 = [touch2.pageX - touch1.pageX, touch2.pageY - touch1.pageY];
+        const vec2 = [
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY,
+        ];
         const rotation = Math.acos(dot(vec1, vec2) / (dist(vec1) * dist(vec2)));
         onPinchMove({
           touchEvent: e,
           touches: [touch1, touch2],
-          distApart,
+          distApartRatio,
           translation: { x: translationX, y: translationY },
+          centroid: { x: centroidX, y: centroidY },
           rotation,
         });
       }
       return;
     }
     const { up, down, left, right } = constraints;
-    const x = touch.pageX;
-    const y = touch.pageY;
+    const x = touch.clientX;
+    const y = touch.clientY;
     // coordinates is top left going right and down
     const isWrongWay =
       (!left && right && x < startPoint.x) ||
@@ -247,17 +258,17 @@ export function getGestureManager({
       }
     }
     if (lastPoint) {
-      lastDirection.vertDown = touch.pageY >= lastPoint.y;
-      lastDirection.horizRight = touch.pageX >= lastPoint.x;
+      lastDirection.vertDown = touch.clientY >= lastPoint.y;
+      lastDirection.horizRight = touch.clientX >= lastPoint.x;
     }
-    lastPoint = { x: touch.pageX, y: touch.pageY };
+    lastPoint = { x: touch.clientX, y: touch.clientY };
     if (!isSwiping) {
       return;
     }
     onMove({ touchEvent: e, moveX, moveY, touch });
   }
   function end(e: TouchEvent) {
-    if (!isSwiping || !startPoint || !lastPoint) return;
+    if ((!isSwiping && !isPinching) || !startPoint || !lastPoint) return;
     if (isPinching) {
       if (e.touches.length === 0) {
         reset(true);
@@ -304,15 +315,31 @@ export function composeGestureHandlers(
       handler.onMove?.(params);
     }
   }
+  const onPinchMove = handlers.some(({ onPinchMove }) => onPinchMove)
+    ? (params: GestureOnPinchMoveParams) => {
+        for (const handler of handlers) {
+          handler.onPinchMove?.(params);
+        }
+      }
+    : undefined;
   function onEnd(params: GestureOnEndParams) {
     for (const handler of handlers) {
       handler.onEnd?.(params);
     }
   }
+  const onPinchEnd = handlers.some(({ onPinchEnd }) => onPinchEnd)
+    ? (params: GestureOnPinchEndParams) => {
+        for (const handler of handlers) {
+          handler.onPinchEnd?.(params);
+        }
+      }
+    : undefined;
   return {
     onReset,
     onMove,
+    onPinchMove,
     onEnd,
+    onPinchEnd,
   };
 }
 

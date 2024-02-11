@@ -68,7 +68,7 @@ function useDismissDragHandler({
       },
     };
     let transformOrigin: string | null = null;
-    const dragDefaultHandler: GestureHandler = {
+    const dismissHandler: GestureHandler = {
       onReset: () => {
         transformOrigin = null;
       },
@@ -117,16 +117,32 @@ function useDismissDragHandler({
         }
       },
     };
-    const { onReset, onMove, onEnd } = composeGestureHandlers([
+    const pinchHandler: GestureHandler = {
+      onPinchMove: ({ distApartRatio, translation, centroid }) => {
+        transformTo(
+          image,
+          `scale(${distApartRatio}) translate(${translation.x}px, ${translation.y}px)`,
+          { transformOrigin: `${centroid.x}px ${centroid.y}px` },
+        );
+      },
+      onPinchEnd: () => {
+        // dismiss if pinch very small
+        transitionWrapper(image, () => {
+          transformReset(image);
+        });
+      },
+    };
+    const handlers = composeGestureHandlers([
       preventDefaultHandler,
-      dragDefaultHandler,
+      dismissHandler,
+      pinchHandler,
       backgroundHandler,
     ]);
     return getGestureManager({
       getConstraints: () => {
         return { down: true };
       },
-      handlers: { onReset, onMove, onEnd },
+      handlers,
     });
   }, [dismiss, imageRef, modalRef]);
   return dragHandler;
@@ -143,7 +159,7 @@ function useSwipeDragHandler(): DragHandler {
         touchEvent.stopPropagation();
       },
     };
-    const dragDefaultHandler: GestureHandler = {
+    const swipeHandler: GestureHandler = {
       onMove: ({ moveX }) => {
         const transform = `translateX(${moveX}px)`;
         getElements(context).forEach((el) => {
@@ -202,15 +218,15 @@ function useSwipeDragHandler(): DragHandler {
         }
       },
     };
-    const { onReset, onMove, onEnd } = composeGestureHandlers([
+    const handlers = composeGestureHandlers([
       preventDefaultHandler,
-      dragDefaultHandler,
+      swipeHandler,
     ]);
     return getGestureManager({
       getConstraints: () => {
         return { left: getCanInc(), right: getCanDec() };
       },
-      handlers: { onReset, onMove, onEnd },
+      handlers,
       withMargin: true,
     });
   }, [context, dec, inc]);
