@@ -8,7 +8,7 @@ import {
   DragHandler,
   GestureHandler,
   composeGestureHandlers,
-  getLinearGestureManager,
+  getGestureManager,
   noopDragHandler,
 } from "../../lib/utils/touch";
 import { useNotification } from "./useNotification";
@@ -347,7 +347,7 @@ export function useScaleDragHandler(params: Params) {
       notifControlsHandler,
       setStateHandler,
     ]);
-    return getLinearGestureManager({
+    return getGestureManager({
       getConstraints: () => {
         const isViewControls = isViewControlsRef.current;
         return { left: true, right: isViewControls };

@@ -7,7 +7,7 @@ import {
   DragHandler,
   GestureHandler,
   composeGestureHandlers,
-  getLinearGestureManager,
+  getGestureManager,
   noopDragHandler,
 } from "../../lib/utils/touch";
 import { clamp } from "../../lib/utils";
@@ -108,7 +108,7 @@ export function useSlideDragHandler(params: Params) {
       notifControlsHandler,
       stateHandler,
     ]);
-    return getLinearGestureManager({
+    return getGestureManager({
       getConstraints: () => {
         return { left: true, right: isViewControls };
       },

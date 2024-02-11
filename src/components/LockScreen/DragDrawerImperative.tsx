@@ -5,7 +5,7 @@ import {
   DragHandler,
   GestureOnEndParams,
   GestureOnMoveParams,
-  getLinearGestureManager,
+  getGestureManager,
   useDragEvent,
 } from "../../lib/utils/touch";
 import {
@@ -87,7 +87,7 @@ function useDragDrawer() {
         contentCover.style.opacity = "";
       }
     }
-    return getLinearGestureManager({
+    return getGestureManager({
       getConstraints: () => {
         const isOpen = isOpenRef.current;
         return { left: isOpen, right: !isOpen };

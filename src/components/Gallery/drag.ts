@@ -8,7 +8,7 @@ import {
   DragHandler,
   GestureHandler,
   composeGestureHandlers,
-  getLinearGestureManager,
+  getGestureManager,
   noopDragHandler,
   useDragEvent,
 } from "../../lib/utils/touch";
@@ -122,7 +122,7 @@ function useDismissDragHandler({
       dragDefaultHandler,
       backgroundHandler,
     ]);
-    return getLinearGestureManager({
+    return getGestureManager({
       getConstraints: () => {
         return { down: true };
       },
@@ -206,7 +206,7 @@ function useSwipeDragHandler(): DragHandler {
       preventDefaultHandler,
       dragDefaultHandler,
     ]);
-    return getLinearGestureManager({
+    return getGestureManager({
       getConstraints: () => {
         return { left: getCanInc(), right: getCanDec() };
       },

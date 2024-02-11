@@ -7,7 +7,7 @@ import {
   GestureHandler,
   GestureOnEndParams,
   composeGestureHandlers,
-  getLinearGestureManager,
+  getGestureManager,
   noopDragHandler,
 } from "../../lib/utils/touch";
 import { getCachedValueManager } from "../../lib/utils/cache";
@@ -164,7 +164,7 @@ export function useWidthDragHandler(params: Params) {
       notifHandler,
       stateHandler,
     ]);
-    return getLinearGestureManager({
+    return getGestureManager({
       getConstraints: () => {
         return { left: true, right: isViewControls };
       },

@@ -9,7 +9,7 @@ import {
   DragHandler,
   GestureOnEndParams,
   GestureOnMoveParams,
-  getLinearGestureManager,
+  getGestureManager,
   useDragEvent,
 } from "../../lib/utils/touch";
 import { getTransform } from "../../lib/utils";
@@ -105,7 +105,7 @@ function useDragViewPager(pagesLength: number) {
           transformReset(contentWrapper);
         });
     }
-    return getLinearGestureManager({
+    return getGestureManager({
       getConstraints: () => {
         const pageIndex = pageIndexRef.current;
         return {
@@ -187,7 +187,7 @@ function useDragViewPager(pagesLength: number) {
       }
       activeState = "no";
     }
-    return getLinearGestureManager({
+    return getGestureManager({
       getConstraints: () => {
         const pageIndex = pageIndexRef.current;
         const pageEl = pageRefs[pageIndex];

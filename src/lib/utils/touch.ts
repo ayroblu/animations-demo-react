@@ -1,5 +1,6 @@
 import React from "react";
 import { isTouchDevice } from ".";
+import { dist, dot } from "./math";
 
 export type DragHandler = () => {
   reset: () => void;
@@ -18,15 +19,6 @@ export function useDragEvent({ dragHandler, getElement }: UseDragEventParams) {
     const handler = dragHandler();
     function touchstart(e: TouchEvent) {
       if (getSelection()?.toString()) {
-        return;
-      }
-      if (e.touches.length > 1) {
-        // Disable pinch to zoom
-        e.preventDefault();
-        return;
-      }
-      if (e.touches.length !== 1) {
-        handler.reset();
         return;
       }
       const [touch] = e.touches;
@@ -87,6 +79,13 @@ export type GestureOnMoveParams = {
   moveX: number;
   moveY: number;
 };
+export type GestureOnPinchMoveParams = {
+  touchEvent: TouchEvent;
+  touches: [Touch, Touch];
+  distApart: number;
+  translation: { x: number; y: number };
+  rotation: number;
+};
 export type GestureOnEndParams = {
   touchEvent: TouchEvent;
   startPoint: Point;
@@ -95,32 +94,41 @@ export type GestureOnEndParams = {
   moveX: number;
   moveY: number;
 };
+export type GestureOnPinchEndParams = {
+  touchEvent: TouchEvent;
+};
 export type GestureManagerParams = {
   getConstraints: () => Constraints;
   handlers: {
     onReset: () => void;
     onMove: (params: GestureOnMoveParams) => void;
+    onPinchMove?: (params: GestureOnPinchMoveParams) => void;
     onEnd: (params: GestureOnEndParams) => void;
+    onPinchEnd?: (params: GestureOnPinchEndParams) => void;
   };
   withMargin?: boolean;
 };
 const safeAreaInsetBottom = getComputedStyle(
   document.documentElement,
 ).getPropertyValue("--safe-area-inset-bottom");
-export function getLinearGestureManager({
+export function getGestureManager({
   getConstraints,
-  handlers: { onReset, onMove, onEnd },
+  handlers: { onReset, onMove, onPinchMove, onEnd, onPinchEnd },
   withMargin,
 }: GestureManagerParams): ReturnType<DragHandler> {
   let startPoint: Point | null = null;
+  let startPoint2: Point | null = null;
   let lastPoint: Point | null = null;
   let lastDirection = { vertDown: false, horizRight: false };
   let isSwiping = false;
+  let isPinching = false;
   let constraints = getConstraints();
   function reset(withoutReset?: boolean) {
     startPoint = null;
+    startPoint2 = null;
     lastPoint = null;
     isSwiping = false;
+    isPinching = false;
     lastDirection = { vertDown: false, horizRight: false };
     if (!withoutReset) {
       onReset();
@@ -146,6 +154,23 @@ export function getLinearGestureManager({
         return;
       }
     }
+    if (!onPinchMove || isSwiping) {
+      if (e.touches.length > 1) {
+        // Disable pinch to zoom
+        e.preventDefault();
+        return;
+      }
+      if (e.touches.length !== 1) {
+        reset();
+        return;
+      }
+    } else {
+      if (e.touches.length === 2) {
+        isPinching = true;
+        const touch = e.touches[1];
+        startPoint2 = { x: touch.pageX, y: touch.pageY };
+      }
+    }
     const viewportHeight = document.documentElement.clientHeight;
     if (touch.screenY > viewportHeight - parseFloat(safeAreaInsetBottom)) {
       // user is swiping home, nothing you should do
@@ -156,6 +181,35 @@ export function getLinearGestureManager({
   }
   function move(e: TouchEvent, touch: Touch) {
     if (!startPoint) {
+      return;
+    }
+    if (isPinching) {
+      if (onPinchMove && startPoint2) {
+        const [touch1, touch2] = e.touches;
+        const distApart = dist([
+          touch1.pageX - touch2.pageX,
+          touch1.pageY - touch2.pageY,
+        ]);
+        const translationX =
+          (touch1.pageX + touch2.pageX) / 2 -
+          (startPoint.x + startPoint2.x) / 2;
+        const translationY =
+          (touch1.pageY + touch2.pageY) / 2 -
+          (startPoint.y + startPoint2.y) / 2;
+        const vec1 = [
+          startPoint2.x - startPoint.x,
+          startPoint2.y - startPoint.y,
+        ];
+        const vec2 = [touch2.pageX - touch1.pageX, touch2.pageY - touch1.pageY];
+        const rotation = Math.acos(dot(vec1, vec2) / (dist(vec1) * dist(vec2)));
+        onPinchMove({
+          touchEvent: e,
+          touches: [touch1, touch2],
+          distApart,
+          translation: { x: translationX, y: translationY },
+          rotation,
+        });
+      }
       return;
     }
     const { up, down, left, right } = constraints;
@@ -204,6 +258,13 @@ export function getLinearGestureManager({
   }
   function end(e: TouchEvent) {
     if (!isSwiping || !startPoint || !lastPoint) return;
+    if (isPinching) {
+      if (e.touches.length === 0) {
+        reset(true);
+        onPinchEnd?.({ touchEvent: e });
+      }
+      return;
+    }
     const { x, y } = lastPoint;
     const moveX = x - startPoint.x;
     const moveY = y - startPoint.y;
