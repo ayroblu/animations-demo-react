@@ -43,6 +43,7 @@
   align-self: center;
   transform-origin: top left;
   contain: paint;
+  will-change: transform;
 }
 .modalFooter {
   position: absolute;

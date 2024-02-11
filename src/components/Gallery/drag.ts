@@ -3,16 +3,18 @@ import {
   DragHandler,
   GestureHandler,
   composeGestureHandlers,
+  ensureNoTransition,
   getLinearGestureManager,
   getTransformsManager,
   noopDragHandler,
   transitionWrapper,
   useDragEvent,
 } from "../../lib/utils/animations";
-import { clamp } from "../../lib/utils";
+import { clamp, nonNullable } from "../../lib/utils";
 import { getCanDec, getCanInc, useIncDecSelectedIndex } from "./state";
 import { useGalleryContext } from "./useGalleryContext";
 import { flushSync } from "react-dom";
+import { GalleryContextType } from "./GalleryContext";
 
 export function useModalGalleryDragHandlers({
   dismiss,
@@ -127,33 +129,34 @@ function useSwipeDragHandler(): DragHandler {
     };
     const dragDefaultHandler: GestureHandler = {
       onMove: ({ moveX }) => {
-        const leftEl = context.leftModalMediaEl;
-        const middleEl = context.modalMediaEl;
-        const rightEl = context.rightModalMediaEl;
-        if (leftEl && middleEl && rightEl) {
-          const transform = `translateX(${moveX}px)`;
-          [leftEl, middleEl, rightEl].forEach((el) => {
-            el.style.transition = "";
-            transformTo(el, transform);
-          });
-        }
+        const transform = `translateX(${moveX}px)`;
+        getElements(context).forEach((el) => {
+          transformTo(el, transform);
+        });
       },
       onEnd: ({ moveX, isReturningX }) => {
-        const leftEl = context.leftModalMediaEl;
+        const width = document.documentElement.clientWidth;
         const middleEl = context.modalMediaEl;
-        const rightEl = context.rightModalMediaEl;
-        if (!leftEl || !middleEl || !rightEl) {
-          return;
+        const centroidDiff = middleEl
+          ? (() => {
+              const rect = middleEl.getBoundingClientRect();
+              return rect.left + rect.width / 2 - width / 2;
+            })()
+          : 0;
+        if (!isReturningX && moveX > 0 !== centroidDiff > 0) {
+          isReturningX = true;
         }
+        moveX = centroidDiff;
         if (isReturningX) {
-          [leftEl, middleEl, rightEl].forEach((el) => {
+          getElements(context).forEach((el) => {
             transitionWrapper(el, () => {
               transformReset(el);
             });
           });
         } else {
-          const width = document.documentElement.clientWidth;
-          [leftEl, middleEl, rightEl].forEach((el) => {
+          getElements(context).forEach((el) => {
+            ensureNoTransition(el);
+            el.getBoundingClientRect();
             transformReset(el);
           });
           flushSync(() => {
@@ -165,14 +168,20 @@ function useSwipeDragHandler(): DragHandler {
           });
           const movement = moveX > 0 ? moveX - width : width + moveX;
           const transform = `translateX(${movement}px)`;
-          [leftEl, middleEl, rightEl].forEach((el) => {
+          const elements = getElements(context);
+          elements.forEach((el) => {
             transformTo(el, transform);
           });
-          [leftEl, middleEl, rightEl].forEach((el) => {
+          elements.forEach((el) => {
             el.getBoundingClientRect();
-            transitionWrapper(el, () => {
-              transformReset(el);
-            });
+            // transformReset(el);
+            transitionWrapper(
+              el,
+              () => {
+                transformReset(el);
+              },
+              // { transition: "transform 3s" },
+            );
           });
         }
       },
@@ -183,11 +192,18 @@ function useSwipeDragHandler(): DragHandler {
     ]);
     return getLinearGestureManager({
       getConstraints: () => {
-        return { left: getCanDec(), right: getCanInc() };
+        return { left: getCanInc(), right: getCanDec() };
       },
       handlers: { onReset, onMove, onEnd },
       withMargin: true,
     });
   }, [context, dec, inc]);
   return dragHandler;
+}
+
+function getElements(context: GalleryContextType): HTMLElement[] {
+  const leftEl = context.leftModalMediaEl;
+  const middleEl = context.modalMediaEl;
+  const rightEl = context.rightModalMediaEl;
+  return [leftEl, middleEl, rightEl].filter(nonNullable);
 }

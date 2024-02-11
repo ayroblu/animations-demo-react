@@ -207,7 +207,7 @@ function withSingleTransition(
     callback();
   });
 }
-function ensureNoTransition(element: HTMLElement) {
+export function ensureNoTransition(element: HTMLElement) {
   const dispose = transitionMap.get(element);
   dispose?.();
 }

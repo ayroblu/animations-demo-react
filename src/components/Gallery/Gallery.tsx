@@ -3,7 +3,12 @@ import styles from "./Gallery.module.css";
 import { cn } from "../../lib/utils";
 import { cacheImg, getCachedImage } from "../../lib/utils/image-cache";
 import { GalleryContext } from "./GalleryContext";
-import { useAllMedia, useSelectedItem, useSetSelectedItem } from "./state";
+import {
+  useAllMedia,
+  useIsItemSelected,
+  useSelectedItem,
+  useSetSelectedItem,
+} from "./state";
 import { getWrappedSetState } from "./animate";
 
 export type Media = {
@@ -29,7 +34,7 @@ type GalleryItemProps = {
 function GalleryItem({ media }: GalleryItemProps): React.ReactNode {
   const { url, width, height, kind } = media;
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
-  const isHidden = useSelectedItem() === media.url;
+  const isHidden = useIsItemSelected(url);
 
   React.useEffect(() => {
     const videoMaybe = videoRef.current;

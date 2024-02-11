@@ -1,6 +1,6 @@
 import React from "react";
 
-type GalleryContextType = {
+export type GalleryContextType = {
   modalEl: HTMLElement | null;
   modalMediaEl: HTMLElement | null;
   leftModalMediaEl: HTMLElement | null;

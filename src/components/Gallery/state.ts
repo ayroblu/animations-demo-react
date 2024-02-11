@@ -1,4 +1,11 @@
-import { atom, getDefaultStore, useAtomValue, useSetAtom } from "jotai";
+import {
+  PrimitiveAtom,
+  atom,
+  getDefaultStore,
+  useAtomValue,
+  useSetAtom,
+  useStore,
+} from "jotai";
 import React from "react";
 import { Media } from "./Gallery";
 
@@ -8,6 +15,25 @@ export function useSelectedItem(): string | null {
 }
 export function useKnownSelectedItem(): string {
   return useAtomValue(selectedItemAtom)!;
+}
+export function useIsItemSelected(itemUrl: string): boolean {
+  return useSelectAtom(selectedItemAtom, (v) => v === itemUrl);
+}
+function useSelectAtom<T, V>(
+  atom: PrimitiveAtom<T>,
+  selector: (value: T) => V,
+): V {
+  const store = useStore();
+  const [state, setState] = React.useState(() => selector(store.get(atom)));
+  React.useLayoutEffect(() => {
+    const dispose = store.sub(atom, () => {
+      setState(selector(store.get(atom)));
+    });
+    return () => {
+      dispose();
+    };
+  }, [atom, selector, store]);
+  return state;
 }
 export function useUnselectItem(): () => void {
   const setItem = useSetAtom(selectedItemAtom);

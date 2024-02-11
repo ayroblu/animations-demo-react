@@ -6,10 +6,13 @@ See it: https://ayroblu.github.io/animations-demo-react
 
 ## Ideas
 
-- lock screen
-    - notifications swipeable
-    - drag down for search
 - photo gallery
+    - swipe up for info (half sheet?)
+    - long press for popup info
+    - pinch to zoom
+    - black bar on edges to have separation between images
+    - popup slightly too far then bounce back
+    - scroll background contents when swiping through images
 - placeholder tweet
 - messages chat
     - Specifically the gradient on scroll
@@ -21,6 +24,7 @@ See it: https://ayroblu.github.io/animations-demo-react
     - drag down for search
     - long press to show notification in more detail
     - open apps / notifications / widgets animation
+- unrelated: maintain scroll position on new item added
 
 ## Getting Started
 
