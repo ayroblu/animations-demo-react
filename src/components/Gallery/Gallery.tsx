@@ -3,12 +3,7 @@ import styles from "./Gallery.module.css";
 import { cn } from "../../lib/utils";
 import { cacheImg, getCachedImage } from "../../lib/utils/image-cache";
 import { GalleryContext } from "./GalleryContext";
-import {
-  useAllMedia,
-  useIsItemSelected,
-  useSelectedItem,
-  useSetSelectedItem,
-} from "./state";
+import { useAllMedia, useIsItemSelected, useSetSelectedItem } from "./state";
 import { getWrappedSetState } from "./animate";
 
 export type Media = {

@@ -1,15 +1,17 @@
 import React from "react";
 import {
+  ensureNoTransition,
+  getTransformsManager,
+  transitionWrapper,
+} from "../../lib/utils/animations";
+import {
   DragHandler,
   GestureHandler,
   composeGestureHandlers,
-  ensureNoTransition,
   getLinearGestureManager,
-  getTransformsManager,
   noopDragHandler,
-  transitionWrapper,
   useDragEvent,
-} from "../../lib/utils/animations";
+} from "../../lib/utils/touch";
 import { clamp, nonNullable } from "../../lib/utils";
 import { getCanDec, getCanInc, useIncDecSelectedIndex } from "./state";
 import { useGalleryContext } from "./useGalleryContext";

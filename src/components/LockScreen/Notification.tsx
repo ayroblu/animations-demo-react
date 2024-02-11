@@ -1,11 +1,8 @@
 import React from "react";
 import styles from "./Notification.module.css";
 import { cn } from "../../lib/utils";
-import {
-  DragHandler,
-  transitionWrapper,
-  useDragEvent,
-} from "../../lib/utils/animations";
+import { transitionWrapper } from "../../lib/utils/animations";
+import { DragHandler, useDragEvent } from "../../lib/utils/touch";
 import { useJoinRefs, useResetOnScrollOrTouch } from "../../lib/utils/hooks";
 import { FixedWithPlaceholder } from "../FixedWithPlaceholder";
 import { useScaleDragHandler } from "./useScaleDragHandler";

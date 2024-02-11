@@ -1,14 +1,16 @@
 import React from "react";
 import styles from "./Notification.module.css";
 import {
+  getTransformsManager,
+  transitionWrapper,
+} from "../../lib/utils/animations";
+import {
   DragHandler,
   GestureHandler,
   composeGestureHandlers,
   getLinearGestureManager,
-  getTransformsManager,
   noopDragHandler,
-  transitionWrapper,
-} from "../../lib/utils/animations";
+} from "../../lib/utils/touch";
 import { useNotification } from "./useNotification";
 import { flushSync } from "react-dom";
 import { useLockScreenData } from "./useLockScreenData";

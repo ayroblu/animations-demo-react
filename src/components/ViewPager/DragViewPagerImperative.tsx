@@ -2,14 +2,16 @@ import { ViewPager } from "./ViewPager";
 import React from "react";
 import { useArrayRef } from "../../lib/utils/hooks";
 import {
+  getTransformsManager,
+  transitionWrapper,
+} from "../../lib/utils/animations";
+import {
   DragHandler,
   GestureOnEndParams,
   GestureOnMoveParams,
   getLinearGestureManager,
-  getTransformsManager,
-  transitionWrapper,
   useDragEvent,
-} from "../../lib/utils/animations";
+} from "../../lib/utils/touch";
 import { getTransform } from "../../lib/utils";
 import styles from "./DragViewPagerImperative.module.css";
 

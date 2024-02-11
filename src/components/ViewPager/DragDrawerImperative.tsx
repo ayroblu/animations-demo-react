@@ -2,14 +2,16 @@ import { Drawer } from "./Drawer";
 import styles from "./DragDrawerImperative.module.css";
 import React from "react";
 import {
+  getTransformsManager,
+  transitionWrapper,
+} from "../../lib/utils/animations";
+import {
   DragHandler,
   GestureOnEndParams,
   GestureOnMoveParams,
   getLinearGestureManager,
-  getTransformsManager,
-  transitionWrapper,
   useDragEvent,
-} from "../../lib/utils/animations";
+} from "../../lib/utils/touch";
 
 type Props = { drawerContent: React.ReactNode; children: React.ReactNode };
 export function DragDrawerImperative(props: Props) {

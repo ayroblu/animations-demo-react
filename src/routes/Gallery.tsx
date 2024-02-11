@@ -13,10 +13,12 @@ export function GalleryRoute() {
   useInitMedia(() => media);
 
   React.useEffect(() => {
-    const page = pageRef.current;
-    if (!page) return;
-    page.scrollTo(0, page.scrollHeight);
-  }, []);
+    if (isInit) {
+      const page = pageRef.current;
+      if (!page) return;
+      page.scrollTo(0, page.scrollHeight);
+    }
+  }, [isInit]);
   React.useLayoutEffect(() => {
     setIsInit(true);
   }, []);

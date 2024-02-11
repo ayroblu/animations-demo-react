@@ -1,16 +1,15 @@
 import React from "react";
 import styles from "./LockScreen.module.css";
 import { clamp } from "../../lib/utils";
+import { getResetable, transitionWrapper } from "../../lib/utils/animations";
 import {
   DragHandler,
   GestureHandler,
   GestureOnEndParams,
   composeGestureHandlers,
   getLinearGestureManager,
-  getResetable,
   noopDragHandler,
-  transitionWrapper,
-} from "../../lib/utils/animations";
+} from "../../lib/utils/touch";
 import { getCachedValueManager } from "../../lib/utils/cache";
 
 type Params = {

@@ -6,9 +6,11 @@ import {
   GestureOnEndParams,
   GestureOnMoveParams,
   getLinearGestureManager,
+  useDragEvent,
+} from "../../lib/utils/touch";
+import {
   getTransformsManager,
   transitionWrapper,
-  useDragEvent,
 } from "../../lib/utils/animations";
 
 type Props = { drawerContent: React.ReactNode; children: React.ReactNode };

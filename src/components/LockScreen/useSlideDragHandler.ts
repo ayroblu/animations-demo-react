@@ -1,13 +1,15 @@
 import React from "react";
 import {
+  getTransformsManager,
+  transitionWrapper,
+} from "../../lib/utils/animations";
+import {
   DragHandler,
   GestureHandler,
   composeGestureHandlers,
   getLinearGestureManager,
-  getTransformsManager,
   noopDragHandler,
-  transitionWrapper,
-} from "../../lib/utils/animations";
+} from "../../lib/utils/touch";
 import { clamp } from "../../lib/utils";
 
 type Params = {
