@@ -117,15 +117,27 @@ function useDismissDragHandler({
         }
       },
     };
+    let pinchTransformOrigin: string | null = null;
     const pinchHandler: GestureHandler = {
+      onReset: () => {
+        pinchTransformOrigin = null;
+      },
       onPinchMove: ({ distApartRatio, translation, centroid }) => {
+        console.log("centroid", centroid);
+        pinchTransformOrigin =
+          pinchTransformOrigin ??
+          (() => {
+            const { left, top } = image.getBoundingClientRect();
+            return `${centroid.x - left}px ${centroid.y - top}px`;
+          })();
         transformTo(
           image,
-          `scale(${distApartRatio}) translate(${translation.x}px, ${translation.y}px)`,
-          { transformOrigin: `${centroid.x}px ${centroid.y}px` },
+          `translate(${translation.x}px, ${translation.y}px) scale(${distApartRatio})`,
+          { transformOrigin: pinchTransformOrigin },
         );
       },
       onPinchEnd: () => {
+        pinchTransformOrigin = null;
         // dismiss if pinch very small
         transitionWrapper(image, () => {
           transformReset(image);
@@ -218,9 +230,15 @@ function useSwipeDragHandler(): DragHandler {
         }
       },
     };
+    const pinchHandler: GestureHandler = {
+      onPinchMove: () => {
+        // just a stub
+      },
+    };
     const handlers = composeGestureHandlers([
       preventDefaultHandler,
       swipeHandler,
+      pinchHandler,
     ]);
     return getGestureManager({
       getConstraints: () => {

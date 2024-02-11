@@ -166,6 +166,10 @@ export function getGestureManager({
         return;
       }
     } else {
+      if (e.touches.length > 1) {
+        // Disable pinch to zoom
+        e.preventDefault();
+      }
       if (e.touches.length === 2) {
         isPinching = true;
         const touch = e.touches[1];
@@ -185,7 +189,7 @@ export function getGestureManager({
       return;
     }
     if (isPinching) {
-      if (onPinchMove && startPoint2) {
+      if (onPinchMove && startPoint2 && e.touches.length === 2) {
         const [touch1, touch2] = e.touches;
         const distApartRatio =
           dist([
@@ -268,7 +272,6 @@ export function getGestureManager({
     onMove({ touchEvent: e, moveX, moveY, touch });
   }
   function end(e: TouchEvent) {
-    if ((!isSwiping && !isPinching) || !startPoint || !lastPoint) return;
     if (isPinching) {
       if (e.touches.length === 0) {
         reset(true);
@@ -276,6 +279,7 @@ export function getGestureManager({
       }
       return;
     }
+    if (!isSwiping || !startPoint || !lastPoint) return;
     const { x, y } = lastPoint;
     const moveX = x - startPoint.x;
     const moveY = y - startPoint.y;
