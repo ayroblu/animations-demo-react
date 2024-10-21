@@ -1,23 +1,28 @@
 .drawerHeading {
   padding: 16px;
 }
+
 .drawerLinks {
   padding: 0;
   margin: 0;
 }
-.drawerLinks > li {
+
+.drawerLinks>li {
   list-style-type: none;
 }
+
 .drawerLink {
   padding: 16px;
   display: block;
   width: 100%;
 }
+
 @media (hover: hover) and (pointer: fine) {
   .drawerLink:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
 }
+
 @media (hover: none) {
   .drawerLink:active {
     background-color: rgba(255, 255, 255, 0.1);
@@ -30,4 +35,8 @@
   border: 1px solid #555;
   display: inline-block;
   margin-inline-start: 8px;
+}
+
+.page {
+  padding: 4px 8px;
 }

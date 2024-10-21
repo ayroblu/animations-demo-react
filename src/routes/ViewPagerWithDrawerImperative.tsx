@@ -32,15 +32,15 @@ const header = (
 
 const pages = [
   {
-    name: "Trams",
-    component: <Page name="Trams" withoutLoremIpsum />,
+    name: "Main",
+    component: <Page name="Main" withoutLoremIpsum />,
   },
   {
-    name: "Cycling",
-    component: <Page name="Cycling" />,
+    name: "Tab 2",
+    component: <Page name="Tab 2" />,
   },
   {
-    name: "Buses",
-    component: <Page name="Buses" />,
+    name: "Tab 3",
+    component: <Page name="Tab 3" />,
   },
 ];

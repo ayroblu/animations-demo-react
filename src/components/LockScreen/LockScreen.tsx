@@ -22,12 +22,44 @@ export function LockScreen(_props: Props) {
   const { refs: notifRefs, onRef: onNotifRef } = useArrayRef();
   const { refs: fixedNotifRefs, onRef: onFixedNotifRef } = useArrayRef();
   const [notifications, setNotifications] = React.useState(() =>
-    Array(20)
+    [{
+      id: `notification-explainer`,
+      isFixed: false,
+      content: {
+        icon: '🚧',
+        title: 'Demo App Explainer',
+        message: 'This is a demo of a notification screen done animating with just transforms. Make sure you are using a mobile phone for the best experience.',
+      }
+    },
+    {
+      id: `notification-cta`,
+      isFixed: false,
+      content: {
+        icon: '❗',
+        title: 'Dismissal',
+        message: 'Try dismissing a notification like you would in iOS, by swiping it to the left.',
+      }
+    },
+    {
+      id: `notification-warning`,
+      isFixed: false,
+      content: {
+        icon: '⚠️',
+        title: 'This is just a toy',
+        message: 'This is just a toy app to try out some web features. It is not a production grade.',
+      }
+    },
+    ...Array(20)
       .fill(null)
       .map((_, i) => ({
-        id: `notificaiton-${i}`,
+        id: `notification-${i}`,
         isFixed: false,
-      })),
+        content: {
+          icon: '📦',
+          title: 'Lorem ipsum',
+          message: 'consequat consectetur non qui esse incididunt occaecat elit Lorem occaecat',
+        }
+      }))],
   );
   const scrollHandlerRef = useScrollRotation({
     scrollRef,
@@ -103,7 +135,7 @@ export function LockScreen(_props: Props) {
               </div>
               <div className={styles.infoSpacer} />
             </div>
-            {notifications.map(({ id, isFixed }, i) => (
+            {notifications.map(({ id, isFixed, content }, i) => (
               <NotificationContext.Provider value={{ id, isFixed }} key={id}>
                 <Notification
                   key={id}
@@ -112,6 +144,7 @@ export function LockScreen(_props: Props) {
                   onNotifRef={onNotifRef(i)}
                   onFixedNotifRef={onFixedNotifRef(i)}
                   removeNotification={removeNotification}
+                  content={content}
                 />
               </NotificationContext.Provider>
             ))}

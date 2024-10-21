@@ -15,16 +15,16 @@ export function LeftButton() {
 export function DrawerContent() {
   return (
     <>
-      <div className={styles.drawerHeading}>Heading</div>
+      <div className={styles.drawerHeading}>Demo App Nav</div>
       <ul className={styles.drawerLinks}>
         <li>
-          <button className={styles.drawerLink}>Benefits</button>
+          <Link to="/" className={styles.drawerLink}>&lt; Home</Link>
         </li>
         <li>
-          <button className={styles.drawerLink}>Issues</button>
+          <button className={styles.drawerLink}>Nav item 2</button>
         </li>
         <li>
-          <button className={styles.drawerLink}>Electrification</button>
+          <button className={styles.drawerLink}>Nav item 3</button>
         </li>
       </ul>
     </>
@@ -41,11 +41,12 @@ export function Page({
   withoutDrawer?: boolean;
 }) {
   return (
-    <>
-      <Link to="/">&lt; Home</Link>
+    <div className={styles.page}>
       {withoutDrawer ? (
         <>
           <h1>ViewPager ({name})</h1>
+
+          <Link to="/">&lt; Home</Link>
 
           <p>
             Fairly standard ViewPager, note the tabs indicator moves as you
@@ -58,9 +59,17 @@ export function Page({
           <h1>ViewPager with Drawer ({name})</h1>
 
           <p>
-            This is tricky because there are two touch / swipeable elements,
-            either you can swipe inside the ViewPager, or you can swipe on the
-            side for the drawer (unless you're already on the left side).
+            Fairly standard ViewPager, note the tabs indicator moves as you
+            swipe, and the contents of the page also moves. Same goes for
+            tapping the tabs.
+          </p>
+
+          <p>
+            There's not much to see on desktop, this is more for mobile phones with touch screens.
+          </p>
+
+          <p>
+            There is a drawer on the left that you can bring up by swiping to the right when you're on the first page, or by swiping from the left edge when you're on a later tab.
           </p>
         </>
       )}
@@ -142,6 +151,6 @@ export function Page({
           </p>
         </>
       )}
-    </>
+    </div>
   );
 }

@@ -10,6 +10,11 @@ import { useWidthDragHandler } from "./useWidthDragHandler";
 import { useSlideDragHandler } from "./useSlideDragHandler";
 import { globalResizeObserver } from "../../lib/global-resize-observer";
 
+type NotificationContent = {
+  icon: string,
+  title: string,
+  message: string,
+}
 type NotificationProps = {
   timeSensitive?: boolean;
   revIndex: number;
@@ -17,6 +22,7 @@ type NotificationProps = {
   onFixedNotifRef: (element: HTMLElement | null) => void;
   isFixed: boolean;
   removeNotification: (id: string) => void;
+  content: NotificationContent,
 };
 export function Notification({
   timeSensitive,
@@ -25,6 +31,7 @@ export function Notification({
   onFixedNotifRef,
   isFixed,
   removeNotification,
+  content: { title, icon, message },
 }: NotificationProps) {
   const {
     isViewControls,
@@ -39,8 +46,8 @@ export function Notification({
   const handleNotifRef = useJoinRefs([notifRef, onFixedNotifRef]);
   const notificationContent = [
     timeSensitive && <div className={styles.fadedText}>TIME SENSITIVE</div>,
-    <div>Title</div>,
-    <div className={styles.message}>Message</div>,
+    <div>{title}</div>,
+    <div className={styles.message}>{message}</div>,
   ].filter(Boolean);
   const notifOptionsWidth = useElementWidth(notifOptionsRef);
   const style = React.useMemo(() => {
@@ -48,8 +55,8 @@ export function Notification({
       zIndex: revIndex,
       transform:
         (dragType === "scale" || dragType === "slide") &&
-        isViewControls &&
-        notifOptionsWidth
+          isViewControls &&
+          notifOptionsWidth
           ? `translateX(${-notifOptionsWidth - 8}px)`
           : undefined,
     };
@@ -76,7 +83,7 @@ export function Notification({
         style={style}
       >
         <div className={styles.iconContainer}>
-          <div className={styles.icon}>Icon</div>
+          <div className={styles.icon}>{icon}</div>
         </div>
         <div className={styles.notifContent}>
           {notificationContent.map((content, i) =>
