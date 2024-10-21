@@ -9,7 +9,7 @@ import {
 import { Link } from "react-router-dom";
 import { useArrayRef } from "../../lib/utils/hooks";
 import { DragDrawerImperative } from "./DragDrawerImperative";
-import { Notification } from "./Notification";
+import { Notification, NotificationContent } from "./Notification";
 import { NotificationContext } from "./useNotification";
 import { LockScreenContext } from "./useLockScreenData";
 
@@ -136,7 +136,7 @@ export function LockScreen(_props: Props) {
               <div className={styles.infoSpacer} />
             </div>
             {notifications.map(({ id, isFixed, content }, i) => (
-              <NotificationContext.Provider value={{ id, isFixed }} key={id}>
+              <NotificationContext.Provider value={{ id, isFixed, content }} key={id}>
                 <Notification
                   key={id}
                   isFixed={isFixed}
@@ -158,7 +158,7 @@ export function LockScreen(_props: Props) {
   );
 }
 
-export type NotificationData = { id: string; isFixed: boolean };
+export type NotificationData = { id: string; isFixed: boolean, content: NotificationContent };
 type ScrollRotationParams = {
   scrollRef: React.RefObject<HTMLElement | null>;
   notifications: NotificationData[];

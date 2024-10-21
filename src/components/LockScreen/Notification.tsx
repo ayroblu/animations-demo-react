@@ -10,7 +10,7 @@ import { useWidthDragHandler } from "./useWidthDragHandler";
 import { useSlideDragHandler } from "./useSlideDragHandler";
 import { globalResizeObserver } from "../../lib/global-resize-observer";
 
-type NotificationContent = {
+export type NotificationContent = {
   icon: string,
   title: string,
   message: string,
